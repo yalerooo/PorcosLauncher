@@ -46,9 +46,10 @@
             text-align: right;
             margin-right: 10px;
         }
-        #updateModsButton, #downloadURLInput { /* Ocultos por defecto */
-          display: none;
+       #updateModsButton, #downloadURLInput, #updateMinecraftButton, #minecraftURLInput {
+          display: none; /* Ocultos por defecto */
         }
+
 
     </style>
 </head>
@@ -80,44 +81,57 @@
         <label for="downloadURL">URL de descarga de Mods:</label>
         <input type="text" id="downloadURLInput" placeholder="URL del archivo ZIP">
         <button id="updateModsButton" onclick="updateMods()">Actualizar Mods</button>
+
+        <label for="minecraftURL">URL de descarga de .minecraft:</label>
+        <input type="text" id="minecraftURLInput" placeholder="URL del archivo ZIP">
+        <button id="updateMinecraftButton" onclick="updateMinecraft()">Actualizar .minecraft</button>
     </div>
 
     <div id="status"></div>
 
     <script>
       function openTab(evt, tabName) {
-          let i, tabcontent, tabbuttons;
-          tabcontent = document.getElementsByClassName("tab-content");
-          for (i = 0; i < tabcontent.length; i++) {
-              tabcontent[i].classList.remove("active");
-          }
-          tabbuttons = document.getElementsByClassName("tab-button");
-          for (i = 0; i < tabbuttons.length; i++) {
-              tabbuttons[i].classList.remove("active");
-          }
-          document.getElementById(tabName).classList.add("active");
-          evt.currentTarget.classList.add("active");
-      }
+            let i, tabcontent, tabbuttons;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tabbuttons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabbuttons.length; i++) {
+                tabbuttons[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
 
-      // --- Función modificada para comprobar TODAS las versiones ---
+            if (tabName === 'settings') {
+              checkForForge(); //Actualiza visibilidad
+              document.getElementById('updateMinecraftButton').style.display = 'block'; //Siempre visible
+              document.getElementById('minecraftURLInput').style.display = 'inline-block';
+            } else {
+               document.getElementById('updateMinecraftButton').style.display = 'none';
+               document.getElementById('minecraftURLInput').style.display = 'none';
+            }
+        }
+
+
       async function checkForForge() {
             const versions = await window.api.getVersions();
             const updateButton = document.getElementById('updateModsButton');
-            const downloadURLInput = document.getElementById('downloadURLInput');  // Obtener el input
+            const downloadURLInput = document.getElementById('downloadURLInput');
             let hasForge = false;
 
             for (const version of versions) {
                 if (version.isForge) {
                     hasForge = true;
-                    break; // Si encontramos UNA versión Forge, ya es suficiente
+                    break;
                 }
             }
 
             if (hasForge) {
-                updateButton.style.display = 'block'; // Mostrar botón
-                downloadURLInput.style.display = 'inline-block'; // Mostrar input y hacerlo en linea
+                updateButton.style.display = 'block';
+                downloadURLInput.style.display = 'inline-block';
             } else {
-                updateButton.style.display = 'none'; // Ocultar
+                updateButton.style.display = 'none';
                 downloadURLInput.style.display = 'none';
             }
       }
@@ -133,17 +147,20 @@
               select.appendChild(option);
           });
 
-          checkForForge(); // Comprobar al cargar la página
+          checkForForge();
+           // Mostrar el botón de actualización de .minecraft por defecto
+          document.getElementById('updateMinecraftButton').style.display = 'block';
+          document.getElementById('minecraftURLInput').style.display = 'inline-block';
       };
 
 
-      async function launch() {
-          const username = document.getElementById('username').value;
-          const versionId = document.getElementById('versions').value;
-          const minMemory = document.getElementById('minMemory').value;
-          const maxMemory = document.getElementById('maxMemory').value;
+       async function launch() {
+            const username = document.getElementById('username').value;
+            const versionId = document.getElementById('versions').value;
+            const minMemory = document.getElementById('minMemory').value;
+            const maxMemory = document.getElementById('maxMemory').value;
 
-          document.getElementById('status').textContent = 'Iniciando...';
+            document.getElementById('status').textContent = 'Iniciando...';
 
             try {
                 const result = await window.api.launchGame({ username, versionId, minMemory, maxMemory });
@@ -155,10 +172,10 @@
             } catch (error) {
                 document.getElementById('status').textContent = `Error: ${error.message}`;
             }
-      }
+        }
 
         async function updateMods() {
-            const downloadURL = document.getElementById('downloadURLInput').value; // Obtener URL del input
+            const downloadURL = document.getElementById('downloadURLInput').value;
 
             if (!downloadURL) {
                 document.getElementById('status').textContent = 'Por favor, introduce la URL de descarga.';
@@ -168,7 +185,7 @@
             document.getElementById('status').textContent = 'Actualizando mods...';
 
             try {
-                const result = await window.api.updateMods(downloadURL); // Pasar solo la URL
+                const result = await window.api.updateMods(downloadURL);
                 if (result.success) {
                     document.getElementById('status').textContent = 'Mods actualizados correctamente!';
                 } else {
@@ -178,6 +195,30 @@
                 document.getElementById('status').textContent = `Error: ${error.message}`;
             }
         }
+
+        //Nueva función
+        async function updateMinecraft() {
+          const downloadURL = document.getElementById('minecraftURLInput').value;
+
+          if (!downloadURL) {
+            document.getElementById('status').textContent = 'Por favor, introduce la URL de descarga.';
+            return;
+          }
+
+          document.getElementById('status').textContent = 'Actualizando .minecraft...';
+          try {
+            const result = await window.api.updateMinecraft(downloadURL);
+            if (result.success) {
+              document.getElementById('status').textContent = 'Carpeta .minecraft actualizada!';
+            } else {
+              document.getElementById('status').textContent = `Error: ${result.error}`;
+            }
+
+          } catch (error) {
+            document.getElementById('status').textContent = `Error: ${error.message}`;
+          }
+        }
+
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const { detectInstalledVersions, isForgeVersion } = require('./versions');
 const { launchMinecraft } = require('./launcher');
-const { downloadAndExtract } = require('./downloader'); // Importamos la función
+const { downloadAndExtract } = require('./downloader'); // Ya lo tenemos importado
 
 
 let mainWindow;
@@ -29,7 +29,6 @@ ipcMain.handle('is-forge-version', async (event, versionId) => {
     return isForgeVersion(versionId, customMinecraftPath);
 });
 
-// --- updateMods usando downloader.js ---
 ipcMain.handle('update-mods', async (event, downloadURL) => {
     try {
         const modsFolder = path.join(customMinecraftPath, 'mods');
@@ -48,16 +47,29 @@ ipcMain.handle('update-mods', async (event, downloadURL) => {
             }
         }
 
-        // 3. Descargar y extraer con la función del downloader
+        // 3. Descargar y extraer
         const result = await downloadAndExtract(downloadURL, modsFolder);
-        return result; // Devolvemos el resultado de downloadAndExtract
-
+        return result;
 
     } catch (error) {
         console.error("Error general en updateMods:", error);
         return { success: false, error: error.message || error };
     }
 });
+
+// Nuevo manejador para updateMinecraft
+ipcMain.handle('update-minecraft', async (event, downloadURL) => {
+  try {
+    // 1. Descargar y extraer directamente a .minecraft
+    const result = await downloadAndExtract(downloadURL, customMinecraftPath);
+    return result;
+
+  } catch (error) {
+    console.error("Error en updateMinecraft:", error);
+    return { success: false, error: error.message || error };
+  }
+});
+
 
 
 function createWindow() {
