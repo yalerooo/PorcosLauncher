@@ -4,7 +4,6 @@ const crypto = require('crypto');
 
 const launcher = new Client();
 
-// Función para generar UUID offline (Correcta y necesaria)
 function generateOfflineUUID(username) {
     const data = `OfflinePlayer:${username}`;
     const md5 = crypto.createHash('md5').update(data).digest();
@@ -16,7 +15,7 @@ function generateOfflineUUID(username) {
         .replace(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/, '$1-$2-$3-$4-$5');
 }
 
-function launchMinecraft(options, customMinecraftPath) { //Recibe el path
+function launchMinecraft(options, customMinecraftPath) {
     const opts = {
         authorization: {
             access_token: "0",
@@ -29,20 +28,21 @@ function launchMinecraft(options, customMinecraftPath) { //Recibe el path
                 demo: false
             }
         },
-        root: customMinecraftPath,  //Usa el path
+        root: customMinecraftPath,
         version: {
             number: options.versionId.split('-')[0],
             type: "release",
             custom: options.versionId
         },
         memory: {
-            max: "4G",
-            min: "2G"
+            max: options.maxMemory,  // Usar el valor del parámetro
+            min: options.minMemory   // Usar el valor del parámetro
         }
     };
 
     launcher.on('debug', (e) => console.log(e));
     launcher.on('data', (e) => console.log(e));
+
     return launcher.launch(opts);
 }
 

@@ -34,9 +34,20 @@
             border: 1px solid #ccc;
             border-top: none;
         }
-        .tab-content.active { /* Mostrar contenido activo */
-          display: block;
+        .tab-content.active {
+            display: block;
         }
+        /* Estilos para los ajustes de memoria */
+        .memory-setting {
+            margin-bottom: 10px;
+        }
+         label {
+            display: inline-block;
+            width: 100px; /* Ancho fijo para las etiquetas */
+            text-align: right;
+            margin-right: 10px;
+        }
+
 
     </style>
 </head>
@@ -56,29 +67,35 @@
         <button onclick="launch()">Jugar!</button>
     </div>
 
-    <!-- Contenido del Tab "Instalar y Ajustes" (vacío por ahora) -->
+    <!-- Contenido del Tab "Instalar y Ajustes" -->
     <div id="settings" class="tab-content">
-        <p>Contenido de la pestaña de instalación y ajustes...</p>
+        <h2>Ajustes de Memoria</h2>
+        <div class="memory-setting">
+            <label for="minMemory">Memoria Mínima:</label>
+            <input type="text" id="minMemory" value="2G">  <span>(ej: 2G, 512M)</span>
+        </div>
+        <div class="memory-setting">
+            <label for="maxMemory">Memoria Máxima:</label>
+            <input type="text" id="maxMemory" value="4G">  <span>(ej: 4G, 8G)</span>
+        </div>
     </div>
-
 
     <div id="status"></div>
 
     <script>
-      // Función para cambiar de tab
+        // Función para cambiar de tab
         function openTab(evt, tabName) {
             let i, tabcontent, tabbuttons;
             tabcontent = document.getElementsByClassName("tab-content");
             for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].classList.remove("active"); // Ocultar todos
+                tabcontent[i].classList.remove("active");
             }
             tabbuttons = document.getElementsByClassName("tab-button");
             for (i = 0; i < tabbuttons.length; i++) {
-              tabbuttons[i].classList.remove("active");
+                tabbuttons[i].classList.remove("active");
             }
-            document.getElementById(tabName).classList.add("active"); //Mostrar
+            document.getElementById(tabName).classList.add("active");
             evt.currentTarget.classList.add("active");
-
         }
 
         window.onload = async () => {
@@ -91,17 +108,21 @@
                 option.textContent = version.name;
                 select.appendChild(option);
             });
+
+            // Podrías cargar valores guardados aquí (localStorage, ipcRenderer)
         };
 
         async function launch() {
             const username = document.getElementById('username').value;
             const versionId = document.getElementById('versions').value;
+            const minMemory = document.getElementById('minMemory').value;  // Obtener valores
+            const maxMemory = document.getElementById('maxMemory').value;
 
             document.getElementById('status').textContent = 'Iniciando...';
 
             try {
-                const result = await window.api.launchGame({ username, versionId });
-                if(result.success){
+              const result =  await window.api.launchGame({ username, versionId, minMemory, maxMemory });
+               if(result.success){
                   document.getElementById('status').textContent = '¡Juego en ejecución!';
                 } else {
                   document.getElementById('status').textContent = `Error: ${result.error}`;
@@ -110,6 +131,7 @@
                 document.getElementById('status').textContent = `Error: ${error.message}`;
             }
         }
+
     </script>
 </body>
 </html>
