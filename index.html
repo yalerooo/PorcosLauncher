@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MC Launcher</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        input, select, button { margin: 10px; padding: 8px; }
+        #status { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Porcos Launcher</h1>
+
+    <input type="text" id="username" placeholder="Nombre de usuario">
+
+    <select id="versions"></select>
+
+    <button onclick="launch()">Jugar!</button>
+
+    <div id="status"></div>
+
+    <script>
+        window.onload = async () => {
+            const versions = await window.api.getVersions();
+            const select = document.getElementById('versions');
+
+            versions.forEach(version => {
+                const option = document.createElement('option');
+                option.value = version.id;
+                option.textContent = version.name;
+                select.appendChild(option);
+            });
+        };
+
+        async function launch() {
+            const username = document.getElementById('username').value;
+            const versionId = document.getElementById('versions').value;
+
+            document.getElementById('status').textContent = 'Iniciando...';
+
+            try {
+                const result = await window.api.launchGame({ username, versionId });
+                 if (result.success) {
+                    document.getElementById('status').textContent = '¡Juego en ejecución!';
+                 } else {
+                     document.getElementById('status').textContent = `Error: ${result.error}`;
+                 }
+
+            } catch (error) {
+                document.getElementById('status').textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
