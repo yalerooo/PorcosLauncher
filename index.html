@@ -6,20 +6,81 @@
         body { font-family: Arial; padding: 20px; }
         input, select, button { margin: 10px; padding: 8px; }
         #status { color: green; }
+
+        /* Estilos para los tabs */
+        .tab-container {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+        .tab-button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+        .tab-button.active {
+            background-color: #ccc;
+        }
+        .tab-content {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+        .tab-content.active { /* Mostrar contenido activo */
+          display: block;
+        }
+
     </style>
 </head>
 <body>
-    <h1>Porcos Launcher</h1>
+    <h1>Project Rewrite Launcher</h1>
 
-    <input type="text" id="username" placeholder="Nombre de usuario">
+    <!-- Contenedor de Tabs -->
+    <div class="tab-container">
+        <button class="tab-button active" onclick="openTab(event, 'play')">Jugar</button>
+        <button class="tab-button" onclick="openTab(event, 'settings')">Instalar y Ajustes</button>
+    </div>
 
-    <select id="versions"></select>
+    <!-- Contenido del Tab "Jugar" -->
+    <div id="play" class="tab-content active">
+        <input type="text" id="username" placeholder="Nombre de usuario">
+        <select id="versions"></select>
+        <button onclick="launch()">Jugar!</button>
+    </div>
 
-    <button onclick="launch()">Jugar!</button>
+    <!-- Contenido del Tab "Instalar y Ajustes" (vacío por ahora) -->
+    <div id="settings" class="tab-content">
+        <p>Contenido de la pestaña de instalación y ajustes...</p>
+    </div>
+
 
     <div id="status"></div>
 
     <script>
+      // Función para cambiar de tab
+        function openTab(evt, tabName) {
+            let i, tabcontent, tabbuttons;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active"); // Ocultar todos
+            }
+            tabbuttons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabbuttons.length; i++) {
+              tabbuttons[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active"); //Mostrar
+            evt.currentTarget.classList.add("active");
+
+        }
+
         window.onload = async () => {
             const versions = await window.api.getVersions();
             const select = document.getElementById('versions');
@@ -40,12 +101,11 @@
 
             try {
                 const result = await window.api.launchGame({ username, versionId });
-                 if (result.success) {
-                    document.getElementById('status').textContent = '¡Juego en ejecución!';
-                 } else {
-                     document.getElementById('status').textContent = `Error: ${result.error}`;
-                 }
-
+                if(result.success){
+                  document.getElementById('status').textContent = '¡Juego en ejecución!';
+                } else {
+                  document.getElementById('status').textContent = `Error: ${result.error}`;
+                }
             } catch (error) {
                 document.getElementById('status').textContent = `Error: ${error.message}`;
             }

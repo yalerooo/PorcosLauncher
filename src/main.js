@@ -1,22 +1,32 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const { detectInstalledVersions, getMinecraftPath } = require('./versions');
-const { launchMinecraft } = require('./launcher'); // Importar launchMinecraft
-
+const fs = require('fs'); // Importante: Asegúrate de tener fs importado
+const { detectInstalledVersions } = require('./versions');
+const { launchMinecraft } = require('./launcher');
 
 let mainWindow;
+let customMinecraftPath;
 
-// Manejador IPC para obtener versiones
-ipcMain.handle('get-versions', async () => { // Usa async aquí
-    return await detectInstalledVersions(); // y await aquí
+// --- Ruta de Roaming Multiplataforma ---
+function getLauncherBasePath() {
+    return path.join(app.getPath('appData'), '.porcosLauncher');
+}
+
+function getCustomMinecraftPath() {
+    return path.join(getLauncherBasePath(), '.minecraft');
+}
+
+
+ipcMain.handle('get-versions', async () => {
+    return await detectInstalledVersions(customMinecraftPath);
 });
 
-//Manejador para obtener la ruta
 ipcMain.handle('get-minecraft-path', () => {
-   return getMinecraftPath()
-})
+  return customMinecraftPath; // Devuelve customMinecraftPath
+});
 
 function createWindow() {
+    customMinecraftPath = getCustomMinecraftPath();  // Calcula la ruta ANTES de usarla
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
@@ -27,11 +37,20 @@ function createWindow() {
         }
     });
 
-    // Debug de la ruta (opcional, pero útil)
-    console.log('Ruta Minecraft:', getMinecraftPath());
+    console.log('Ruta Minecraft:', customMinecraftPath);
 
-    // Cargar la interfaz
     mainWindow.loadFile('index.html');
+
+    // --- Creación de carpetas (ahora en getLauncherBasePath()) ---
+    const launcherDir = getLauncherBasePath();
+    const minecraftDir = customMinecraftPath;
+
+    if (!fs.existsSync(launcherDir)) {
+        fs.mkdirSync(launcherDir, { recursive: true });
+    }
+    if (!fs.existsSync(minecraftDir)) {
+        fs.mkdirSync(minecraftDir, { recursive: true });
+    }
 }
 
 app.whenReady().then(() => {
@@ -44,20 +63,18 @@ app.whenReady().then(() => {
     });
 });
 
-
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
 });
 
-// Manejador del lanzamiento
-ipcMain.handle('launch-game', async (event, options) => { // Usa async
+ipcMain.handle('launch-game', async (event, options) => {
     try {
-        await launchMinecraft(options); // Usa await
-        return { success: true }; // Indica éxito
+        await launchMinecraft(options, customMinecraftPath); // Pasa customMinecraftPath
+        return { success: true };
     } catch (error) {
         console.error("Error al lanzar el juego:", error);
-        return { success: false, error: error.message || error }; // Devuelve el error
+        return { success: false, error: error.message || error };
     }
 });
