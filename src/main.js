@@ -1,13 +1,14 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const fs = require('fs'); // Importante: Asegúrate de tener fs importado
-const { detectInstalledVersions } = require('./versions');
+const fs = require('fs');
+const { detectInstalledVersions, isForgeVersion } = require('./versions');
 const { launchMinecraft } = require('./launcher');
+const { downloadAndExtract } = require('./downloader'); // Importamos la función
+
 
 let mainWindow;
 let customMinecraftPath;
 
-// --- Ruta de Roaming Multiplataforma ---
 function getLauncherBasePath() {
     return path.join(app.getPath('appData'), '.porcosLauncher');
 }
@@ -16,17 +17,51 @@ function getCustomMinecraftPath() {
     return path.join(getLauncherBasePath(), '.minecraft');
 }
 
-
 ipcMain.handle('get-versions', async () => {
     return await detectInstalledVersions(customMinecraftPath);
 });
 
 ipcMain.handle('get-minecraft-path', () => {
-  return customMinecraftPath; // Devuelve customMinecraftPath
+    return customMinecraftPath;
 });
 
+ipcMain.handle('is-forge-version', async (event, versionId) => {
+    return isForgeVersion(versionId, customMinecraftPath);
+});
+
+// --- updateMods usando downloader.js ---
+ipcMain.handle('update-mods', async (event, downloadURL) => {
+    try {
+        const modsFolder = path.join(customMinecraftPath, 'mods');
+
+        // 1. Crear la carpeta 'mods' si no existe
+        if (!fs.existsSync(modsFolder)) {
+            fs.mkdirSync(modsFolder, { recursive: true });
+        }
+
+        // 2. Eliminar mods existentes
+        const files = fs.readdirSync(modsFolder);
+        for (const file of files) {
+            const filePath = path.join(modsFolder, file);
+            if (fs.statSync(filePath).isFile()) {
+               fs.unlinkSync(filePath);
+            }
+        }
+
+        // 3. Descargar y extraer con la función del downloader
+        const result = await downloadAndExtract(downloadURL, modsFolder);
+        return result; // Devolvemos el resultado de downloadAndExtract
+
+
+    } catch (error) {
+        console.error("Error general en updateMods:", error);
+        return { success: false, error: error.message || error };
+    }
+});
+
+
 function createWindow() {
-    customMinecraftPath = getCustomMinecraftPath();  // Calcula la ruta ANTES de usarla
+    customMinecraftPath = getCustomMinecraftPath();
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
@@ -41,10 +76,8 @@ function createWindow() {
 
     mainWindow.loadFile('index.html');
 
-    // --- Creación de carpetas (ahora en getLauncherBasePath()) ---
     const launcherDir = getLauncherBasePath();
     const minecraftDir = customMinecraftPath;
-
     if (!fs.existsSync(launcherDir)) {
         fs.mkdirSync(launcherDir, { recursive: true });
     }
@@ -71,7 +104,7 @@ app.on('window-all-closed', () => {
 
 ipcMain.handle('launch-game', async (event, options) => {
     try {
-        await launchMinecraft(options, customMinecraftPath); // Pasa customMinecraftPath
+        await launchMinecraft(options, customMinecraftPath);
         return { success: true };
     } catch (error) {
         console.error("Error al lanzar el juego:", error);

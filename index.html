@@ -37,40 +37,38 @@
         .tab-content.active {
             display: block;
         }
-        /* Estilos para los ajustes de memoria */
-        .memory-setting {
+       .memory-setting {
             margin-bottom: 10px;
         }
          label {
             display: inline-block;
-            width: 100px; /* Ancho fijo para las etiquetas */
+            width: 100px;
             text-align: right;
             margin-right: 10px;
         }
-
+        #updateModsButton, #downloadURLInput { /* Ocultos por defecto */
+          display: none;
+        }
 
     </style>
 </head>
 <body>
     <h1>Project Rewrite Launcher</h1>
 
-    <!-- Contenedor de Tabs -->
     <div class="tab-container">
         <button class="tab-button active" onclick="openTab(event, 'play')">Jugar</button>
         <button class="tab-button" onclick="openTab(event, 'settings')">Instalar y Ajustes</button>
     </div>
 
-    <!-- Contenido del Tab "Jugar" -->
     <div id="play" class="tab-content active">
         <input type="text" id="username" placeholder="Nombre de usuario">
         <select id="versions"></select>
         <button onclick="launch()">Jugar!</button>
     </div>
 
-    <!-- Contenido del Tab "Instalar y Ajustes" -->
     <div id="settings" class="tab-content">
         <h2>Ajustes de Memoria</h2>
-        <div class="memory-setting">
+         <div class="memory-setting">
             <label for="minMemory">Memoria Mínima:</label>
             <input type="text" id="minMemory" value="2G">  <span>(ej: 2G, 512M)</span>
         </div>
@@ -78,51 +76,78 @@
             <label for="maxMemory">Memoria Máxima:</label>
             <input type="text" id="maxMemory" value="4G">  <span>(ej: 4G, 8G)</span>
         </div>
+         <!-- Campo para la URL y botón -->
+        <label for="downloadURL">URL de descarga de Mods:</label>
+        <input type="text" id="downloadURLInput" placeholder="URL del archivo ZIP">
+        <button id="updateModsButton" onclick="updateMods()">Actualizar Mods</button>
     </div>
 
     <div id="status"></div>
 
     <script>
-        // Función para cambiar de tab
-        function openTab(evt, tabName) {
-            let i, tabcontent, tabbuttons;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].classList.remove("active");
-            }
-            tabbuttons = document.getElementsByClassName("tab-button");
-            for (i = 0; i < tabbuttons.length; i++) {
-                tabbuttons[i].classList.remove("active");
-            }
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-        }
+      function openTab(evt, tabName) {
+          let i, tabcontent, tabbuttons;
+          tabcontent = document.getElementsByClassName("tab-content");
+          for (i = 0; i < tabcontent.length; i++) {
+              tabcontent[i].classList.remove("active");
+          }
+          tabbuttons = document.getElementsByClassName("tab-button");
+          for (i = 0; i < tabbuttons.length; i++) {
+              tabbuttons[i].classList.remove("active");
+          }
+          document.getElementById(tabName).classList.add("active");
+          evt.currentTarget.classList.add("active");
+      }
 
-        window.onload = async () => {
+      // --- Función modificada para comprobar TODAS las versiones ---
+      async function checkForForge() {
             const versions = await window.api.getVersions();
-            const select = document.getElementById('versions');
+            const updateButton = document.getElementById('updateModsButton');
+            const downloadURLInput = document.getElementById('downloadURLInput');  // Obtener el input
+            let hasForge = false;
 
-            versions.forEach(version => {
-                const option = document.createElement('option');
-                option.value = version.id;
-                option.textContent = version.name;
-                select.appendChild(option);
-            });
+            for (const version of versions) {
+                if (version.isForge) {
+                    hasForge = true;
+                    break; // Si encontramos UNA versión Forge, ya es suficiente
+                }
+            }
 
-            // Podrías cargar valores guardados aquí (localStorage, ipcRenderer)
-        };
+            if (hasForge) {
+                updateButton.style.display = 'block'; // Mostrar botón
+                downloadURLInput.style.display = 'inline-block'; // Mostrar input y hacerlo en linea
+            } else {
+                updateButton.style.display = 'none'; // Ocultar
+                downloadURLInput.style.display = 'none';
+            }
+      }
 
-        async function launch() {
-            const username = document.getElementById('username').value;
-            const versionId = document.getElementById('versions').value;
-            const minMemory = document.getElementById('minMemory').value;  // Obtener valores
-            const maxMemory = document.getElementById('maxMemory').value;
+      window.onload = async () => {
+          const versions = await window.api.getVersions();
+          const select = document.getElementById('versions');
 
-            document.getElementById('status').textContent = 'Iniciando...';
+          versions.forEach(version => {
+              const option = document.createElement('option');
+              option.value = version.id;
+              option.textContent = version.name;
+              select.appendChild(option);
+          });
+
+          checkForForge(); // Comprobar al cargar la página
+      };
+
+
+      async function launch() {
+          const username = document.getElementById('username').value;
+          const versionId = document.getElementById('versions').value;
+          const minMemory = document.getElementById('minMemory').value;
+          const maxMemory = document.getElementById('maxMemory').value;
+
+          document.getElementById('status').textContent = 'Iniciando...';
 
             try {
-              const result =  await window.api.launchGame({ username, versionId, minMemory, maxMemory });
-               if(result.success){
+                const result = await window.api.launchGame({ username, versionId, minMemory, maxMemory });
+                if(result.success){
                   document.getElementById('status').textContent = '¡Juego en ejecución!';
                 } else {
                   document.getElementById('status').textContent = `Error: ${result.error}`;
@@ -130,8 +155,29 @@
             } catch (error) {
                 document.getElementById('status').textContent = `Error: ${error.message}`;
             }
-        }
+      }
 
+        async function updateMods() {
+            const downloadURL = document.getElementById('downloadURLInput').value; // Obtener URL del input
+
+            if (!downloadURL) {
+                document.getElementById('status').textContent = 'Por favor, introduce la URL de descarga.';
+                return;
+            }
+
+            document.getElementById('status').textContent = 'Actualizando mods...';
+
+            try {
+                const result = await window.api.updateMods(downloadURL); // Pasar solo la URL
+                if (result.success) {
+                    document.getElementById('status').textContent = 'Mods actualizados correctamente!';
+                } else {
+                    document.getElementById('status').textContent = `Error al actualizar mods: ${result.error}`;
+                }
+            } catch (error) {
+                document.getElementById('status').textContent = `Error: ${error.message}`;
+            }
+        }
     </script>
 </body>
 </html>
