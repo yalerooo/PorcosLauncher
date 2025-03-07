@@ -144,7 +144,6 @@ button:hover {
 }
 
 .version-logo::after {
-  content: "MC";
   position: absolute;
   font-size: 14px;
 }

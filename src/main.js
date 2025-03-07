@@ -1,5 +1,6 @@
-// --- START OF FILE main.js --- (No substantial changes, just formatting)
-const { app, BrowserWindow, ipcMain, shell } = require("electron");
+// --- FILE: main.js ---
+
+const { app, BrowserWindow, ipcMain, shell, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const { detectInstalledVersions } = require("./versions");
@@ -105,43 +106,48 @@ function createWindow() {
 }
 
 function ensureAssets() {
-  const assetsDir = path.join(app.getAppPath(), "assets")
-  if (!fs.existsSync(assetsDir)) {
-    fs.mkdirSync(assetsDir, { recursive: true })
-  }
+    const assetsDir = path.join(app.getAppPath(), "assets");
+    const versionsAssetsDir = path.join(assetsDir, "versions"); // Subdirectory for version images
 
-  // Create background.png if it doesn't exist
-  const backgroundPath = path.join(assetsDir, "background.png")
-  if (!fs.existsSync(backgroundPath)) {
-    // Create a simple dark purple background
-    const { createCanvas } = require("canvas")
-    const canvas = createCanvas(1920, 1080)
-    const ctx = canvas.getContext("2d")
-
-    // Create gradient background
-    const gradient = ctx.createLinearGradient(0, 0, 1920, 1080)
-    gradient.addColorStop(0, "#300a24")
-    gradient.addColorStop(1, "#4a1942")
-
-    ctx.fillStyle = gradient
-    ctx.fillRect(0, 0, 1920, 1080)
-
-    // Add some texture
-    ctx.globalAlpha = 0.05
-    for (let i = 0; i < 1000; i++) {
-      const x = Math.random() * 1920
-      const y = Math.random() * 1080
-      const radius = Math.random() * 2
-      ctx.beginPath()
-      ctx.arc(x, y, radius, 0, Math.PI * 2)
-      ctx.fillStyle = "#ffffff"
-      ctx.fill()
+    if (!fs.existsSync(assetsDir)) {
+        fs.mkdirSync(assetsDir, { recursive: true });
+    }
+    if (!fs.existsSync(versionsAssetsDir)) {
+        fs.mkdirSync(versionsAssetsDir, { recursive: true });
     }
 
-    // Save the background
-    const buffer = canvas.toBuffer("image/png")
-    fs.writeFileSync(backgroundPath, buffer)
-  }
+    // Create background.png if it doesn't exist
+    const backgroundPath = path.join(assetsDir, "background.png");
+    if (!fs.existsSync(backgroundPath)) {
+        // Create a simple dark purple background
+        const { createCanvas } = require("canvas");
+        const canvas = createCanvas(1920, 1080);
+        const ctx = canvas.getContext("2d");
+
+        // Create gradient background
+        const gradient = ctx.createLinearGradient(0, 0, 1920, 1080);
+        gradient.addColorStop(0, "#300a24");
+        gradient.addColorStop(1, "#4a1942");
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1920, 1080);
+
+        // Add some texture
+        ctx.globalAlpha = 0.05;
+        for (let i = 0; i < 1000; i++) {
+            const x = Math.random() * 1920;
+            const y = Math.random() * 1080;
+            const radius = Math.random() * 2;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+        }
+
+        // Save the background
+        const buffer = canvas.toBuffer("image/png");
+        fs.writeFileSync(backgroundPath, buffer);
+    }
 
   // Create pig-logo.png if it doesn't exist
   const logoPath = path.join(assetsDir, "logo.jpg")
@@ -161,6 +167,20 @@ function ensureAssets() {
       fs.copyFileSync(defaultPig, pigImagePath)
     }
   }
+    // Copy default version images (if you have any)
+    const defaultVersionImages = [
+        "default1.png",
+        "default2.png",
+        "default3.jpg",
+        "logo.jpg" // Example default images.  Add your filenames here.
+    ];
+    defaultVersionImages.forEach(imageName => {
+        const srcPath = path.join(__dirname, "../assets/versions", imageName); // Assuming they are in project assets
+        const destPath = path.join(versionsAssetsDir, imageName);
+        if (fs.existsSync(srcPath) && !fs.existsSync(destPath)) {
+            fs.copyFileSync(srcPath, destPath);
+        }
+    });
 }
 
 app.whenReady().then(() => {
@@ -223,5 +243,138 @@ ipcMain.handle("set-version-name", async (event, versionId, newName) => {
     } catch (error) {
         console.error("Error saving version name:", error);
         return { success: false, error: error.message };
+    }
+});
+
+// --- Version image handlers ---
+
+ipcMain.handle("set-version-image", async (event, versionId, imageDataURL) => {
+    const versionPath = path.join(customMinecraftPath, "versions", versionId);
+
+    try {
+        if (!fs.existsSync(versionPath)) {
+            fs.mkdirSync(versionPath, { recursive: true });
+        }
+
+        // 1. ***DELETE ANY EXISTING IMAGE FILES***
+        const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif'];
+        for (const ext of imageExtensions) {
+            const existingImagePath = path.join(versionPath, `version-image${ext}`);
+            if (fs.existsSync(existingImagePath)) {
+                try {
+                    await fs.promises.unlink(existingImagePath); // Asynchronously delete
+                    console.log(`Deleted existing image: ${existingImagePath}`);
+                } catch (deleteError) {
+                    console.error(`Error deleting existing image ${existingImagePath}:`, deleteError);
+                    //  Decide:  Do you want to STOP if deletion fails?  Probably not.
+                    // return { success: false, error: `Failed to delete existing image: ${deleteError.message}` };
+                }
+            }
+        }
+
+
+        // 2. Determine MIME type and extension
+        let mimeType;
+        let fileExtension;
+
+        if (imageDataURL.startsWith('data:image/jpeg')) {
+            mimeType = 'image/jpeg';
+            fileExtension = '.jpg';
+        } else if (imageDataURL.startsWith('data:image/png')) {
+            mimeType = 'image/png';
+            fileExtension = '.png';
+        } else if (imageDataURL.startsWith('data:image/gif')) {
+            mimeType = 'image/gif';
+            fileExtension = '.gif';
+        } else {
+            return { success: false, error: 'Unsupported image format.' };
+        }
+
+        const imagePath = path.join(versionPath, `version-image${fileExtension}`);
+
+
+        // 3. Convert data URL to buffer and save
+        const base64Data = imageDataURL.replace(/^data:image\/(png|jpeg|gif);base64,/, "");
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+
+        await fs.promises.writeFile(imagePath, imageBuffer);
+        return { success: true };
+
+    } catch (error) {
+        console.error("Error saving version image:", error);
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle("get-version-image", async (event, versionId) => {
+    const versionPath = path.join(customMinecraftPath, "versions", versionId);
+    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif']; // Include .jpeg
+
+    try {
+        for (const ext of imageExtensions) {
+            const imagePath = path.join(versionPath, `version-image${ext}`);
+            if (fs.existsSync(imagePath)) {
+                const data = await fs.promises.readFile(imagePath);
+                const base64Image = data.toString('base64');
+                const mimeType = `image/${ext.substring(1)}`; // Correct MIME type
+                const dataURL = `data:${mimeType};base64,${base64Image}`;
+                return dataURL;
+            }
+        }
+        return null;
+
+    } catch (error) {
+        console.error("Error reading version image:", error);
+        return null;
+    }
+});
+
+ipcMain.handle("remove-version-image", async (event, versionId) => {
+    const versionPath = path.join(customMinecraftPath, "versions", versionId);
+    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif'];
+
+    try {
+        for (const ext of imageExtensions) {
+            const imagePath = path.join(versionPath, `version-image${ext}`);
+            if (fs.existsSync(imagePath)) {
+                await fs.promises.unlink(imagePath); // Asynchronously delete the file
+            }
+        }
+        return { success: true };
+    } catch (error) {
+        console.error("Error removing version image:", error);
+        return { success: false, error: error.message };
+    }
+});
+
+// --- Delete version handler ---
+ipcMain.handle("delete-version", async (event, versionId) => {
+    const versionPath = path.join(customMinecraftPath, "versions", versionId);
+    try {
+        if (fs.existsSync(versionPath)) {
+            await fs.promises.rm(versionPath, { recursive: true, force: true });
+            return { success: true };
+        } else {
+            return { success: false, error: "Version folder not found." };
+        }
+    } catch (error) {
+        console.error("Error deleting version:", error);
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('get-default-version-images', async () => {
+    const defaultImagesDir = path.join(app.getAppPath(), 'assets', 'versions');
+    try {
+        const files = await fs.promises.readdir(defaultImagesDir);
+        // Filter to only include image files (optional, but good practice)
+        const imageFiles = files.filter(file => /\.(png|jpg|jpeg|gif)$/i.test(file));
+
+        // Create absolute paths for the renderer process
+        const imagePaths = imageFiles.map(file => path.join(defaultImagesDir, file).replace(/\\/g, '/')); // Normalize paths
+        return imagePaths;
+    } catch (error) {
+        console.error('Error reading default version images:', error);
+        return []; // Return an empty array on error
     }
 });

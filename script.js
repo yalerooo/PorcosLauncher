@@ -1,308 +1,529 @@
+// --- FILE: script.js ---
 document.addEventListener("DOMContentLoaded", async () => {
-    let selectedVersionButton = null
+    let selectedVersionButton = null;
+    let currentEditingVersion = null; // Store the ID of the version being edited
+  
+    // --- Helper Functions ---
   
     function showSection(sectionId) {
       document.querySelectorAll(".content-section").forEach((section) => {
-        section.classList.remove("active")
-        section.style.display = "none"
-      })
+        section.classList.remove("active");
+        section.style.display = "none";
+      });
   
-      const section = document.getElementById(sectionId)
+      const section = document.getElementById(sectionId);
       if (section) {
-        section.classList.add("active")
-        section.style.display = "block"
+        section.classList.add("active");
+        section.style.display = "block";
       }
   
-      const appTitle = document.getElementById("app-title")
-      const versionInfoHeader = document.getElementById("version-info-header")
-      const versionNameInput = document.getElementById("version-name-input")
+      const appTitle = document.getElementById("app-title");
+      const versionInfoHeader = document.getElementById("version-info-header");
+      const versionNameInput = document.getElementById("version-name-input");
   
-      // Reset all relevant UI elements
-      versionNameInput.style.display = "none"
-      appTitle.style.display = "inline" // Ensure appTitle is visible
+      versionNameInput.style.display = "none";
+      appTitle.style.display = "inline";
   
       if (sectionId === "home") {
-        appTitle.textContent = "Porcos Launcher"
-        versionInfoHeader.textContent = ""
+        appTitle.textContent = "Porcos Launcher";
+        versionInfoHeader.textContent = "";
       } else if (sectionId === "version-details") {
-        // version-details ahora solo muestra la interfaz de juego
         if (selectedVersionButton) {
-          const versionId = selectedVersionButton.dataset.version
-          versionInfoHeader.textContent = `Version: ${versionId}`
-          document.getElementById("username").value = "" // Clear username field
+          const versionId = selectedVersionButton.dataset.version;
+          versionInfoHeader.textContent = `Version: ${versionId}`;
+          document.getElementById("username").value = "";
         }
       } else if (sectionId === "settings") {
-        appTitle.textContent = "Settings"
-        versionInfoHeader.textContent = ""
+        appTitle.textContent = "Settings";
+        versionInfoHeader.textContent = "";
       }
     }
   
     async function loadVersionName(versionId) {
       try {
-        const storedName = await window.api.getVersionName(versionId)
-        const appTitle = document.getElementById("app-title")
+        const storedName = await window.api.getVersionName(versionId);
+        const appTitle = document.getElementById("app-title");
   
-        // Ya no actualizamos el version-id porque lo hemos eliminado
-        // Solo actualizamos el título en la barra superior
-        appTitle.textContent = storedName || "Installation Name"
-        appTitle.dataset.versionId = versionId // Store on the title
+        appTitle.textContent = storedName || "Installation Name";
+        appTitle.dataset.versionId = versionId;
   
         if (selectedVersionButton) {
-          selectedVersionButton.title = storedName || "Installation Name"
+          selectedVersionButton.title = storedName || "Installation Name";
+          updateVersionLogo(selectedVersionButton, versionId); // Update logo after loading
         }
       } catch (error) {
-        console.error("Error loading version name:", error)
-        showStatus("Error loading version name.")
+        console.error("Error loading version name:", error);
+        showStatus("Error loading version name.");
       }
     }
   
     async function saveVersionName(versionId, newName) {
       try {
-        await window.api.setVersionName(versionId, newName)
-        const appTitle = document.getElementById("app-title")
-        appTitle.textContent = newName // Update top-bar title
+        await window.api.setVersionName(versionId, newName);
+        const appTitle = document.getElementById("app-title");
+        appTitle.textContent = newName;
   
         if (selectedVersionButton) {
-          selectedVersionButton.title = newName
+          selectedVersionButton.title = newName;
+            updateVersionLogo(selectedVersionButton, versionId);
         }
       } catch (error) {
-        console.error("Error saving version name:", error)
-        showStatus("Error saving version name.")
+        console.error("Error saving version name:", error);
+        showStatus("Error saving version name.");
       }
     }
   
-    // Click-to-edit handler
-    function setupNameEditing() {
-      const appTitle = document.getElementById("app-title")
-      const nameInput = document.getElementById("version-name-input")
+    async function updateVersionLogo(versionButton, versionId) {
+        const versionLogo = versionButton.querySelector(".version-logo");
+        const storedName = await window.api.getVersionName(versionId) || versionId;
+
+        try {
+            const imagePath = await window.api.getVersionImage(versionId);
+            if (imagePath) {
+                // Use custom image.  Crucially, use `URL.createObjectURL`
+                versionLogo.style.backgroundImage = `url('${imagePath}')`;
+                versionLogo.classList.add("has-image");
+                versionLogo.textContent = ""; // Remove text
+            }else {
+              // No custom image, use initials or version number
+              versionLogo.style.backgroundImage = ""; // Remove background image
+              versionLogo.classList.remove("has-image");
+              versionLogo.textContent = storedName.substring(0, 2).toUpperCase(); // Display initials
+          }
   
-      appTitle.addEventListener("click", () => {
-        // Only allow editing when in version details
-        if (document.getElementById("version-details").classList.contains("active")) {
-          nameInput.value = appTitle.textContent
-          appTitle.style.display = "none"
-          nameInput.style.display = "inline-block"
-          nameInput.focus()
-        }
-      })
+      } catch (error) {
+          console.error("Error updating version logo:", error);
+          versionLogo.style.backgroundImage = "";
+          versionLogo.classList.remove("has-image");
+          versionLogo.textContent = storedName.substring(0, 2).toUpperCase(); // Fallback to initials
+      }
+  }
   
-      nameInput.addEventListener("blur", async () => {
-        const newName = nameInput.value.trim()
-        if (newName && newName !== appTitle.textContent) {
-          await saveVersionName(appTitle.dataset.versionId, newName)
-        }
-        nameInput.style.display = "none"
-        appTitle.style.display = "inline"
-      })
   
-      nameInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          nameInput.blur() // Trigger blur to save
-        }
-      })
-    }
+    // --- Event Handlers ---
+  
+    // Click-to-edit (removed - now handled in the modal)
   
     document.querySelector(".sidebar").addEventListener("click", async (event) => {
-      const versionButton = event.target.closest(".version-button")
+      const versionButton = event.target.closest(".version-button");
       if (versionButton) {
         if (selectedVersionButton) {
-          selectedVersionButton.querySelector(".version-logo").classList.remove("selected")
+          selectedVersionButton
+            .querySelector(".version-logo")
+            .classList.remove("selected");
         }
-        selectedVersionButton = versionButton
-        versionButton.querySelector(".version-logo").classList.add("selected")
+        selectedVersionButton = versionButton;
+        versionButton.querySelector(".version-logo").classList.add("selected");
   
-        const versionId = versionButton.dataset.version
-        await loadVersionName(versionId) // Load before showing
-        showSection("version-details")
+        const versionId = versionButton.dataset.version;
+        await loadVersionName(versionId);
+        showSection("version-details");
       }
-    })
+    });
   
-    const launcherLogo = document.getElementById("launcher-logo")
+    const launcherLogo = document.getElementById("launcher-logo");
     if (launcherLogo) {
       launcherLogo.addEventListener("click", () => {
         if (selectedVersionButton) {
-          selectedVersionButton.querySelector(".version-logo").classList.remove("selected")
-          selectedVersionButton = null
+          selectedVersionButton
+            .querySelector(".version-logo")
+            .classList.remove("selected");
+          selectedVersionButton = null;
         }
-        showSection("home")
-      })
+        showSection("home");
+      });
     }
   
     document.getElementById("settings-icon").addEventListener("click", () => {
       if (selectedVersionButton) {
-        selectedVersionButton.querySelector(".version-logo").classList.remove("selected")
-        selectedVersionButton = null
+        selectedVersionButton
+          .querySelector(".version-logo")
+          .classList.remove("selected");
+        selectedVersionButton = null;
       }
-      showSection("settings")
-    })
+      showSection("settings");
+    });
   
     document.getElementById("folder-icon").addEventListener("click", async () => {
       try {
-        const minecraftPath = await window.api.getMinecraftPath()
-        await window.api.openMinecraftFolder(minecraftPath)
+        const minecraftPath = await window.api.getMinecraftPath();
+        await window.api.openMinecraftFolder(minecraftPath);
       } catch (error) {
-        console.error("Error opening folder:", error)
-        showStatus(`Error opening folder: ${error.message}`)
+        console.error("Error opening folder:", error);
+        showStatus(`Error opening folder: ${error.message}`);
       }
-    })
+    });
   
     function showStatus(message, duration = 3000) {
-      const statusElement = document.getElementById("status")
-      statusElement.textContent = message
-      statusElement.style.display = "block"
+      const statusElement = document.getElementById("status");
+      statusElement.textContent = message;
+      statusElement.style.display = "block";
   
-      // Add animation
-      statusElement.style.animation = "none"
+      statusElement.style.animation = "none";
       setTimeout(() => {
-        statusElement.style.animation = "slideUp 0.3s ease"
-      }, 10)
+        statusElement.style.animation = "slideUp 0.3s ease";
+      }, 10);
   
       setTimeout(() => {
-        statusElement.style.display = "none"
-      }, duration)
+        statusElement.style.display = "none";
+      }, duration);
     }
   
     async function loadInitialUI() {
       try {
-        const versions = await window.api.getVersions()
-        const sidebar = document.querySelector(".sidebar")
-        sidebar.querySelectorAll(".version-button").forEach((button) => button.remove())
+        const versions = await window.api.getVersions();
+        const sidebar = document.querySelector(".sidebar");
+        sidebar
+          .querySelectorAll(".version-button")
+          .forEach((button) => button.remove());
   
         for (const version of versions) {
-          const versionButton = document.createElement("div")
-          versionButton.classList.add("version-button")
-          versionButton.dataset.version = version.id
-          versionButton.title = version.name
+          const versionButton = document.createElement("div");
+          versionButton.classList.add("version-button");
+          versionButton.dataset.version = version.id;
+          versionButton.title = version.name;
   
-          const versionLogo = document.createElement("div")
-          versionLogo.classList.add("version-logo")
-          versionButton.appendChild(versionLogo)
-          sidebar.appendChild(versionButton)
+  
+          const versionLogo = document.createElement("div");
+          versionLogo.classList.add("version-logo");
+          versionButton.appendChild(versionLogo);
+  
+            // Edit button (pencil icon)
+          const editButton = document.createElement("div");
+          editButton.classList.add("version-edit-button");
+          editButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+              <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+            </svg>
+          `;
+  
+          versionButton.appendChild(editButton);
+            editButton.addEventListener("click", (event) => {
+                event.stopPropagation(); // Prevent triggering the version button click
+                openEditModal(version.id);
+            });
+  
+          sidebar.appendChild(versionButton);
+          await updateVersionLogo(versionButton, version.id); // Update logo after creation
+  
         }
   
-        showSection("home")
-        checkForForge()
-        document.getElementById("updateMinecraftButton").style.display = "block"
-        document.getElementById("minecraftURLInput").style.display = "inline-block"
+        showSection("home");
+        checkForForge();
+        document.getElementById("updateMinecraftButton").style.display = "block";
+        document.getElementById("minecraftURLInput").style.display =
+          "inline-block";
       } catch (error) {
-        console.error("Error loading initial UI:", error)
-        showStatus(`Error loading versions: ${error.message}`)
+        console.error("Error loading initial UI:", error);
+        showStatus(`Error loading versions: ${error.message}`);
       }
     }
   
     async function launch() {
-      const username = document.getElementById("username").value
-      let versionId = null
+      const username = document.getElementById("username").value;
+      let versionId = null;
       if (selectedVersionButton) {
-        versionId = selectedVersionButton.dataset.version
+        versionId = selectedVersionButton.dataset.version;
       }
   
       if (!versionId) {
-        showStatus("Please select a version.")
-        return
+        showStatus("Please select a version.");
+        return;
       }
       if (!username) {
-        showStatus("Please enter a username.")
-        return
+        showStatus("Please enter a username.");
+        return;
       }
-      const minMemory = document.getElementById("minMemory").value
-      const maxMemory = document.getElementById("maxMemory").value
+      const minMemory = document.getElementById("minMemory").value;
+      const maxMemory = document.getElementById("maxMemory").value;
   
-      showStatus("Launching game...")
+      showStatus("Launching game...");
   
       try {
-        const result = await window.api.launchGame({ username, versionId, minMemory, maxMemory })
+        const result = await window.api.launchGame({
+          username,
+          versionId,
+          minMemory,
+          maxMemory,
+        });
         if (result.success) {
-          showStatus("Game running!")
+          showStatus("Game running!");
         } else {
-          showStatus(`Error: ${result.error}`)
+          showStatus(`Error: ${result.error}`);
         }
       } catch (error) {
-        showStatus(`Error: ${error.message}`)
+        showStatus(`Error: ${error.message}`);
       }
     }
   
     async function updateMods() {
-      const downloadURL = document.getElementById("downloadURLInput").value
+      const downloadURL = document.getElementById("downloadURLInput").value;
       if (!downloadURL) {
-        showStatus("Please enter a download URL.")
-        return
+        showStatus("Please enter a download URL.");
+        return;
       }
-      showStatus("Updating mods...")
+      showStatus("Updating mods...");
       try {
-        const result = await window.api.updateMods(downloadURL)
+        const result = await window.api.updateMods(downloadURL);
         if (result.success) {
-          showStatus("Mods updated successfully!")
+          showStatus("Mods updated successfully!");
         } else {
-          showStatus(`Error updating mods: ${result.error}`)
+          showStatus(`Error updating mods: ${result.error}`);
         }
       } catch (error) {
-        showStatus(`Error: ${error.message}`)
+        showStatus(`Error: ${error.message}`);
       }
     }
   
     async function updateMinecraft() {
-      const downloadURL = document.getElementById("minecraftURLInput").value
+      const downloadURL = document.getElementById("minecraftURLInput").value;
       if (!downloadURL) {
-        showStatus("Please enter a download URL.")
-        return
+        showStatus("Please enter a download URL.");
+        return;
       }
-      showStatus("Updating .minecraft...")
+      showStatus("Updating .minecraft...");
       try {
-        const result = await window.api.updateMinecraft(downloadURL)
+        const result = await window.api.updateMinecraft(downloadURL);
         if (result.success) {
-          showStatus(".minecraft folder updated!")
-          loadInitialUI()
+          showStatus(".minecraft folder updated!");
+          loadInitialUI();
         } else {
-          showStatus(`Error: ${result.error}`)
+          showStatus(`Error: ${result.error}`);
         }
       } catch (error) {
-        showStatus(`Error: ${error.message}`)
+        showStatus(`Error: ${error.message}`);
       }
     }
   
     async function checkForForge() {
-      const versions = await window.api.getVersions()
-      const updateButton = document.getElementById("updateModsButton")
-      const downloadURLInput = document.getElementById("downloadURLInput")
-      let hasForge = false
+      const versions = await window.api.getVersions();
+      const updateButton = document.getElementById("updateModsButton");
+      const downloadURLInput = document.getElementById("downloadURLInput");
+      let hasForge = false;
   
       for (const version of versions) {
         if (version.isForge) {
-          hasForge = true
-          break
+          hasForge = true;
+          break;
         }
       }
       if (hasForge) {
-        updateButton.style.display = "block"
-        downloadURLInput.style.display = "block"
+        updateButton.style.display = "block";
+        downloadURLInput.style.display = "block";
       } else {
-        updateButton.style.display = "none"
-        downloadURLInput.style.display = "none"
+        updateButton.style.display = "none";
+        downloadURLInput.style.display = "none";
       }
     }
   
-    setupNameEditing()
   
-    // Add this after setupNameEditing() in your initialization code
-    function setupPlayControls() {
-      const usernameInput = document.getElementById("username")
+      async function openEditModal(versionId) {
+          currentEditingVersion = versionId; // Store the version being edited
+          const modal = document.getElementById("versionEditModal");
+          const versionName = await window.api.getVersionName(versionId);
+          document.getElementById("modalVersionName").value = versionName || versionId;
   
-      usernameInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          launch()
+          // Load current image (if any)
+         try {
+              const currentImagePath = await window.api.getVersionImage(versionId);
+              const versionImagePreview = document.getElementById("versionImagePreview");
+              if (currentImagePath) {
+                  versionImagePreview.src = currentImagePath;
+                  versionImagePreview.style.display = "block";
+              } else {
+                  versionImagePreview.src = "";
+                  versionImagePreview.style.display = "none";
+              }
+          } catch (error) {
+              console.error("Error loading current image:", error);
+              // Handle error (e.g., show a default image)
+          }
+  
+          // Populate default images
+          const defaultImagesContainer = document.getElementById("defaultImagesContainer");
+          defaultImagesContainer.innerHTML = ""; // Clear previous images
+  
+          try {
+             const defaultImages = await window.api.getDefaultVersionImages();
+              defaultImages.forEach(imagePath => {
+                  const imgElement = document.createElement("img");
+                  imgElement.src = imagePath;
+                  imgElement.classList.add("default-version-image");
+                  imgElement.title = path.basename(imagePath); // Tooltip with filename
+                  imgElement.addEventListener("click", () => selectDefaultImage(imagePath));
+                  defaultImagesContainer.appendChild(imgElement);
+              });
+          } catch(error) {
+              console.error("Error loading default images", error);
+              // Handle error (e.g., show a message)
+          }
+  
+  
+  
+          modal.style.display = "block";
+      }
+  
+  
+      function closeEditModal() {
+          document.getElementById("versionEditModal").style.display = "none";
+          currentEditingVersion = null; // Reset
+      }
+  
+      function selectDefaultImage(imagePath) {
+          const versionImagePreview = document.getElementById("versionImagePreview");
+          versionImagePreview.src = imagePath;
+          versionImagePreview.style.display = "block";
+      }
+  
+  
+         // --- FILE: script.js ---
+    //In the setVersionImage
+    async function saveVersionChanges() {
+        const versionId = currentEditingVersion;
+        if (!versionId) return;
+
+        const newName = document.getElementById("modalVersionName").value.trim();
+        const versionImageInput = document.getElementById("versionImage");
+        const versionImagePreview = document.getElementById("versionImagePreview");
+
+        // Save name
+        if (newName) {
+            try {
+                await window.api.setVersionName(versionId, newName);
+                // Update the UI (sidebar button title)
+                const versionButton = document.querySelector(`.version-button[data-version="${versionId}"]`);
+                if (versionButton) {
+                    versionButton.title = newName;
+                }
+
+                //Update the UI (app title if is the selected)
+                const appTitle = document.getElementById("app-title")
+                appTitle.textContent = newName;
+            } catch (error) {
+                console.error("Error saving version name:", error);
+                showStatus("Error saving version name.");
+                return; // Stop if name saving failed
+            }
         }
-      })
+
+        // Save image
+        try {
+            if (versionImagePreview.src && versionImagePreview.src !== "") {
+               await window.api.setVersionImage(versionId, versionImagePreview.src); //Before it was getBase64Image()
+            }
+
+            // Update the version logo in the UI
+            const versionButton = document.querySelector(`.version-button[data-version="${versionId}"]`);
+            if(versionButton){
+                await updateVersionLogo(versionButton, versionId); //Now its using updateVersionLogo
+            }
+
+        } catch (error) {
+            console.error("Error saving version image:", error);
+            showStatus("Error saving version image.");
+            // Don't return, allow name saving even if image saving failed
+        }
+
+        closeEditModal();
+        showStatus("Changes saved.");
+        loadInitialUI();
     }
   
-    // Then call this function in your initialization
-    setupPlayControls()
-  
-    loadInitialUI()
-  
-    window.launch = launch
-    window.updateMods = updateMods
-    window.updateMinecraft = updateMinecraft
-  })
   
   
+    async function deleteVersion() {
+      const versionId = currentEditingVersion;
+        if (!versionId) return;
+  
+        const confirmDelete = confirm(`Are you sure you want to delete version ${versionId}? This cannot be undone.`);
+      if (confirmDelete) {
+        try {
+          await window.api.deleteVersion(versionId);
+          showStatus(`Version ${versionId} deleted.`);
+          closeEditModal();
+          loadInitialUI(); // Refresh the version list
+            //If the deleted is the selected
+            showSection("home");
+        } catch (error) {
+          console.error("Error deleting version:", error);
+          showStatus(`Error deleting version: ${error.message}`);
+        }
+      }
+    }
+  
+      function setupEditModal() {
+          document.getElementById("saveVersionChanges").addEventListener("click", saveVersionChanges);
+          document.getElementById("cancelVersionEdit").addEventListener("click", closeEditModal);
+          document.getElementById("deleteVersion").addEventListener("click", deleteVersion);
+          document.getElementById("removeVersionImage").addEventListener("click", removeImage);
+  
+          //Close modal
+          const modal = document.getElementById("versionEditModal");
+          window.onclick = (event) => {
+              if(event.target == modal) {
+                  closeEditModal();
+              }
+          }
+      }
+
+      async function removeImage() {
+        const versionId = currentEditingVersion;
+        if (!versionId) return;
+
+        try {
+            const result = await window.api.removeVersionImage(versionId);
+            if (result.success) {
+                // Update UI: Hide preview, update sidebar logo
+                document.getElementById("versionImagePreview").src = "";
+                document.getElementById("versionImagePreview").style.display = "none";
+
+                const versionButton = document.querySelector(`.version-button[data-version="${versionId}"]`);
+                if (versionButton) {
+                   await updateVersionLogo(versionButton, versionId);
+                }
+
+                showStatus("Version image removed.");
+            } else {
+                showStatus(`Error: ${result.error}`);
+            }
+        } catch (error) {
+            console.error("Error removing version image:", error);
+            showStatus(`Error: ${error.message}`);
+        }
+    }
+  
+    // --- Initialization ---
+  
+    setupPlayControls();
+    loadInitialUI();
+      setupEditModal();
+  
+    // --- Expose functions to the window ---
+  
+    window.launch = launch;
+    window.updateMods = updateMods;
+    window.updateMinecraft = updateMinecraft;
+  
+        function setupPlayControls() {
+        const usernameInput = document.getElementById("username")
+  
+        usernameInput.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            launch()
+          }
+        })
+      }
+  
+        // Handle image uploads
+      document.getElementById('versionImage').addEventListener('change', async (event) => {
+          const file = event.target.files[0];
+          if (file) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                  document.getElementById('versionImagePreview').src = e.target.result;
+                  document.getElementById('versionImagePreview').style.display = 'block'; // Show preview
+              };
+              reader.readAsDataURL(file);
+          }
+      });
+  });

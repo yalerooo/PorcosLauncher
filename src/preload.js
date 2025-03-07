@@ -1,4 +1,4 @@
-// --- START OF FILE preload.js ---
+// --- FILE: preload.js ---
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
@@ -12,4 +12,9 @@ contextBridge.exposeInMainWorld('api', {
     getAppPath: () => ipcRenderer.invoke('get-app-path'),
     getVersionName: (versionId) => ipcRenderer.invoke('get-version-name', versionId),
     setVersionName: (versionId, name) => ipcRenderer.invoke('set-version-name', versionId, name),
+    getVersionImage: (versionId) => ipcRenderer.invoke('get-version-image', versionId),
+    setVersionImage: (versionId, imageDataURL) => ipcRenderer.invoke('set-version-image', versionId, imageDataURL),
+    deleteVersion: (versionId) => ipcRenderer.invoke('delete-version', versionId),
+    getDefaultVersionImages: () => ipcRenderer.invoke('get-default-version-images'),
+    removeVersionImage: (versionId) => ipcRenderer.invoke('remove-version-image', versionId),
 });

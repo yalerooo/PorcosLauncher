@@ -1,4 +1,4 @@
-// --- START OF FILE versions.js ---
+// --- FILE: versions.js ---
 const fs = require('fs').promises; // Use fs.promises for async operations
 const path = require('path');
 
@@ -15,6 +15,7 @@ async function detectInstalledVersions(minecraftPath) {
                 const versionFolder = dirent.name;
                 const jsonPath = path.join(versionsPath, versionFolder, `${versionFolder}.json`);
                 const nameFilePath = path.join(versionsPath, versionFolder, "version-name.txt");
+                //const imageFilePath = path.join(versionsPath, versionFolder, "version-image.png"); // Path to the image
 
                 console.log('Verificando:', jsonPath);
 
@@ -35,11 +36,23 @@ async function detectInstalledVersions(minecraftPath) {
                              versionName = (await fs.readFile(nameFilePath, 'utf8')).trim();
                         }
 
+                        let versionImage = null;
+                        const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif']; // Check all extensions
+                        for (const ext of imageExtensions) {
+                            const imageFilePath = path.join(versionsPath, versionFolder, `version-image${ext}`);
+                            if (await fileExists(imageFilePath)) {
+                                versionImage = imageFilePath;
+                                break; // Stop once an image is found
+                            }
+                        }
+
+
 
                         versions.push({
                             id: versionFolder,
-                            name: versionName,  // Use custom name if available
+                            name: versionName,
                             isForge: isForge,
+                            image: versionImage, // Add the image path
                         });
                     } catch (error) {
                         console.error('Error parseando JSON:', jsonPath, error);

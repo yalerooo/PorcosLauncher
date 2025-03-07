@@ -1,3 +1,4 @@
+<!-- FILE: index.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="styles/settings.css">
     <link rel="stylesheet" href="styles/version-details.css">
     <link rel="stylesheet" href="styles/play-button.css">
+     <link rel="stylesheet" href="styles/modal.css"> <!--NEW-->
 </head>
 <body>
     <!-- Sidebar -->
@@ -107,6 +109,33 @@
 
         <div id="status"></div>
     </main>
+
+    <!-- Version Edit Modal -->
+    <div id="versionEditModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Version</h2>
+            <label for="modalVersionName">Version Name:</label>
+            <input type="text" id="modalVersionName">
+
+
+            <label for="versionImage">Custom Image:</label>
+            <input type="file" id="versionImage" accept="image/png, image/jpeg, image/gif">
+            <img id="versionImagePreview" src="" style="display: none; max-width: 100px; max-height: 100px;">
+            <button type="button" id="removeVersionImage">Remove Image</button> 
+
+             <label>Or select a default image:</label>
+            <div id="defaultImagesContainer" class="default-images-container">
+                <!-- Default images will be loaded here -->
+            </div>
+
+
+            <div class="modal-buttons">
+                <button id="saveVersionChanges">Save</button>
+                <button id="cancelVersionEdit">Cancel</button>
+                <button id="deleteVersion" class="delete-button">Delete Version</button> <!-- New delete button -->
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
