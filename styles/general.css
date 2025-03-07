@@ -256,7 +256,7 @@ button:hover {
 
 /* --- Minecraft Image --- */
 .minecraft-image {
-  max-width: 240px;
+  max-width: 100%;
   margin: 40px auto;
   display: block;
   filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.2));
@@ -347,7 +347,7 @@ button:hover {
   }
 
   .minecraft-image {
-    max-width: 180px;
+    max-width: 380px;
   }
 
   .content-section {
