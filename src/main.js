@@ -1,6 +1,6 @@
 // --- FILE: main.js ---
 const { app, BrowserWindow, ipcMain, shell, dialog } = require("electron");
-const path = require("path"); // Make sure path is imported
+const path = require("path");
 const fs = require("fs");
 const { detectInstalledVersions } = require("./versions");
 const { launchMinecraft } = require("./launcher");
@@ -248,6 +248,7 @@ ipcMain.handle("set-version-name", async (event, versionId, newName) => {
 
 ipcMain.handle("set-version-image", async (event, versionId, imageDataURL) => {
     const versionPath = path.join(customMinecraftPath, "versions", versionId);
+    const versionAssetsPath = path.join(getLauncherBasePath(), "assets", "versions");
 
     try {
         if (!fs.existsSync(versionPath)) {
@@ -270,32 +271,50 @@ ipcMain.handle("set-version-image", async (event, versionId, imageDataURL) => {
             }
         }
 
+        // 2. Determine if it's a data URL or a file path
+        if (imageDataURL.startsWith('data:')) {
+            // Data URL: Process as before
+            let mimeType;
+            let fileExtension;
 
-        // 2. Determine MIME type and extension
-        let mimeType;
-        let fileExtension;
+            if (imageDataURL.startsWith('data:image/jpeg')) {
+                mimeType = 'image/jpeg';
+                fileExtension = '.jpg';
+            } else if (imageDataURL.startsWith('data:image/png')) {
+                mimeType = 'image/png';
+                fileExtension = '.png';
+            } else if (imageDataURL.startsWith('data:image/gif')) {
+                mimeType = 'image/gif';
+                fileExtension = '.gif';
+            } else {
+                return { success: false, error: 'Unsupported image format.' };
+            }
+            const imagePath = path.join(versionPath, `version-image${fileExtension}`);
+            const base64Data = imageDataURL.replace(/^data:image\/(png|jpeg|gif);base64,/, "");
+            const imageBuffer = Buffer.from(base64Data, 'base64');
+            await fs.promises.writeFile(imagePath, imageBuffer);
 
-        if (imageDataURL.startsWith('data:image/jpeg')) {
-            mimeType = 'image/jpeg';
-            fileExtension = '.jpg';
-        } else if (imageDataURL.startsWith('data:image/png')) {
-            mimeType = 'image/png';
-            fileExtension = '.png';
-        } else if (imageDataURL.startsWith('data:image/gif')) {
-            mimeType = 'image/gif';
-            fileExtension = '.gif';
+        } else if (imageDataURL.startsWith('file:///')) {
+            // File Path: Copy the file
+            const originalFilePath = decodeURI(imageDataURL.substring(8)); // Remove "file:///" and decode
+            const fileExtension = path.extname(originalFilePath).toLowerCase();
+            const imagePath = path.join(versionPath, `version-image${fileExtension}`);
+
+
+             // Copy the file
+            try {
+                await fs.promises.copyFile(originalFilePath, imagePath);
+                console.log(`Copied image from ${originalFilePath} to ${imagePath}`);
+            } catch (copyError) {
+                console.error(`Error copying image from ${originalFilePath} to ${imagePath}:`, copyError);
+                return { success: false, error: `Error copying image: ${copyError.message}` };
+            }
+
+
         } else {
-            return { success: false, error: 'Unsupported image format.' };
+            return { success: false, error: 'Invalid image data provided.' };
         }
 
-        const imagePath = path.join(versionPath, `version-image${fileExtension}`);
-
-
-        // 3. Convert data URL to buffer and save
-        const base64Data = imageDataURL.replace(/^data:image\/(png|jpeg|gif);base64,/, "");
-        const imageBuffer = Buffer.from(base64Data, 'base64');
-
-        await fs.promises.writeFile(imagePath, imageBuffer);
         return { success: true };
 
     } catch (error) {
@@ -306,7 +325,7 @@ ipcMain.handle("set-version-image", async (event, versionId, imageDataURL) => {
 
 ipcMain.handle("get-version-image", async (event, versionId) => {
     const versionPath = path.join(customMinecraftPath, "versions", versionId);
-    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif']; // Include .jpeg
+    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif']; // Check all extensions
 
     try {
         for (const ext of imageExtensions) {
@@ -360,10 +379,6 @@ ipcMain.handle("delete-version", async (event, versionId) => {
         return { success: false, error: error.message };
     }
 });
-
-// --- FILE: main.js ---
-
-// --- FILE: main.js ---
 
 ipcMain.handle('get-default-version-images', async () => {
     // Use __dirname (directory of main.js) + path.resolve + path.join

@@ -13,7 +13,7 @@ contextBridge.exposeInMainWorld('api', {
     getVersionName: (versionId) => ipcRenderer.invoke('get-version-name', versionId),
     setVersionName: (versionId, name) => ipcRenderer.invoke('set-version-name', versionId, name),
     getVersionImage: (versionId) => ipcRenderer.invoke('get-version-image', versionId),
-    setVersionImage: (versionId, imageDataURL) => ipcRenderer.invoke('set-version-image', versionId, imageDataURL),
+    setVersionImage: (versionId, imageDataURL) => ipcRenderer.invoke('set-version-image', versionId, imageDataURL),  // Pass the path directly
     deleteVersion: (versionId) => ipcRenderer.invoke('delete-version', versionId),
     getDefaultVersionImages: () => ipcRenderer.invoke('get-default-version-images'),
     removeVersionImage: (versionId) => ipcRenderer.invoke('remove-version-image', versionId),
