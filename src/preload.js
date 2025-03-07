@@ -17,4 +17,6 @@ contextBridge.exposeInMainWorld('api', {
     deleteVersion: (versionId) => ipcRenderer.invoke('delete-version', versionId),
     getDefaultVersionImages: () => ipcRenderer.invoke('get-default-version-images'),
     removeVersionImage: (versionId) => ipcRenderer.invoke('remove-version-image', versionId),
+    getSettings: () => ipcRenderer.invoke('get-settings'), // Add this
+    setSettings: (settings) => ipcRenderer.invoke('set-settings', settings), // Add this
 });
