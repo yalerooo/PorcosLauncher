@@ -1,4 +1,4 @@
-/* --- FILE: styles/modal.css --- */
+/* modal.css */
 /* Modal Styles */
 .modal {
     display: none; /* Hidden by default */
@@ -36,7 +36,9 @@
     font-weight: bold;
 }
 .modal-content input[type="text"],
-.modal-content input[type="file"]{
+.modal-content input[type="file"],
+.modal-content select
+{
   width: calc(100% - 24px);
   padding: 10px 12px;
   border: 1px solid #555;
@@ -60,11 +62,14 @@
     font-weight: 500;
 }
 
-.modal-buttons button#saveVersionChanges {
+.modal-buttons button#saveVersionChanges,
+.modal-buttons button#createVersion {
     background-color: var(--primary);
     color: white;
 }
-.modal-buttons button#cancelVersionEdit {
+.modal-buttons button#cancelVersionEdit,
+.modal-buttons button#cancelVersionCreate
+{
     background-color: var(--surface-light);
     color: var(--text-secondary);
 }
@@ -152,4 +157,27 @@
 }
 #removeVersionImage:hover {
     opacity: 0.8; /* Example hover effect */
+}
+
+/* Style for the "+" button */
+
+.version-add-icon {
+    width: 100%;
+    height: 100%;
+    background-color: var(--surface-light); /* Use a suitable color */
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: var(--transition);
+    color: white;
+}
+.version-add-icon > svg{
+    color: white;
+}
+
+
+.version-button:hover .version-add-icon {
+     background-color: rgba(255, 107, 139, 0.1);
+    transform: translateY(-2px);
 }

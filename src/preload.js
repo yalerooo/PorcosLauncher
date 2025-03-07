@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('api', {
     getAppPath: () => ipcRenderer.invoke('get-app-path'),
     getVersionName: (versionId) => ipcRenderer.invoke('get-version-name', versionId),
     setVersionName: (versionId, name) => ipcRenderer.invoke('set-version-name', versionId, name),
+    getVersionManifest: () => ipcRenderer.invoke('get-version-manifest'),
     getVersionImage: (versionId) => ipcRenderer.invoke('get-version-image', versionId),
     setVersionImage: (versionId, imageDataURL) => ipcRenderer.invoke('set-version-image', versionId, imageDataURL),  // Pass the path directly
     deleteVersion: (versionId) => ipcRenderer.invoke('delete-version', versionId),
@@ -19,4 +20,6 @@ contextBridge.exposeInMainWorld('api', {
     removeVersionImage: (versionId) => ipcRenderer.invoke('remove-version-image', versionId),
     getSettings: () => ipcRenderer.invoke('get-settings'), // Add this
     setSettings: (settings) => ipcRenderer.invoke('set-settings', settings), // Add this
+    downloadVersion: (versionNumber) => ipcRenderer.invoke('download-version', versionNumber), // <---  AÑADE ESTO
+
 });

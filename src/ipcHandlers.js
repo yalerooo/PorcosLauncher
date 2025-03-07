@@ -1,6 +1,6 @@
 // --- FILE: src/ipcHandlers.js ---
 const { ipcMain, shell } = require('electron');
-const { detectInstalledVersions } = require('./versions');
+const { detectInstalledVersions, downloadVersion, fetchVersionManifest } = require('./versions');
 const { launchMinecraft } = require('./launcher');
 const { downloadAndExtract } = require('./downloader');
 const fs = require('fs');
@@ -275,6 +275,18 @@ function setupIpcHandlers() {
             console.error('Error reading default version images:', error);
             return [];
         }
+    });
+
+    // New handler for downloading a version
+    ipcMain.handle('download-version', async (event, versionNumber) => {
+      console.log("Received request to download version:", versionNumber);
+      return await downloadVersion(versionNumber);
+    });
+
+    //Get version manifest
+    ipcMain.handle('get-version-manifest', async () => {
+      const manifest = await fetchVersionManifest();
+      return manifest;
     });
 }
 
