@@ -36,6 +36,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         } else if (sectionId === "settings") {
             appTitle.textContent = "Settings";
             versionInfoHeader.textContent = "";
+
+            // *** ADDED: Reset display styles for inputs and buttons ***
+            document.getElementById("updateMinecraftButton").style.display = "block";
+            document.getElementById("minecraftURLInput").style.display = "inline-block";
+            document.getElementById("updateModsButton").style.display = "block";  // Show by default
+            document.getElementById("downloadURLInput").style.display = "inline-block"; // Show by default
         }
     }
 
@@ -254,10 +260,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             addCreateVersionButton();
 
             showSection("home");
-            checkForForge();
-            document.getElementById("updateMinecraftButton").style.display = "block";
-            document.getElementById("minecraftURLInput").style.display =
-                "inline-block";
+           // checkForForge(); // REMOVE THIS LINE
+           // document.getElementById("updateMinecraftButton").style.display = "block"; // NO LONGER NEEDED
+           // document.getElementById("minecraftURLInput").style.display =
+           //     "inline-block";  // NO LONGER NEEDED
         } catch (error) {
             console.error("Error loading initial UI:", error);
             showStatus(`Error loading versions: ${error.message}`);
@@ -395,7 +401,7 @@ document.addEventListener("DOMContentLoaded", async () => {
        }
    }
 
-   async function checkForForge() {
+   async function checkForForge() { //KEEP THIS
     const versions = await window.api.getVersions();
     const updateButton = document.getElementById("updateModsButton");
     const downloadURLInput = document.getElementById("downloadURLInput");

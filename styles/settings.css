@@ -52,6 +52,7 @@
     font-size: 14px;
     font-weight: 500;
     color: var(--text);
+    /* REMOVE display: flex; FROM HERE */
   }
   
   .memory-setting input {
@@ -94,6 +95,7 @@
     font-size: 14px;
     font-weight: 500;
     color: var(--text);
+     /* REMOVE display: flex; FROM HERE */
   }
   
   .update-row .input-container {
