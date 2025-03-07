@@ -317,51 +317,72 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   
   
-      async function openEditModal(versionId) {
-          currentEditingVersion = versionId; // Store the version being edited
-          const modal = document.getElementById("versionEditModal");
-          const versionName = await window.api.getVersionName(versionId);
-          document.getElementById("modalVersionName").value = versionName || versionId;
-  
-          // Load current image (if any)
-         try {
-              const currentImagePath = await window.api.getVersionImage(versionId);
-              const versionImagePreview = document.getElementById("versionImagePreview");
-              if (currentImagePath) {
-                  versionImagePreview.src = currentImagePath;
-                  versionImagePreview.style.display = "block";
-              } else {
-                  versionImagePreview.src = "";
-                  versionImagePreview.style.display = "none";
-              }
-          } catch (error) {
-              console.error("Error loading current image:", error);
-              // Handle error (e.g., show a default image)
-          }
-  
-          // Populate default images
-          const defaultImagesContainer = document.getElementById("defaultImagesContainer");
-          defaultImagesContainer.innerHTML = ""; // Clear previous images
-  
-          try {
-             const defaultImages = await window.api.getDefaultVersionImages();
-              defaultImages.forEach(imagePath => {
-                  const imgElement = document.createElement("img");
-                  imgElement.src = imagePath;
-                  imgElement.classList.add("default-version-image");
-                  imgElement.title = path.basename(imagePath); // Tooltip with filename
-                  imgElement.addEventListener("click", () => selectDefaultImage(imagePath));
-                  defaultImagesContainer.appendChild(imgElement);
-              });
-          } catch(error) {
-              console.error("Error loading default images", error);
-              // Handle error (e.g., show a message)
-          }
-  
-  
-  
-          modal.style.display = "block";
-      }
+    async function openEditModal(versionId) {
+        currentEditingVersion = versionId;
+        const modal = document.getElementById("versionEditModal");
+        const versionName = await window.api.getVersionName(versionId);
+        document.getElementById("modalVersionName").value = versionName || versionId;
+    
+        // Load current image (if any)
+        try {
+            const currentImagePath = await window.api.getVersionImage(versionId);
+            const versionImagePreview = document.getElementById("versionImagePreview");
+            if (currentImagePath) {
+                versionImagePreview.src = currentImagePath;
+                versionImagePreview.style.display = "block";
+            } else {
+                versionImagePreview.src = "";
+                versionImagePreview.style.display = "none";
+            }
+        } catch (error) {
+            console.error("Error loading current image:", error);
+            // Handle error
+        }
+    
+        // *** Populate default images DYNAMICALLY ***
+        const defaultImagesContainer = document.getElementById("defaultImagesContainer");
+    defaultImagesContainer.innerHTML = "";
+
+    try {
+        const defaultImages = await window.api.getDefaultVersionImages();
+        console.log("Received default image paths from main process:", defaultImages);
+
+        defaultImages.forEach(imagePath => {
+            const imgElement = document.createElement("img");
+            imgElement.src = imagePath;
+            imgElement.classList.add("default-version-image");
+
+            // --- FIX: Extract filename from URL ---
+            const url = new URL(imagePath);
+            const filename = url.pathname.split('/').pop(); // Get last part of path
+            imgElement.title = filename; // Use extracted filename
+            // --- END FIX ---
+
+            imgElement.addEventListener("click", () => selectDefaultImage(imagePath));
+            imgElement.addEventListener('error', (event) => { //Keep the error listener.
+                console.error(`Error loading image at path: ${imagePath}`, event);
+                imgElement.src = 'assets/versions/default-minecraft.png'; //Set default in case of error
+            });
+            defaultImagesContainer.appendChild(imgElement);
+        });
+
+    } catch (error) {
+        console.error("Error loading default images (outer try/catch):", error);
+        // Display an error message to the user in the modal, e.g.,
+        defaultImagesContainer.innerHTML = "<p>Error loading default images.</p>";
+    }
+    
+        modal.style.display = "block";
+    }
+    
+    function selectDefaultImage(imagePath) {
+        const versionImagePreview = document.getElementById("versionImagePreview");
+        versionImagePreview.src = imagePath; // This should be correct now
+        versionImagePreview.style.display = "block";
+    
+        //Crucially, remove the file from the input
+        document.getElementById("versionImage").value = "";
+    }
   
   
       function closeEditModal() {
@@ -369,65 +390,54 @@ document.addEventListener("DOMContentLoaded", async () => {
           currentEditingVersion = null; // Reset
       }
   
-      function selectDefaultImage(imagePath) {
-          const versionImagePreview = document.getElementById("versionImagePreview");
-          versionImagePreview.src = imagePath;
-          versionImagePreview.style.display = "block";
-      }
-  
   
          // --- FILE: script.js ---
     //In the setVersionImage
-    async function saveVersionChanges() {
-        const versionId = currentEditingVersion;
-        if (!versionId) return;
+   async function saveVersionChanges() {
+    const versionId = currentEditingVersion;
+    if (!versionId) return;
 
-        const newName = document.getElementById("modalVersionName").value.trim();
-        const versionImageInput = document.getElementById("versionImage");
-        const versionImagePreview = document.getElementById("versionImagePreview");
+    const newName = document.getElementById("modalVersionName").value.trim();
+    const versionImagePreview = document.getElementById("versionImagePreview");
 
-        // Save name
-        if (newName) {
-            try {
-                await window.api.setVersionName(versionId, newName);
-                // Update the UI (sidebar button title)
-                const versionButton = document.querySelector(`.version-button[data-version="${versionId}"]`);
-                if (versionButton) {
-                    versionButton.title = newName;
-                }
-
-                //Update the UI (app title if is the selected)
-                const appTitle = document.getElementById("app-title")
-                appTitle.textContent = newName;
-            } catch (error) {
-                console.error("Error saving version name:", error);
-                showStatus("Error saving version name.");
-                return; // Stop if name saving failed
-            }
-        }
-
-        // Save image
+    // Save name (this part is likely fine)
+    if (newName) {
         try {
-            if (versionImagePreview.src && versionImagePreview.src !== "") {
-               await window.api.setVersionImage(versionId, versionImagePreview.src); //Before it was getBase64Image()
-            }
-
-            // Update the version logo in the UI
+            await window.api.setVersionName(versionId, newName);
             const versionButton = document.querySelector(`.version-button[data-version="${versionId}"]`);
-            if(versionButton){
-                await updateVersionLogo(versionButton, versionId); //Now its using updateVersionLogo
+            if (versionButton) {
+                versionButton.title = newName;
             }
-
+            const appTitle = document.getElementById("app-title")
+            appTitle.textContent = newName;
         } catch (error) {
-            console.error("Error saving version image:", error);
-            showStatus("Error saving version image.");
-            // Don't return, allow name saving even if image saving failed
+            console.error("Error saving version name:", error);
+            showStatus("Error saving version name.");
+            return;
+        }
+    }
+
+    // Save image (the likely problem area)
+    try {
+        // Check if a new image was selected (either uploaded or default)
+        if (versionImagePreview.src) { // Simplified check
+            await window.api.setVersionImage(versionId, versionImagePreview.src);
         }
 
-        closeEditModal();
-        showStatus("Changes saved.");
-        loadInitialUI();
+        const versionButton = document.querySelector(`.version-button[data-version="${versionId}"]`);
+        if (versionButton) {
+            await updateVersionLogo(versionButton, versionId);
+        }
+
+    } catch (error) {
+        console.error("Error saving version image:", error);
+        showStatus("Error saving version image.");
     }
+
+    closeEditModal();
+    showStatus("Changes saved.");
+    loadInitialUI();
+}
   
   
   

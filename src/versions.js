@@ -52,7 +52,6 @@ async function detectInstalledVersions(minecraftPath) {
                             id: versionFolder,
                             name: versionName,
                             isForge: isForge,
-                            image: versionImage, // Add the image path
                         });
                     } catch (error) {
                         console.error('Error parseando JSON:', jsonPath, error);

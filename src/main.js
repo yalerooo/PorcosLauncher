@@ -1,7 +1,6 @@
 // --- FILE: main.js ---
-
 const { app, BrowserWindow, ipcMain, shell, dialog } = require("electron");
-const path = require("path");
+const path = require("path"); // Make sure path is imported
 const fs = require("fs");
 const { detectInstalledVersions } = require("./versions");
 const { launchMinecraft } = require("./launcher");
@@ -17,7 +16,6 @@ function getLauncherBasePath() {
 function getCustomMinecraftPath() {
     return path.join(getLauncherBasePath(), ".minecraft");
 }
-
 // --- IPC Handlers ---
 ipcMain.handle("get-versions", async () => {
     return await detectInstalledVersions(customMinecraftPath);
@@ -363,18 +361,36 @@ ipcMain.handle("delete-version", async (event, versionId) => {
     }
 });
 
+// --- FILE: main.js ---
+
+// --- FILE: main.js ---
+
 ipcMain.handle('get-default-version-images', async () => {
-    const defaultImagesDir = path.join(app.getAppPath(), 'assets', 'versions');
+    // Use __dirname (directory of main.js) + path.resolve + path.join
+    const defaultImagesDir = path.join(__dirname, '../assets', 'versions'); // Corrected path
+    console.log("Attempting to read default images from:", defaultImagesDir);
+
     try {
         const files = await fs.promises.readdir(defaultImagesDir);
-        // Filter to only include image files (optional, but good practice)
-        const imageFiles = files.filter(file => /\.(png|jpg|jpeg|gif)$/i.test(file));
+        console.log("Files found (raw):", files);
 
-        // Create absolute paths for the renderer process
-        const imagePaths = imageFiles.map(file => path.join(defaultImagesDir, file).replace(/\\/g, '/')); // Normalize paths
+        const imageFiles = files.filter(file => /\.(png|jpg|jpeg|gif)$/i.test(file));
+        console.log("Image files found (filtered):", imageFiles);
+
+        const imagePaths = imageFiles.map(file => {
+            const absolutePath = path.join(defaultImagesDir, file);
+            console.log("  - Absolute path:", absolutePath);
+            // Convert to file:// URI (REQUIRED for security in Electron)
+            const fileURI = 'file://' + path.normalize(absolutePath).replace(/\\/g, '/'); // Add file://
+            console.log("    - file:// URI:", fileURI);
+
+            return fileURI;
+        });
+        console.log("Returning image paths:", imagePaths);
         return imagePaths;
+
     } catch (error) {
         console.error('Error reading default version images:', error);
-        return []; // Return an empty array on error
+        return [];
     }
 });
