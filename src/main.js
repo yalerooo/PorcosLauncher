@@ -1,10 +1,9 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { detectInstalledVersions, isForgeVersion } = require('./versions');
+const { detectInstalledVersions } = require('./versions');
 const { launchMinecraft } = require('./launcher');
-const { downloadAndExtract } = require('./downloader'); // Ya lo tenemos importado
-
+const { downloadAndExtract } = require('./downloader');
 
 let mainWindow;
 let customMinecraftPath;
@@ -17,6 +16,8 @@ function getCustomMinecraftPath() {
     return path.join(getLauncherBasePath(), '.minecraft');
 }
 
+// --- IPC Handlers ---
+
 ipcMain.handle('get-versions', async () => {
     return await detectInstalledVersions(customMinecraftPath);
 });
@@ -26,19 +27,16 @@ ipcMain.handle('get-minecraft-path', () => {
 });
 
 ipcMain.handle('is-forge-version', async (event, versionId) => {
-    return isForgeVersion(versionId, customMinecraftPath);
+    //  implementación de isForgeVersion (ahora no se usa, función vacía)
+    return false;
 });
 
 ipcMain.handle('update-mods', async (event, downloadURL) => {
     try {
         const modsFolder = path.join(customMinecraftPath, 'mods');
-
-        // 1. Crear la carpeta 'mods' si no existe
         if (!fs.existsSync(modsFolder)) {
             fs.mkdirSync(modsFolder, { recursive: true });
         }
-
-        // 2. Eliminar mods existentes
         const files = fs.readdirSync(modsFolder);
         for (const file of files) {
             const filePath = path.join(modsFolder, file);
@@ -46,8 +44,6 @@ ipcMain.handle('update-mods', async (event, downloadURL) => {
                fs.unlinkSync(filePath);
             }
         }
-
-        // 3. Descargar y extraer
         const result = await downloadAndExtract(downloadURL, modsFolder);
         return result;
 
@@ -57,10 +53,9 @@ ipcMain.handle('update-mods', async (event, downloadURL) => {
     }
 });
 
-// Nuevo manejador para updateMinecraft
+
 ipcMain.handle('update-minecraft', async (event, downloadURL) => {
   try {
-    // 1. Descargar y extraer directamente a .minecraft
     const result = await downloadAndExtract(downloadURL, customMinecraftPath);
     return result;
 
@@ -70,7 +65,17 @@ ipcMain.handle('update-minecraft', async (event, downloadURL) => {
   }
 });
 
+ipcMain.handle('open-minecraft-folder', async (event, minecraftPath) => {
+    try {
+        shell.openPath(minecraftPath);
+        return { success: true };
+    } catch (error) {
+        console.error("Error al abrir la carpeta:", error);
+        return { success: false, error: error.message };
+    }
+});
 
+// ---  Funciones de la ventana principal  ---
 
 function createWindow() {
     customMinecraftPath = getCustomMinecraftPath();
@@ -80,12 +85,11 @@ function createWindow() {
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
-            contextIsolation: true
+            contextIsolation: true,
         }
     });
 
     console.log('Ruta Minecraft:', customMinecraftPath);
-
     mainWindow.loadFile('index.html');
 
     const launcherDir = getLauncherBasePath();
@@ -100,7 +104,6 @@ function createWindow() {
 
 app.whenReady().then(() => {
     createWindow();
-
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow();
@@ -122,4 +125,8 @@ ipcMain.handle('launch-game', async (event, options) => {
         console.error("Error al lanzar el juego:", error);
         return { success: false, error: error.message || error };
     }
+});
+
+ipcMain.handle('get-app-path', () => {
+    return path.join(__dirname, 'src'); //  __dirname en main.js
 });

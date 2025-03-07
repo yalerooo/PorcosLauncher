@@ -1,224 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>MC Launcher</title>
-    <style>
-        body { font-family: Arial; padding: 20px; }
-        input, select, button { margin: 10px; padding: 8px; }
-        #status { color: green; }
-
-        /* Estilos para los tabs */
-        .tab-container {
-            overflow: hidden;
-            border: 1px solid #ccc;
-            background-color: #f1f1f1;
-        }
-        .tab-button {
-            background-color: inherit;
-            float: left;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            padding: 14px 16px;
-            transition: 0.3s;
-        }
-        .tab-button:hover {
-            background-color: #ddd;
-        }
-        .tab-button.active {
-            background-color: #ccc;
-        }
-        .tab-content {
-            display: none;
-            padding: 6px 12px;
-            border: 1px solid #ccc;
-            border-top: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-       .memory-setting {
-            margin-bottom: 10px;
-        }
-         label {
-            display: inline-block;
-            width: 100px;
-            text-align: right;
-            margin-right: 10px;
-        }
-       #updateModsButton, #downloadURLInput, #updateMinecraftButton, #minecraftURLInput {
-          display: none; /* Ocultos por defecto */
-        }
-
-
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Project Rewrite Launcher</h1>
+    <!-- Barra Lateral -->
+    <aside class="sidebar">
+        <div class="launcher-logo" id="launcher-logo"></div>
+        <!-- Los botones de versión se generan DINÁMICAMENTE en script.js -->
+    </aside>
 
-    <div class="tab-container">
-        <button class="tab-button active" onclick="openTab(event, 'play')">Jugar</button>
-        <button class="tab-button" onclick="openTab(event, 'settings')">Instalar y Ajustes</button>
-    </div>
-
-    <div id="play" class="tab-content active">
-        <input type="text" id="username" placeholder="Nombre de usuario">
-        <select id="versions"></select>
-        <button onclick="launch()">Jugar!</button>
-    </div>
-
-    <div id="settings" class="tab-content">
-        <h2>Ajustes de Memoria</h2>
-         <div class="memory-setting">
-            <label for="minMemory">Memoria Mínima:</label>
-            <input type="text" id="minMemory" value="2G">  <span>(ej: 2G, 512M)</span>
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <div class="top-bar">
+            <div class="top-bar-icon" id="folder-icon"></div>
+            <div class="top-bar-icon" id="settings-icon"></div>
         </div>
-        <div class="memory-setting">
-            <label for="maxMemory">Memoria Máxima:</label>
-            <input type="text" id="maxMemory" value="4G">  <span>(ej: 4G, 8G)</span>
+
+        <h1>Porcos Launcher</h1>
+
+        <div id="version-details" class="content-section">
+          <div class = "version-info">
+            <h2 id="version-name"></h2>
+            <input type="text" id="username" placeholder="Nombre de usuario" style="display: none;">
+            <button onclick="launch()" id="launch" style="display: none;">Jugar!</button>
+          </div>
+            <img src="assets/pigimage.png" alt="Minecraft Image" class="minecraft-image" id="minecraft-img">
+
         </div>
-         <!-- Campo para la URL y botón -->
-        <label for="downloadURL">URL de descarga de Mods:</label>
-        <input type="text" id="downloadURLInput" placeholder="URL del archivo ZIP">
-        <button id="updateModsButton" onclick="updateMods()">Actualizar Mods</button>
 
-        <label for="minecraftURL">URL de descarga de .minecraft:</label>
-        <input type="text" id="minecraftURLInput" placeholder="URL del archivo ZIP">
-        <button id="updateMinecraftButton" onclick="updateMinecraft()">Actualizar .minecraft</button>
-    </div>
+        <div id="settings" class="content-section" style="display: none;">
+            <h2>Ajustes de Memoria</h2>
+            <div class="memory-setting">
+                <label for="minMemory">Memoria Mínima:</label>
+                <input type="text" id="minMemory" value="2G">
+                <span>(ej: 2G, 512M)</span>
+            </div>
+            <div class="memory-setting">
+                <label for="maxMemory">Memoria Máxima:</label>
+                <input type="text" id="maxMemory" value="4G">
+                <span>(ej: 4G, 8G)</span>
+            </div>
+            <label for="downloadURL">URL de descarga de Mods:</label>
+            <input type="text" id="downloadURLInput" placeholder="URL del archivo ZIP" class="input-url">
+            <button id="updateModsButton" onclick="updateMods()">Actualizar Mods</button>
 
-    <div id="status"></div>
+            <label for="minecraftURL">URL de descarga de .minecraft:</label>
+            <input type="text" id="minecraftURLInput" placeholder="URL del archivo ZIP"  class="input-url">
+            <button id="updateMinecraftButton" onclick="updateMinecraft()">Actualizar .minecraft</button>
+        </div>
 
-    <script>
-      function openTab(evt, tabName) {
-            let i, tabcontent, tabbuttons;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].classList.remove("active");
-            }
-            tabbuttons = document.getElementsByClassName("tab-button");
-            for (i = 0; i < tabbuttons.length; i++) {
-                tabbuttons[i].classList.remove("active");
-            }
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
+        <div id="status"></div>
+    </main>
 
-            if (tabName === 'settings') {
-              checkForForge(); //Actualiza visibilidad
-              document.getElementById('updateMinecraftButton').style.display = 'block'; //Siempre visible
-              document.getElementById('minecraftURLInput').style.display = 'inline-block';
-            } else {
-               document.getElementById('updateMinecraftButton').style.display = 'none';
-               document.getElementById('minecraftURLInput').style.display = 'none';
-            }
-        }
-
-
-      async function checkForForge() {
-            const versions = await window.api.getVersions();
-            const updateButton = document.getElementById('updateModsButton');
-            const downloadURLInput = document.getElementById('downloadURLInput');
-            let hasForge = false;
-
-            for (const version of versions) {
-                if (version.isForge) {
-                    hasForge = true;
-                    break;
-                }
-            }
-
-            if (hasForge) {
-                updateButton.style.display = 'block';
-                downloadURLInput.style.display = 'inline-block';
-            } else {
-                updateButton.style.display = 'none';
-                downloadURLInput.style.display = 'none';
-            }
-      }
-
-      window.onload = async () => {
-          const versions = await window.api.getVersions();
-          const select = document.getElementById('versions');
-
-          versions.forEach(version => {
-              const option = document.createElement('option');
-              option.value = version.id;
-              option.textContent = version.name;
-              select.appendChild(option);
-          });
-
-          checkForForge();
-           // Mostrar el botón de actualización de .minecraft por defecto
-          document.getElementById('updateMinecraftButton').style.display = 'block';
-          document.getElementById('minecraftURLInput').style.display = 'inline-block';
-      };
-
-
-       async function launch() {
-            const username = document.getElementById('username').value;
-            const versionId = document.getElementById('versions').value;
-            const minMemory = document.getElementById('minMemory').value;
-            const maxMemory = document.getElementById('maxMemory').value;
-
-            document.getElementById('status').textContent = 'Iniciando...';
-
-            try {
-                const result = await window.api.launchGame({ username, versionId, minMemory, maxMemory });
-                if(result.success){
-                  document.getElementById('status').textContent = '¡Juego en ejecución!';
-                } else {
-                  document.getElementById('status').textContent = `Error: ${result.error}`;
-                }
-            } catch (error) {
-                document.getElementById('status').textContent = `Error: ${error.message}`;
-            }
-        }
-
-        async function updateMods() {
-            const downloadURL = document.getElementById('downloadURLInput').value;
-
-            if (!downloadURL) {
-                document.getElementById('status').textContent = 'Por favor, introduce la URL de descarga.';
-                return;
-            }
-
-            document.getElementById('status').textContent = 'Actualizando mods...';
-
-            try {
-                const result = await window.api.updateMods(downloadURL);
-                if (result.success) {
-                    document.getElementById('status').textContent = 'Mods actualizados correctamente!';
-                } else {
-                    document.getElementById('status').textContent = `Error al actualizar mods: ${result.error}`;
-                }
-            } catch (error) {
-                document.getElementById('status').textContent = `Error: ${error.message}`;
-            }
-        }
-
-        //Nueva función
-        async function updateMinecraft() {
-          const downloadURL = document.getElementById('minecraftURLInput').value;
-
-          if (!downloadURL) {
-            document.getElementById('status').textContent = 'Por favor, introduce la URL de descarga.';
-            return;
-          }
-
-          document.getElementById('status').textContent = 'Actualizando .minecraft...';
-          try {
-            const result = await window.api.updateMinecraft(downloadURL);
-            if (result.success) {
-              document.getElementById('status').textContent = 'Carpeta .minecraft actualizada!';
-            } else {
-              document.getElementById('status').textContent = `Error: ${result.error}`;
-            }
-
-          } catch (error) {
-            document.getElementById('status').textContent = `Error: ${error.message}`;
-          }
-        }
-
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
