@@ -21,20 +21,26 @@
         <!-- Top bar section -->
         <div class="top-bar">
             <div class="version-info">
-                <h1 class="app-title" id="app-title">Porcos Launcher</h1>
+                <h1 class="app-title" id="app-title">Porco's Launcher</h1>
                 <input type="text" id="version-name-input" style="display: none;">
                 <span class="version-info-header" id="version-info-header"></span>
             </div>
             <div class="top-bar-icons">
-                <div class="top-bar-icon" id="folder-icon" title="Open Minecraft Folder"></div>
-                <div class="top-bar-icon" id="settings-icon" title="Settings"></div>
+                <div class="top-bar-icon" id="folder-icon" title="Open Minecraft Folder">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+                        <path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V6h5.17l2 2H20v10z"/>
+                    </svg>
+                </div>
+                <div class="top-bar-icon" id="settings-icon" title="Settings">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M0 0h24v24H0z" fill="none"/><path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.09-.16-.26-.25-.44-.25-.06 0-.12.01-.17.03l-1.83.7c-.51-.4-1.08-.73-1.69-.93l-.38-1.84c-.03-.06-.09-.12-.16-.15-.32-.15-.69-.07-.93.2l-1.6 3.1c-.44.85-.27 1.84.34 2.42l.95.89c-.08.32-.13.67-.13 1.02 0 .35.04.7.13 1.02l-.95.89c-.61.57-.78 1.56-.34 2.42l1.6 3.1c.24.27.61.35.93.2.07-.03.13-.08.16-.15l.38-1.84c.61.2 1.18.53 1.69.93l1.83.7c.05.02.11.03.17.03.17 0 .35-.09.44-.25l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                </div>
             </div>
         </div>
 
         <!-- Home Section -->
         <div id="home" class="content-section active">
             <h1>Welcome to Minecraft</h1>
-            <p>Select a version from the sidebar to start playing or configure your game settings.</p>
+            <p id="home-description">Select a version from the sidebar to start playing or configure your game settings.</p>
             <img src="assets/pigimage.png" alt="Minecraft Pig" class="minecraft-image">
         </div>
 
@@ -46,19 +52,19 @@
                         <h2>Ready to Play?</h2>
                         <p>Enter your username to start your adventure</p>
                     </div>
-                    
+
                     <div class="play-controls">
                         <div class="input-wrapper">
                             <input type="text" id="username" placeholder="Enter username">
                         </div>
-                        
+
                         <button id="launch" onclick="launch()">
                             <svg viewBox="0 0 24 24" class="play-icon">
                                 <polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/>
                             </svg>
                         </button>
                     </div>
-                    
+
                     <div class="play-footer">
                         <span>Press Enter or click Play to start</span>
                     </div>
@@ -105,4 +111,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
