@@ -1,3 +1,4 @@
+// --- START OF FILE launcher.js ---
 const path = require('path');
 const { Client } = require('minecraft-launcher-core');
 const crypto = require('crypto');
@@ -35,8 +36,8 @@ function launchMinecraft(options, customMinecraftPath) {
             custom: options.versionId
         },
         memory: {
-            max: options.maxMemory,  // Usar el valor del parámetro
-            min: options.minMemory   // Usar el valor del parámetro
+            max: options.maxMemory,
+            min: options.minMemory
         }
     };
 

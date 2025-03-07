@@ -1,0 +1,145 @@
+/* Estilos para el nuevo botón de play */
+.play-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    background-color: rgba(28, 28, 30, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .play-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.5;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 107, 139, 0.1), transparent 70%);
+    z-index: 0;
+    border-radius: 20px;
+  }
+  
+  .play-content {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .play-header {
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  
+  .play-header h2 {
+    margin-bottom: 8px;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: white;
+  }
+  
+  .play-header p {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  
+  .play-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .input-wrapper {
+    position: relative;
+    flex: 1;
+  }
+  
+  #username {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background-color: rgba(44, 44, 46, 0.5);
+    color: var(--text);
+    font-size: 14px;
+    border: none;
+    outline: none;
+    transition: all 0.3s;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+  
+  #username:focus {
+    background-color: rgba(44, 44, 46, 0.8);
+    box-shadow: 0 0 0 2px rgba(255, 107, 139, 0.3);
+  }
+  
+  #username::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+  
+  #launch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: var(--primary);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    padding: 0;
+  }
+  
+  #launch:hover {
+    transform: scale(1.05);
+    background: var(--primary-hover);
+  }
+  
+  #launch:active {
+    transform: scale(0.95);
+  }
+  
+  .play-icon {
+    width: 20px;
+    height: 20px;
+    fill: white;
+    transition: transform 0.3s;
+  }
+  
+  #launch:hover .play-icon {
+    transform: scale(1.1);
+  }
+  
+  .play-footer {
+    text-align: center;
+    margin-top: 16px;
+  }
+  
+  .play-footer span {
+    font-size: 12px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+  }
+  
+  @media (max-width: 768px) {
+    .play-container {
+      padding: 30px;
+      margin: 0 20px;
+    }
+  
+    .play-controls {
+      flex-direction: column;
+    }
+  
+    #launch {
+      width: 100%;
+      margin-top: 12px;
+      height: 46px;
+    }
+  }
+  
+  

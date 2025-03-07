@@ -2,54 +2,101 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>MC Launcher</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Porcos Launcher</title>
+    <link rel="stylesheet" href="styles/general.css">
+    <link rel="stylesheet" href="styles/settings.css">
+    <link rel="stylesheet" href="styles/version-details.css">
+    <link rel="stylesheet" href="styles/play-button.css">
 </head>
 <body>
-    <!-- Barra Lateral -->
+    <!-- Sidebar -->
     <aside class="sidebar">
         <div class="launcher-logo" id="launcher-logo"></div>
-        <!-- Los botones de versión se generan DINÁMICAMENTE en script.js -->
+        <!-- Version buttons will be generated dynamically in script.js -->
     </aside>
 
-    <!-- Contenido Principal -->
+    <!-- Main Content -->
     <main class="main-content">
+        <!-- Top bar section -->
         <div class="top-bar">
-            <div class="top-bar-icon" id="folder-icon"></div>
-            <div class="top-bar-icon" id="settings-icon"></div>
+            <div class="version-info">
+                <h1 class="app-title" id="app-title">Porcos Launcher</h1>
+                <input type="text" id="version-name-input" style="display: none;">
+                <span class="version-info-header" id="version-info-header"></span>
+            </div>
+            <div class="top-bar-icons">
+                <div class="top-bar-icon" id="folder-icon" title="Open Minecraft Folder"></div>
+                <div class="top-bar-icon" id="settings-icon" title="Settings"></div>
+            </div>
         </div>
 
-        <h1>Porcos Launcher</h1>
+        <!-- Home Section -->
+        <div id="home" class="content-section active">
+            <h1>Welcome to Minecraft</h1>
+            <p>Select a version from the sidebar to start playing or configure your game settings.</p>
+            <img src="assets/pigimage.png" alt="Minecraft Pig" class="minecraft-image">
+        </div>
 
+        <!-- Version details section -->
         <div id="version-details" class="content-section">
-          <div class = "version-info">
-            <h2 id="version-name"></h2>
-            <input type="text" id="username" placeholder="Nombre de usuario" style="display: none;">
-            <button onclick="launch()" id="launch" style="display: none;">Jugar!</button>
-          </div>
-            <img src="assets/pigimage.png" alt="Minecraft Image" class="minecraft-image" id="minecraft-img">
-
+            <div class="play-container">
+                <div class="play-content">
+                    <div class="play-header">
+                        <h2>Ready to Play?</h2>
+                        <p>Enter your username to start your adventure</p>
+                    </div>
+                    
+                    <div class="play-controls">
+                        <div class="input-wrapper">
+                            <input type="text" id="username" placeholder="Enter username">
+                        </div>
+                        
+                        <button id="launch" onclick="launch()">
+                            <svg viewBox="0 0 24 24" class="play-icon">
+                                <polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="play-footer">
+                        <span>Press Enter or click Play to start</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="settings" class="content-section" style="display: none;">
-            <h2>Ajustes de Memoria</h2>
-            <div class="memory-setting">
-                <label for="minMemory">Memoria Mínima:</label>
-                <input type="text" id="minMemory" value="2G">
-                <span>(ej: 2G, 512M)</span>
-            </div>
-            <div class="memory-setting">
-                <label for="maxMemory">Memoria Máxima:</label>
-                <input type="text" id="maxMemory" value="4G">
-                <span>(ej: 4G, 8G)</span>
-            </div>
-            <label for="downloadURL">URL de descarga de Mods:</label>
-            <input type="text" id="downloadURLInput" placeholder="URL del archivo ZIP" class="input-url">
-            <button id="updateModsButton" onclick="updateMods()">Actualizar Mods</button>
+        <!-- Settings Section -->
+        <div id="settings" class="content-section">
+            <h2>Settings</h2>
 
-            <label for="minecraftURL">URL de descarga de .minecraft:</label>
-            <input type="text" id="minecraftURLInput" placeholder="URL del archivo ZIP"  class="input-url">
-            <button id="updateMinecraftButton" onclick="updateMinecraft()">Actualizar .minecraft</button>
+            <div class="memory-setting">
+                <label for="minMemory">Minimum Memory:</label>
+                <input type="text" id="minMemory" value="2G">
+            </div>
+
+            <div class="memory-setting">
+                <label for="maxMemory">Maximum Memory:</label>
+                <input type="text" id="maxMemory" value="4G">
+            </div>
+
+            <div class="update-section">
+                <div class="update-row">
+                    <label for="downloadURLInput">Update Mods:</label>
+                    <div class="input-container">
+                        <input type="text" id="downloadURLInput" placeholder="Enter download URL" class="input-url">
+                        <button id="updateModsButton" onclick="updateMods()" class="update-button">Update</button>
+                    </div>
+                </div>
+
+                <div class="update-row">
+                    <label for="minecraftURLInput">Update .minecraft:</label>
+                    <div class="input-container">
+                        <input type="text" id="minecraftURLInput" placeholder="Enter download URL" class="input-url">
+                        <button id="updateMinecraftButton" onclick="updateMinecraft()" class="update-button">Update</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="status"></div>
@@ -58,3 +105,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+

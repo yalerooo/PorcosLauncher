@@ -1,4 +1,5 @@
-const fs = require('fs');
+// --- START OF FILE versions.js ---
+const fs = require('fs').promises; // Use fs.promises for async operations
 const path = require('path');
 
 async function detectInstalledVersions(minecraftPath) {
@@ -7,33 +8,37 @@ async function detectInstalledVersions(minecraftPath) {
 
     try {
         console.log('Buscando en:', versionsPath);
-        const folders = fs.readdirSync(versionsPath, { withFileTypes: true });
+        const folders = await fs.readdir(versionsPath, { withFileTypes: true });
 
         for (const dirent of folders) {
             if (dirent.isDirectory()) {
                 const versionFolder = dirent.name;
                 const jsonPath = path.join(versionsPath, versionFolder, `${versionFolder}.json`);
+                const nameFilePath = path.join(versionsPath, versionFolder, "version-name.txt");
+
                 console.log('Verificando:', jsonPath);
 
-                if (fs.existsSync(jsonPath)) {
+                if (await fileExists(jsonPath)) {
                     try {
-                        const data = fs.readFileSync(jsonPath, 'utf8');
+                        const data = await fs.readFile(jsonPath, 'utf8');
                         const json = JSON.parse(data);
 
                         let versionName = json.id;
-                        let isForge = false; // Añadimos una bandera para Forge
+                        let isForge = false;
 
                          if (json.id.toLowerCase().includes("forge") || json.id.toLowerCase().includes("fabric")) {
-                            versionName += ` [Forge/Fabric]`; // Simplificado
-                            isForge = true; // Si incluye forge o fabric, asumimos que lo es.
-                        } else {
-                            versionName += ' [Vanilla]';
+                            isForge = true;
+                        }
+
+                        //Prioritize version-name.txt
+                        if(await fileExists(nameFilePath)){
+                             versionName = (await fs.readFile(nameFilePath, 'utf8')).trim();
                         }
 
 
                         versions.push({
                             id: versionFolder,
-                            name: versionName,
+                            name: versionName,  // Use custom name if available
                             isForge: isForge,
                         });
                     } catch (error) {
@@ -47,6 +52,16 @@ async function detectInstalledVersions(minecraftPath) {
     }
 
     return versions;
+}
+
+// Helper function to check if a file exists (asynchronously)
+async function fileExists(filePath) {
+    try {
+        await fs.access(filePath);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 module.exports = {

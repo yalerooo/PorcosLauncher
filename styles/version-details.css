@@ -1,0 +1,30 @@
+/* Version details styles */
+#version-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 70px);
+    animation: fadeIn 0.3s ease;
+    background-color: var(--background);
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    #version-details {
+      padding: 20px;
+    }
+  }
+  
+  
