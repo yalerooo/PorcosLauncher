@@ -5,6 +5,7 @@ const { setupIpcHandlers } = require("./ipcHandlers");
 const { ensureAssets } = require("./assetManager");
 const { getCustomMinecraftPath } = require('./config');
 const { getWindowState, setWindowState } = require('./storage'); // Import window state functions
+const { initializeMinecraftFolder } = require('./minecraftInitializer'); // Import minecraft initializer
 
 
 let mainWindow;
@@ -67,7 +68,11 @@ async function createWindow() { //  Make createWindow async
 }
 
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+    // Initialize the Minecraft folder with default files
+    const minecraftPath = getCustomMinecraftPath();
+    await initializeMinecraftFolder(minecraftPath);
+    
     createWindow();
     setupIpcHandlers(); // Set up IPC handlers
 

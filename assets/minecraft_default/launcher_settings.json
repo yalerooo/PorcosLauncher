@@ -1,0 +1,13 @@
+{
+  "channel" : "release",
+  "customChannels" : [],
+  "deviceId" : 10618082933876330008,
+  "formatVersion" : 0,
+  "locale" : "es-ES",
+  "productLibraryDir" : "C:\\Users\\Yaler\\AppData\\Local\\Mojang\\products",
+  "quickPlayEnabled" : true,
+  "shutDownTimestampGamecore" : 1741450114755,
+  "useArm64JreIfSupported" : false,
+  "useMagnifiedMode" : false,
+  "version" : 15
+}

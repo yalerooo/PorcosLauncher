@@ -1,0 +1,54 @@
+{
+  "accounts" : {
+    "901ecf1532144646b4173fdb9159ad12" : {
+      "accessToken" : "",
+      "accessTokenExpiresAt" : "2025-03-09T16:08:03Z",
+      "avatar" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAASASURBVHhe7VvdbtRGGP3G9v6loW1QhaqqoUGoqtRroAL6ENyVG56CN+CGv8fgrki8RJFKlVxz0RYWEYTawEUou9kl9q57zngCu/GMm/Vslib2iU4+79gez3c8831jz656dffuwzhJTotSI6kQ0vFYmlEk6uXNm8/h/OoIBVVCmqbS0gLcutWF82uVEwBshaEE2cfqohbA2MqiFsDYyuLIC6CUEhUExUS0zxHlAnv8ewAEsoLCwdRDwNjKohbA2MqiFsDYagJp4KMLcKA8XkA+1fHZ3kUVBhJEyPcWKjwOH/8ewHmAgxT/+AvALuJCmtZBsBbA2MoiCBgICshxUsiPDVubJhjABZtfmswkT27c6I7S1PlStN1uS2jSjQ1pkmQXKwlGYh2VywJtc56Pdu2mSIeW5qX406/F106e7GL/2n4P+do4RK78+f59OXf+vCRxbPZMABd+/eCBDDc39TP2woGbtnLlirRWVyUdTS9rUNgRyq7+dFU2Ntal2WyaPQbwV2uPzS64pgtzUPLot0fyw4UL5nMef9+7J4OnT/WkYuGAg19cuyatM2dyArCLs1dfvnRJNtbXTWkeHAWIhHlSmQizKJ/uvRCwfSSH8AQ5C6QNVRbnbT5mrDhqAYytLAKMFrGRI5+ZwCtFHTKmopMO6fsIZJ4gHMDaGHSihtjYCiNpNxqiTHRlvs9xL/LqC9Iulkx1bINuB9ozRVPeNK++bT6S6uH1690xJkIgDsvja+TYpU4n6w37wLLmZysSNJBjHecfKiDC7pttGce7VMMUTgBt2nzxQoaDgRZrEmx7g+sDr+7cKZwJJlBz7NiHamT57HcSnfgUFbqOOTzQqd6fv0vy9h+7AECDvdiyT988vhCJ4VyMruJiipNzqyp7DLLZn3aePWDB1L0Sk31r2wwTl38oT2DrLGBsZVELYGx5IL4wyLjoDUudU9Q5sTy8BRgjkIyQKZgtbLSlz1kwttS5x1HM+v2yj9e3xHgHnm9tSX841NvTyBz//uKPsvz5SvZ0NjOUPP71F+ltb+s1gGkwC4icPnVKPmm33ULn2pWBR8/lW2K7w4EM+z0Z7vSn2e/LANSLE+bYWcG2v0P9A1v9huyBPphDDMBTNd8qcDxO0pT5QrnqZ7m25sCS8BfgiKMWwNjKYg4CmDn5Pvimvw9APba69so8L+MtgA5EliClFx24KuExUaGPrvrfB1nSA37fFkcLoy+/EtXp2O8S0Fpaghjl1wze7exkqc7qp5Lkr5eSIlXOKgRby3mAtwDLZ7+VaPkENu0ClJsAfUDRXea+3pM/JOm9LS2A9xBIx6l+YUJHbfQFhbXVS+rregaBOgsYW1nUAhhbHjpGzRaA/k+YQxDMAhIXIstwMqjNSl2HXwz0/9UYl8W9egBXbz1OT+PYmYIJV9t4BhdN/H82V3DxA4EzOrNZBv919SIB5vOzOV7Ag/hvLT8wPVFnAWMri1oAnVI438aHo0jCVv6eDt8YvGnV1u3bz7DxTeks4AsEMp80WpQCNVi/2ZwEz2qGofwLFK9mThGgQ24AAAAASUVORK5CYII=",
+      "azureToken" : "",
+      "eligibleForMigration" : false,
+      "franchiseInventoryId" : "1/MjQ=",
+      "hasMultipleProfiles" : false,
+      "inForcedMigration" : false,
+      "legacy" : false,
+      "licenseProductIds" : 
+      [
+        "9P5KH0238TPW",
+        "9P45BPZCP004",
+        "9NBLGGH2JHXJ",
+        "9NGG3CWJMC7V",
+        "9MV69L4JSD31",
+        "9PB1LJZFN9XK",
+        "9N6184JJ7NSG",
+        "9PBP71DDVCT9",
+        "9P4BFQNXLMDR",
+        "9P1XF6ZQGV3R",
+        "9PKCNQ57B2JG",
+        "9N98Z825TNFW",
+        "9P8MK4NC0LJB",
+        "9P427LFN9KCD",
+        "9MV1BF8J0TTX",
+        "9P2VR3K66TJX",
+        "9NZ12RV7B7R3",
+        "9P4HCS6S5C2K",
+        "9P0WDBKKS7MK",
+        "9P5JQ1XPRGN6",
+        "9N5KX36SQJ9Q"
+      ],
+      "licenseRequestId" : "c51b0efc-1f7c-43fa-b05a-4376dd778d6a",
+      "localId" : "901ecf1532144646b4173fdb9159ad12",
+      "minecraftProfile" : {
+        "id" : "1281cfbfee784daba5d9adbaa082a7fc",
+        "name" : "Yalero",
+        "requiresProfileNameChange" : false,
+        "requiresSkinChange" : false
+      },
+      "persistent" : true,
+      "remoteId" : "2535426962133127",
+      "type" : "Xbox",
+      "userProperites" : [],
+      "username" : "Yalero"
+    }
+  },
+  "activeAccountLocalId" : "901ecf1532144646b4173fdb9159ad12",
+  "mojangClientToken" : ""
+}

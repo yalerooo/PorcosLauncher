@@ -1,0 +1,59 @@
+{
+   "author": "Ace Stream",
+   "background": {
+      "scripts": [ "background/index.js" ]
+   },
+   "browser_action": {
+      "browser_style": true,
+      "default_icon": {
+         "16": "public/images/icon16.png",
+         "32": "public/images/icon32.png"
+      },
+      "default_popup": "popup/index.html",
+      "default_title": "__MSG_extName__"
+   },
+   "browser_specific_settings": {
+      "gecko": {
+         "id": "acewebextension@acestream.org",
+         "strict_min_version": "57.0"
+      }
+   },
+   "commands": {
+      "_execute_browser_action": {
+      },
+      "dashboard": {
+         "description": "__MSG_menuDashboard__"
+      },
+      "newScript": {
+         "description": "__MSG_menuNewScript__"
+      },
+      "settings": {
+         "description": "__MSG_labelSettings__"
+      }
+   },
+   "content_scripts": [ {
+      "all_frames": true,
+      "js": [ "injected-web.js", "injected.js" ],
+      "matches": [ "\u003Call_urls>" ],
+      "run_at": "document_start"
+   } ],
+   "default_locale": "en",
+   "description": "__MSG_extDescription__",
+   "homepage_url": "https://awe.acestream.me/",
+   "icons": {
+      "128": "public/images/icon128.png",
+      "16": "public/images/icon16.png",
+      "48": "public/images/icon48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyWFKzQsLk08wBX1aQqGPT73gK/d7Nu/U+9rV3db7kFIm0OkFOGF1I8MBBoYoym1xbMaCM6jsB2MgB0DpgF9TnLpUFFWURTf19BMoBAvuphWR+G0jcZ2rgLK5n5IkxIy99gt7fUCdn18RbQsPhjMX4Azvo10aAUq7skx/kbwB871c/laUh/AcXHLmjMpkyqmSs277Hgatq7pUAHgOB/cEd5sH942t+b4yh2SqPeGFv0vDf2gv6+/1VQTHJGXSGIpGBnXFhOJX5OszXj4Ni40FcESkRX38dl7qARLUss//PyODPccWQIdZd3T++KPXqQ2Bl+J85m+xMLaFVjssD41NMwIDAQAB",
+   "manifest_version": 2,
+   "minimum_chrome_version": "57.0",
+   "name": "__MSG_extName__",
+   "options_ui": {
+      "open_in_tab": true,
+      "page": "options/index.html"
+   },
+   "permissions": [ "tabs", "\u003Call_urls>", "webRequest", "webRequestBlocking", "notifications", "storage", "unlimitedStorage", "clipboardWrite", "contextMenus", "nativeMessaging", "cookies" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.2.5"
+}
