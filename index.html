@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="styles/settings.css">
     <link rel="stylesheet" href="styles/version-details.css">
     <link rel="stylesheet" href="styles/play-button.css">
-     <link rel="stylesheet" href="styles/modal.css"> <!--NEW-->
+    <link rel="stylesheet" href="styles/modal.css"> <!--NEW-->
+    <link rel="stylesheet" href="styles/loading.css">
 </head>
 <body>
     <!-- Sidebar -->
@@ -145,6 +146,14 @@
             <input type="text" id="modalCreateVersionName">
             <label for="modalCreateVersionNumber">Versión de Minecraft:</label>
             <select id="modalCreateVersionNumber"></select>
+            
+            <!-- Loading indicators -->
+            <div class="loading-spinner" id="createVersionSpinner"></div>
+            <div class="loading-progress" id="createVersionProgress">
+                <div class="loading-progress-bar" id="createVersionProgressBar"></div>
+            </div>
+            <div class="loading-text" id="createVersionLoadingText">Creando versión...</div>
+            
             <div class="modal-buttons">
                 <button id="createVersion">Crear</button>
                 <button id="cancelVersionCreate">Cancelar</button>

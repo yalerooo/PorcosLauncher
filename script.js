@@ -359,13 +359,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function closeCreateVersionModal() {
-       // console.log("closeCreateVersionModal called"); // ADD THIS
+        // Hide the modal
         document.getElementById('versionCreateModal').style.display = 'none';
+        
+        // Reset loading elements (spinner is hidden via CSS)
+        document.getElementById('createVersionProgress').style.display = 'none';
+        document.getElementById('createVersionLoadingText').style.display = 'none';
+        document.getElementById('createVersionProgressBar').style.width = '0%';
+        
+        // Re-enable buttons
+        document.getElementById('createVersion').disabled = false;
+        document.getElementById('cancelVersionCreate').disabled = false;
     }
 
 
    async function createNewVersion() {
-       // console.log("createNewVersion called"); // ADD THIS
         const versionName = document.getElementById('modalCreateVersionName').value.trim();
         const versionNumber = document.getElementById('modalCreateVersionNumber').value;
 
@@ -374,31 +382,86 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
+        // Show loading indicators
+        const spinner = document.getElementById('createVersionSpinner');
+        const progress = document.getElementById('createVersionProgress');
+        const progressBar = document.getElementById('createVersionProgressBar');
+        const loadingText = document.getElementById('createVersionLoadingText');
+        const createButton = document.getElementById('createVersion');
+        const cancelButton = document.getElementById('cancelVersionCreate');
+
+        // Display loading elements (spinner is hidden via CSS)
+        progress.style.display = 'block';
+        loadingText.style.display = 'block';
+        
+        // Disable buttons during loading
+        createButton.disabled = true;
+        cancelButton.disabled = true;
+
+        // Simulate progress (since we don't have real-time progress from the API)
+        let progressValue = 0;
+        const progressInterval = setInterval(() => {
+            // Increment progress slowly up to 90% (leave room for completion)
+            if (progressValue < 90) {
+                progressValue += Math.random() * 5;
+                progressBar.style.width = `${Math.min(progressValue, 90)}%`;
+            }
+        }, 300);
+
         try {
             // Primero, descarga la versión
+            loadingText.textContent = 'Descargando versión...';
             const downloadResult = await window.api.downloadVersion(versionNumber);
 
             if (downloadResult.success) {
                 // Si la descarga fue exitosa, entonces establece el nombre personalizado
+                loadingText.textContent = 'Configurando versión...';
+                progressBar.style.width = '95%';
+                
                 const setNameResult = await window.api.setVersionName(versionNumber, versionName);
 
+                // Complete the progress bar
+                progressBar.style.width = '100%';
+                
                 if (setNameResult.success) {
+                    loadingText.textContent = '¡Versión creada con éxito!';
                     showStatus(`Version ${versionNumber} created successfully!`);
                 } else {
+                    loadingText.textContent = 'Error al configurar el nombre';
                     showStatus(`Version ${versionNumber} downloaded, but failed to set name: ${setNameResult.error}`);
                 }
 
-               closeCreateVersionModal();
-               loadInitialUI(); // Reload the version list
-               showSection("home"); // Vuelve a la sección principal.
-           } else {
-               // Si la descarga falla, muestra el error
-               showStatus(`Error downloading version: ${downloadResult.error}`);
-           }
-       } catch (error) {
-           console.error("Error creating version:", error);
-           showStatus(`Error creating version: ${error.message}`);
-       }
+                // Wait a moment to show the completion state
+                setTimeout(() => {
+                    clearInterval(progressInterval);
+                    closeCreateVersionModal();
+                    loadInitialUI(); // Reload the version list
+                    showSection("home"); // Vuelve a la sección principal.
+                }, 1000);
+            } else {
+                // Si la descarga falla, muestra el error
+                loadingText.textContent = 'Error al descargar la versión';
+                showStatus(`Error downloading version: ${downloadResult.error}`);
+                
+                // Reset loading state
+                clearInterval(progressInterval);
+                // Spinner is hidden via CSS
+                progress.style.display = 'none';
+                createButton.disabled = false;
+                cancelButton.disabled = false;
+            }
+        } catch (error) {
+            console.error("Error creating version:", error);
+            loadingText.textContent = 'Error al crear la versión';
+            showStatus(`Error creating version: ${error.message}`);
+            
+            // Reset loading state
+            clearInterval(progressInterval);
+            // Spinner is hidden via CSS
+            progress.style.display = 'none';
+            createButton.disabled = false;
+            cancelButton.disabled = false;
+        }
    }
 
    async function checkForForge() { //KEEP THIS

@@ -1,0 +1,40 @@
+.loading-spinner {
+    display: none !important; /* Always hide the spinner */
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-progress {
+    display: none;
+    width: 100%;
+    height: 6px; /* Slightly taller for better visibility */
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.loading-progress-bar {
+    width: 0%;
+    height: 100%;
+    background-color: var(--primary);
+    transition: width 0.3s ease;
+}
+
+.loading-text {
+    display: none;
+    text-align: center;
+    color: var(--text-secondary);
+    margin: 10px 0;
+    font-size: 14px;
+}
