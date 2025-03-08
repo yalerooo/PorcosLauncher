@@ -1,7 +1,0 @@
-[49064:22072:0308/170752.430:WARNING:chrome_main_delegate.cc(748)] This is Chrome version 127.0.6533.120 (not a warning)
-[49064:18560:0308/170752.463:ERROR:google_update_settings.cc(265)] Failed opening key Software\Chromium to set usagestats; result: 5
-[49064:22072:0308/170752.474:WARNING:account_consistency_mode_manager.cc(77)] Desktop Identity Consistency cannot be enabled as no OAuth client ID and client secret have been configured.
-[49064:22072:0308/170752.505:WARNING:browser_management_service.cc(128)] EnterpriseLogoUrl fetch failed with error code -1 and MIME type 
-[49064:22072:0308/170752.684:INFO:main_context.cpp(131)] CEF initialized successfully.
-[49064:22072:0308/170752.684:INFO:main_context.cpp(133)] CEF version: 127.3.5+g114ea2a+chromium-127.0.6533.120
-[49064:22072:0308/170835.199:WARNING:pref_notifier_impl.cc(41)] Pref observer for media_router.cast_allow_all_ips found at shutdown.
