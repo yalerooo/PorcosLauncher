@@ -181,3 +181,43 @@
      background-color: rgba(255, 107, 139, 0.1);
     transform: translateY(-2px);
 }
+
+/* Instance selection styles */
+.instance-selection-list {
+    margin: 15px 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.instance-option {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background-color: var(--surface-light);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.instance-option:hover {
+    background-color: rgba(255, 107, 139, 0.1);
+}
+
+.instance-option.selected {
+    background-color: var(--primary);
+    color: white;
+}
+
+.instance-option-icon {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--surface);
+    background-size: cover;
+    background-position: center;
+}

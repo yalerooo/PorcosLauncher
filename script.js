@@ -1156,15 +1156,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         try {
-            showStatus("Updating mods...");
-            const result = await window.api.updateMods(downloadURL, activeInstanceId);
-            if (result.success) {
-                showStatus("Mods updated successfully!");
-            } else {
-                showStatus(`Error updating mods: ${result.error}`);
+            const instances = await window.api.listInstances();
+            
+            // Si solo hay una instancia, actualizar directamente
+            if (instances.length === 1) {
+                await performModsUpdate(downloadURL, instances[0].id);
+                return;
             }
+            
+            // Si hay múltiples instancias, mostrar modal de selección
+            await showInstanceSelectionModal('Update Mods', 'Select instance to update mods:', async (selectedInstanceId) => {
+                await performModsUpdate(downloadURL, selectedInstanceId);
+            });
         } catch (error) {
-            console.error("Error updating mods:", error);
+            console.error("Error in updateMods:", error);
             showStatus(`Error updating mods: ${error.message}`);
         }
     };
@@ -1177,19 +1182,123 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         try {
-            showStatus("Updating Minecraft...");
-            const result = await window.api.updateMinecraft(downloadURL, activeInstanceId);
-            if (result.success) {
-                showStatus("Minecraft updated successfully!");
-                loadVersions(activeInstanceId); // Recargar versiones
-            } else {
-                showStatus(`Error updating Minecraft: ${result.error}`);
+            const instances = await window.api.listInstances();
+            
+            // Si solo hay una instancia, actualizar directamente
+            if (instances.length === 1) {
+                await performMinecraftUpdate(downloadURL, instances[0].id);
+                return;
             }
+            
+            // Si hay múltiples instancias, mostrar modal de selección
+            await showInstanceSelectionModal('Update Minecraft', 'Select instance to update:', async (selectedInstanceId) => {
+                await performMinecraftUpdate(downloadURL, selectedInstanceId);
+            });
         } catch (error) {
-            console.error("Error updating Minecraft:", error);
+            console.error("Error in updateMinecraft:", error);
             showStatus(`Error updating Minecraft: ${error.message}`);
         }
     };
+
+    // Funciones auxiliares para la actualización
+    async function performModsUpdate(downloadURL, instanceId) {
+        showStatus("Updating mods...");
+        const result = await window.api.updateMods(downloadURL, instanceId);
+        if (result.success) {
+            showStatus("Mods updated successfully!");
+        } else {
+            showStatus(`Error updating mods: ${result.error}`);
+        }
+    }
+
+    async function performMinecraftUpdate(downloadURL, instanceId) {
+        showStatus("Updating Minecraft...");
+        const result = await window.api.updateMinecraft(downloadURL, instanceId);
+        if (result.success) {
+            showStatus("Minecraft updated successfully!");
+            loadVersions(instanceId);
+        } else {
+            showStatus(`Error updating Minecraft: ${result.error}`);
+        }
+    }
+
+    async function showInstanceSelectionModal(title, message, onSelect) {
+        let modal = document.getElementById('instanceSelectionModal');
+        if (!modal) {
+            const modalHTML = `
+                <div id="instanceSelectionModal" class="modal">
+                    <div class="modal-content">
+                        <h2>${title}</h2>
+                        <p>${message}</p>
+                        <div class="instance-selection-list" id="instanceSelectionList"></div>
+                        <div class="modal-buttons">
+                            <button id="confirmInstanceSelection" disabled>Update</button>
+                            <button id="cancelInstanceSelection">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            modal = document.getElementById('instanceSelectionModal');
+        }
+
+        const instances = await window.api.listInstances();
+        const listContainer = document.getElementById('instanceSelectionList');
+        listContainer.innerHTML = '';
+        let selectedInstanceId = null;
+
+        for (const instance of instances) {
+            const option = document.createElement('div');
+            option.className = 'instance-option';
+            
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'instance-option-icon';
+            
+            if (instance.icon) {
+                const iconDataUrl = await window.api.getInstanceIcon(instance.icon);
+                if (iconDataUrl) {
+                    iconDiv.style.backgroundImage = `url('${iconDataUrl}')`;
+                } else {
+                    iconDiv.textContent = instance.name.substring(0, 2).toUpperCase();
+                }
+            } else {
+                iconDiv.textContent = instance.name.substring(0, 2).toUpperCase();
+            }
+            
+            option.appendChild(iconDiv);
+            option.appendChild(document.createTextNode(instance.name));
+            
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.instance-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedInstanceId = instance.id;
+                document.getElementById('confirmInstanceSelection').disabled = false;
+            });
+            
+            listContainer.appendChild(option);
+        }
+
+        return new Promise((resolve) => {
+            modal.style.display = 'block';
+            
+            document.getElementById('confirmInstanceSelection').onclick = async () => {
+                if (selectedInstanceId) {
+                    modal.style.display = 'none';
+                    await onSelect(selectedInstanceId);
+                }
+            };
+
+            document.getElementById('cancelInstanceSelection').onclick = () => {
+                modal.style.display = 'none';
+            };
+
+            window.onclick = (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+        });
+    }
 
     window.saveSettings = function() {
         saveCurrentSettings();
