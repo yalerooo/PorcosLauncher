@@ -11,11 +11,18 @@
     <link rel="stylesheet" href="styles/play-button.css">
     <link rel="stylesheet" href="styles/modal.css"> <!--NEW-->
     <link rel="stylesheet" href="styles/loading.css">
+    <link rel="stylesheet" href="styles/version-edit.css"> <!--NEW-->
+    <link rel="stylesheet" href="styles/instance-edit.css"> <!--NEW-->
 </head>
 <body>
-    <!-- Sidebar -->
-    <aside class="sidebar">
+    <!-- Sidebar de Instancias -->
+    <aside class="instances-sidebar" id="instances-sidebar">
         <div class="launcher-logo" id="launcher-logo"></div>
+        <!-- Instance buttons will be generated dynamically in script.js -->
+    </aside>
+
+    <!-- Sidebar de Versiones -->
+    <aside class="versions-sidebar" id="versions-sidebar">
         <!-- Version buttons will be generated dynamically in script.js -->
     </aside>
 
@@ -43,7 +50,7 @@
         <!-- Home Section -->
         <div id="home" class="content-section active">
             <h1>Welcome to Minecraft</h1>
-            <p id="home-description">Select a version from the sidebar to start playing or configure your game settings.</p>
+            <p id="home-description">Select an instance from the sidebar to start playing or configure your game settings.</p>
             <img src="assets/pigimage.png" alt="Minecraft Pig" class="minecraft-image">
         </div>
 
@@ -99,68 +106,36 @@
                 </div>
 
                 <div class="update-row">
-                    <label for="minecraftURLInput">Update .minecraft:</label>
+                    <label for="minecraftURLInput">Update Minecraft:</label>
                     <div class="input-container">
                         <input type="text" id="minecraftURLInput" placeholder="Enter download URL" class="input-url">
                         <button id="updateMinecraftButton" onclick="updateMinecraft()" class="update-button">Update</button>
                     </div>
                 </div>
             </div>
+
+            <div class="settings-buttons">
+                <button id="saveSettingsButton" onclick="saveSettings()">Save Settings</button>
+            </div>
         </div>
 
-        <div id="status"></div>
+        <!-- Status Message -->
+        <div id="status">Status message here</div>
     </main>
 
-    <!-- Version Edit Modal -->
-    <div id="versionEditModal" class="modal">
+    <!-- Instance Creation Modal -->
+    <div id="instanceCreateModal" class="modal">
         <div class="modal-content">
-            <h2>Edit Version</h2>
-            <label for="modalVersionName">Version Name:</label>
-            <input type="text" id="modalVersionName">
-
-
-            <label for="versionImage">Custom Image:</label>
-            <input type="file" id="versionImage" accept="image/png, image/jpeg, image/gif">
-            <img id="versionImagePreview" src="" style="display: none; max-width: 100px; max-height: 100px;">
-            <button type="button" id="removeVersionImage">Remove Image</button> 
-
-             <label>Or select a default image:</label>
-            <div id="defaultImagesContainer" class="default-images-container">
-                <!-- Default images will be loaded here -->
-            </div>
-
-
+            <h2>Create New Instance</h2>
+            <label for="modalCreateInstanceName">Name:</label>
+            <input type="text" id="modalCreateInstanceName" placeholder="Enter instance name">
             <div class="modal-buttons">
-                <button id="saveVersionChanges">Save</button>
-                <button id="cancelVersionEdit">Cancel</button>
-                <button id="deleteVersion" class="delete-button">Delete Version</button> <!-- New delete button -->
+                <button id="createInstance">Create</button>
+                <button id="cancelInstanceCreate">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- Version Create Modal -->
-    <div id="versionCreateModal" class="modal">
-        <div class="modal-content">
-            <h2>Crear nueva versión</h2>
-            <label for="modalCreateVersionName">Nombre:</label>
-            <input type="text" id="modalCreateVersionName">
-            <label for="modalCreateVersionNumber">Versión de Minecraft:</label>
-            <select id="modalCreateVersionNumber"></select>
-            
-            <!-- Loading indicators -->
-            <div class="loading-spinner" id="createVersionSpinner"></div>
-            <div class="loading-progress" id="createVersionProgress">
-                <div class="loading-progress-bar" id="createVersionProgressBar"></div>
-            </div>
-            <div class="loading-text" id="createVersionLoadingText">Creando versión...</div>
-            
-            <div class="modal-buttons">
-                <button id="createVersion">Crear</button>
-                <button id="cancelVersionCreate">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

@@ -3,23 +3,37 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
     launchGame: (options) => ipcRenderer.invoke('launch-game', options),
-    getVersions: () => ipcRenderer.invoke('get-versions'),
-    getMinecraftPath: () => ipcRenderer.invoke('get-minecraft-path'),
+    getVersions: (instanceId) => ipcRenderer.invoke('get-versions', instanceId),
+    getMinecraftPath: (instanceId) => ipcRenderer.invoke('get-minecraft-path', instanceId),
     isForgeVersion: (versionId) => ipcRenderer.invoke('is-forge-version', versionId),
-    updateMods: (downloadURL) => ipcRenderer.invoke('update-mods', downloadURL),
-    updateMinecraft: (downloadURL) => ipcRenderer.invoke('update-minecraft', downloadURL),
-    openMinecraftFolder: (path) => ipcRenderer.invoke('open-minecraft-folder', path),
+    updateMods: (downloadURL, instanceId) => ipcRenderer.invoke('update-mods', downloadURL, instanceId),
+    updateMinecraft: (downloadURL, instanceId) => ipcRenderer.invoke('update-minecraft', downloadURL, instanceId),
+    openMinecraftFolder: (instanceId) => ipcRenderer.invoke('open-minecraft-folder', instanceId),
     getAppPath: () => ipcRenderer.invoke('get-app-path'),
-    getVersionName: (versionId) => ipcRenderer.invoke('get-version-name', versionId),
-    setVersionName: (versionId, name) => ipcRenderer.invoke('set-version-name', versionId, name),
+    getVersionName: (versionId, instanceId) => ipcRenderer.invoke('get-version-name', versionId, instanceId),
+    setVersionName: (versionId, name, instanceId) => ipcRenderer.invoke('set-version-name', versionId, name, instanceId),
     getVersionManifest: () => ipcRenderer.invoke('get-version-manifest'),
-    getVersionImage: (versionId) => ipcRenderer.invoke('get-version-image', versionId),
-    setVersionImage: (versionId, imageDataURL) => ipcRenderer.invoke('set-version-image', versionId, imageDataURL),  // Pass the path directly
-    deleteVersion: (versionId) => ipcRenderer.invoke('delete-version', versionId),
+    getVersionImage: (versionId, instanceId) => ipcRenderer.invoke('get-version-image', versionId, instanceId),
+    setVersionImage: (versionId, imageDataURL, instanceId) => ipcRenderer.invoke('set-version-image', versionId, imageDataURL, instanceId),
+    deleteVersion: (versionId, instanceId) => ipcRenderer.invoke('delete-version', versionId, instanceId),
     getDefaultVersionImages: () => ipcRenderer.invoke('get-default-version-images'),
-    removeVersionImage: (versionId) => ipcRenderer.invoke('remove-version-image', versionId),
-    getSettings: () => ipcRenderer.invoke('get-settings'), // Add this
-    setSettings: (settings) => ipcRenderer.invoke('set-settings', settings), // Add this
-    downloadVersion: (versionNumber) => ipcRenderer.invoke('download-version', versionNumber), // <---  AÑADE ESTO
-
+    removeVersionImage: (versionId, instanceId) => ipcRenderer.invoke('remove-version-image', versionId, instanceId),
+    getSettings: () => ipcRenderer.invoke('get-settings'),
+    setSettings: (settings) => ipcRenderer.invoke('set-settings', settings),
+    downloadVersion: (versionNumber, instanceId) => ipcRenderer.invoke('download-version', versionNumber, instanceId),
+    
+    // Nuevas funciones para instancias
+    listInstances: () => ipcRenderer.invoke('list-instances'),
+    createInstance: (name) => ipcRenderer.invoke('create-instance', name),
+    updateInstance: (instanceId, config) => ipcRenderer.invoke('update-instance', instanceId, config),
+    deleteInstance: (instanceId) => ipcRenderer.invoke('delete-instance', instanceId),
+    getActiveInstance: () => ipcRenderer.invoke('get-active-instance'),
+    setActiveInstance: (instanceId) => ipcRenderer.invoke('set-active-instance', instanceId),
+    
+    // Add new method for instance icons
+    getInstanceIcon: (iconPath) => ipcRenderer.invoke('get-instance-icon', iconPath),
+    
+    // Progress event handlers
+    onDownloadProgress: (callback) => ipcRenderer.on('download-progress', callback),
+    offDownloadProgress: (callback) => ipcRenderer.removeListener('download-progress', callback)
 });

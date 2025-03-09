@@ -3,9 +3,10 @@ const { app, BrowserWindow, screen } = require("electron"); // Import 'screen'
 const path = require("path");
 const { setupIpcHandlers } = require("./ipcHandlers");
 const { ensureAssets } = require("./assetManager");
-const { getCustomMinecraftPath } = require('./config');
+const { getCustomMinecraftPath, getInstanceMinecraftPath, getActiveInstance } = require('./config');
 const { getWindowState, setWindowState } = require('./storage'); // Import window state functions
 const { initializeMinecraftFolder } = require('./minecraftInitializer'); // Import minecraft initializer
+const { listInstances, createInstance } = require('./instances'); // Import instances functions
 
 
 let mainWindow;
@@ -42,49 +43,59 @@ async function createWindow() { //  Make createWindow async
     });
 
     mainWindow.loadFile("index.html");
-    console.log("Minecraft Path:", getCustomMinecraftPath());
+    
+    // Inicializar la instancia activa o la carpeta .minecraft por defecto
+    const activeInstance = getActiveInstance();
+    const minecraftPath = activeInstance ? getInstanceMinecraftPath(activeInstance) : getCustomMinecraftPath();
+    console.log("Minecraft Path:", minecraftPath);
 
-      // Show window when ready-to-show, prevents visual flash
+    // Show window when ready-to-show, prevents visual flash
     mainWindow.on('ready-to-show', () => {
         mainWindow.show();
     });
 
-
-    // Save window state on resize, move, and close.
-    mainWindow.on('resize', () => {
-        const { width, height, x, y } = mainWindow.getBounds();
-        setWindowState({ width, height, x, y });
+    // Save window state and clear active instance when closing
+    mainWindow.on('close', async () => {
+        const bounds = mainWindow.getBounds();
+        await setWindowState(bounds);
+        // Clear active instance when closing the application
+        const { setActiveInstance } = require('./config');
+        setActiveInstance(null);
     });
 
-    mainWindow.on('move', () => {
-      const { width, height, x, y } = mainWindow.getBounds();
-        setWindowState({ width, height, x, y });
-    });
+    // Ensure assets are available
+    await ensureAssets();
 
-    mainWindow.on('closed', () => {
-        mainWindow = null; // Dereference the window object
-    });
-    ensureAssets(); // Call the asset manager
-}
-
-
-app.whenReady().then(async () => {
-    // Initialize the Minecraft folder with default files
-    const minecraftPath = getCustomMinecraftPath();
+    // Initialize Minecraft folder
     await initializeMinecraftFolder(minecraftPath);
     
-    createWindow();
-    setupIpcHandlers(); // Set up IPC handlers
+    // Inicializar instancias
+    await initializeInstances();
+}
 
-    app.on("activate", () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
+async function initializeInstances() {
+    try {
+        // Verificar si hay instancias existentes
+        const instances = await listInstances();
+        
+        // Si no hay instancias, crear una por defecto
+        if (instances.length === 0) {
+            await createInstance('Default');
         }
+    } catch (error) {
+        console.error('Error initializing instances:', error);
+    }
+}
+
+app.whenReady().then(async () => {
+    setupIpcHandlers();
+    await createWindow();
+
+    app.on("activate", function () {
+        if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
 });
 
-app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
-        app.quit();
-    }
+app.on("window-all-closed", function () {
+    if (process.platform !== "darwin") app.quit();
 });

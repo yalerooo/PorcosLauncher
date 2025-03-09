@@ -26,7 +26,7 @@ async function fetchVersionManifest() {
 
  // --- FILE: src/versions.js ---
 
- async function downloadVersion(versionNumber) {
+ async function downloadVersion(versionNumber, minecraftPath, progressCallback = null) {
   try {
       const manifest = await fetchVersionManifest();
       const versionData = manifest.versions.find(v => v.id === versionNumber);
@@ -36,7 +36,7 @@ async function fetchVersionManifest() {
       }
  
       const versionJsonUrl = versionData.url;
-       console.log(`versionJsonUrl: ${versionJsonUrl}`);
+      console.log(`versionJsonUrl: ${versionJsonUrl}`);
  
       // Download the version JSON
       const versionJson = await new Promise((resolve, reject) => {
@@ -48,11 +48,10 @@ async function fetchVersionManifest() {
           });
       });
  
-      const minecraftPath = getCustomMinecraftPath();
       const versionsDir = path.join(minecraftPath, 'versions');
       const versionDir = path.join(versionsDir, versionNumber);
       const versionJsonPath = path.join(versionDir, `${versionNumber}.json`);
-      const versionJarPath = path.join(versionDir, `${versionNumber}.jar`); //No se usa, pero buena practica
+      const versionJarPath = path.join(versionDir, `${versionNumber}.jar`);
  
       // Create directories if they don't exist
       await fs.mkdir(versionDir, { recursive: true });
@@ -63,15 +62,13 @@ async function fetchVersionManifest() {
       // Download the client JAR (using your downloadAndExtract function)
       const clientDownloadUrl = versionJson.downloads.client.url;
       console.log(`clientDownloadUrl: ${clientDownloadUrl}`);
-      const downloadResult = await downloadAndExtract(clientDownloadUrl, versionDir);
- 
+      const downloadResult = await downloadAndExtract(clientDownloadUrl, versionDir, true, `${versionNumber}.jar`, progressCallback);
  
       if (!downloadResult.success) {
         throw new Error("Failed to download client jar" + downloadResult.error)
       }
  
- 
-    return { success: true }; // Return success if all goes well
+      return { success: true }; // Return success if all goes well
   } catch (error) {
       console.error('Error downloading version:', error);
       return { success: false, error: error.message || error };  // Return failure with error message.

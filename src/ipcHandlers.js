@@ -1,12 +1,13 @@
 // --- FILE: src/ipcHandlers.js ---
-const { ipcMain, shell } = require('electron');
+const { ipcMain, shell, app } = require('electron');
 const { detectInstalledVersions, downloadVersion, fetchVersionManifest } = require('./versions');
 const { launchMinecraft } = require('./launcher');
 const { downloadAndExtract } = require('./downloader');
 const fs = require('fs');
 const path = require('path');
-const { getCustomMinecraftPath } = require('./config');
+const { getCustomMinecraftPath, getInstanceMinecraftPath, getActiveInstance, setActiveInstance } = require('./config');
 const { getSettings, setSettings } = require('./storage');
+const { listInstances, createInstance, updateInstance, deleteInstance } = require('./instances');
 
 function setupIpcHandlers() {
     // --- Get and set all settings ---
@@ -18,10 +19,36 @@ function setupIpcHandlers() {
         await setSettings(settings);
     });
 
+    // --- Instance handlers ---
+    ipcMain.handle('list-instances', async () => {
+        return await listInstances();
+    });
+
+    ipcMain.handle('create-instance', async (event, name) => {
+        return await createInstance(name);
+    });
+
+    ipcMain.handle('update-instance', async (event, instanceId, config) => {
+        return await updateInstance(instanceId, config);
+    });
+
+    ipcMain.handle('delete-instance', async (event, instanceId) => {
+        return await deleteInstance(instanceId);
+    });
+
+    ipcMain.handle('get-active-instance', () => {
+        return getActiveInstance();
+    });
+
+    ipcMain.handle('set-active-instance', async (event, instanceId) => {
+        return setActiveInstance(instanceId);
+    });
+
     // --- Existing handlers ---
-    ipcMain.handle("update-mods", async (event, downloadURL) => {
+    ipcMain.handle("update-mods", async (event, downloadURL, instanceId) => {
         try {
-            const modsFolder = path.join(getCustomMinecraftPath(), "mods");
+            const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+            const modsFolder = path.join(minecraftPath, "mods");
             if (!fs.existsSync(modsFolder)) {
                 fs.mkdirSync(modsFolder, { recursive: true });
             }
@@ -40,9 +67,10 @@ function setupIpcHandlers() {
         }
     });
 
-    ipcMain.handle("update-minecraft", async (event, downloadURL) => {
+    ipcMain.handle("update-minecraft", async (event, downloadURL, instanceId) => {
         try {
-            const result = await downloadAndExtract(downloadURL, getCustomMinecraftPath());
+            const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+            const result = await downloadAndExtract(downloadURL, minecraftPath);
             return result;
         } catch (error) {
             console.error("Error in updateMinecraft:", error);
@@ -52,7 +80,9 @@ function setupIpcHandlers() {
 
    ipcMain.handle("launch-game", async (event, options) => {
         try {
-            await launchMinecraft(options, getCustomMinecraftPath());
+            const instanceId = options.instanceId || getActiveInstance();
+            const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+            await launchMinecraft(options, minecraftPath);
             return { success: true };
         } catch (error) {
             console.error("Error launching game:", error);
@@ -64,19 +94,22 @@ function setupIpcHandlers() {
         return path.join(__dirname, "src");
     });
 
-    ipcMain.handle("get-versions", async () => {
-        return await detectInstalledVersions(getCustomMinecraftPath());
+    ipcMain.handle("get-versions", async (event, instanceId) => {
+        const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+        return await detectInstalledVersions(minecraftPath);
     });
 
-    ipcMain.handle("get-minecraft-path", () => {
-        return getCustomMinecraftPath();
+    ipcMain.handle("get-minecraft-path", (event, instanceId) => {
+        return instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
     });
 
     ipcMain.handle("is-forge-version", async (event, versionId) => {
         return false; //Not used
     });
-    ipcMain.handle("open-minecraft-folder", async (event, minecraftPath) => {
+    
+    ipcMain.handle("open-minecraft-folder", async (event, instanceId) => {
         try {
+            const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
             shell.openPath(minecraftPath);
             return { success: true };
         } catch (error) {
@@ -86,8 +119,9 @@ function setupIpcHandlers() {
     });
 
     // --- Version name handlers ---
-    ipcMain.handle("get-version-name", async (event, versionId) => {
-        const versionPath = path.join(getCustomMinecraftPath(), "versions", versionId);
+    ipcMain.handle("get-version-name", async (event, versionId, instanceId) => {
+        const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+        const versionPath = path.join(minecraftPath, "versions", versionId);
         const nameFilePath = path.join(versionPath, "version-name.txt");
         try {
             if (fs.existsSync(nameFilePath)) {
@@ -104,8 +138,9 @@ function setupIpcHandlers() {
         }
     });
 
-    ipcMain.handle("set-version-name", async (event, versionId, newName) => {
-        const versionPath = path.join(getCustomMinecraftPath(), "versions", versionId);
+    ipcMain.handle("set-version-name", async (event, versionId, newName, instanceId) => {
+        const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+        const versionPath = path.join(minecraftPath, "versions", versionId);
         const nameFilePath = path.join(versionPath, "version-name.txt");
         try {
             if (!fs.existsSync(versionPath)) {
@@ -120,9 +155,10 @@ function setupIpcHandlers() {
     });
 
     // --- Version image handlers ---
-    ipcMain.handle("set-version-image", async (event, versionId, imageDataURL) => {
-        const versionPath = path.join(getCustomMinecraftPath(), "versions", versionId);
-        const versionAssetsPath = path.join(getCustomMinecraftPath(), "assets", "versions");
+    ipcMain.handle("set-version-image", async (event, versionId, imageDataURL, instanceId) => {
+        const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+        const versionPath = path.join(minecraftPath, "versions", versionId);
+        const versionAssetsPath = path.join(minecraftPath, "assets", "versions");
 
         try {
             if (!fs.existsSync(versionPath)) {
@@ -192,8 +228,9 @@ function setupIpcHandlers() {
         }
     });
 
-     ipcMain.handle("get-version-image", async (event, versionId) => {
-        const versionPath = path.join(getCustomMinecraftPath(), "versions", versionId);
+     ipcMain.handle("get-version-image", async (event, versionId, instanceId) => {
+        const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+        const versionPath = path.join(minecraftPath, "versions", versionId);
         const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif']; // Check all extensions
 
         try {
@@ -202,46 +239,56 @@ function setupIpcHandlers() {
                 if (fs.existsSync(imagePath)) {
                     const data = await fs.promises.readFile(imagePath);
                     const base64Image = data.toString('base64');
-                    const mimeType = `image/${ext.substring(1)}`; // Correct MIME type
+                    const mimeType = `image/${ext.substring(1)}`;
                     const dataURL = `data:${mimeType};base64,${base64Image}`;
                     return dataURL;
                 }
             }
             return null;
-
         } catch (error) {
-            console.error("Error reading version image:", error);
+            console.error("Error getting version image:", error);
             return null;
         }
     });
 
-    ipcMain.handle("remove-version-image", async (event, versionId) => {
-        const versionPath = path.join(getCustomMinecraftPath(), "versions", versionId);
-        const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif'];
-
+    ipcMain.handle("get-version-manifest", async () => {
         try {
-            for (const ext of imageExtensions) {
-                const imagePath = path.join(versionPath, `version-image${ext}`);
-                if (fs.existsSync(imagePath)) {
-                    await fs.promises.unlink(imagePath);
-                }
-            }
-            return { success: true };
+            return await fetchVersionManifest();
         } catch (error) {
-            console.error("Error removing version image:", error);
+            console.error("Error fetching version manifest:", error);
             return { success: false, error: error.message };
         }
     });
 
-    // --- Delete version handler ---
-    ipcMain.handle("delete-version", async (event, versionId) => {
-        const versionPath = path.join(getCustomMinecraftPath(), "versions", versionId);
+    ipcMain.handle("download-version", async (event, versionNumber, instanceId) => {
         try {
+            const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+            
+            // Create a progress handler that sends updates to the renderer
+            const progressHandler = (progress) => {
+                event.sender.send('download-progress', { progress });
+            };
+            
+            // Pass the progress handler to downloadVersion
+            const result = await downloadVersion(versionNumber, minecraftPath, progressHandler);
+            
+            return result;
+        } catch (error) {
+            console.error("Error downloading version:", error);
+            return { success: false, error: error.message };
+        }
+    });
+
+    ipcMain.handle("delete-version", async (event, versionId, instanceId) => {
+        try {
+            const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+            const versionPath = path.join(minecraftPath, "versions", versionId);
+            
             if (fs.existsSync(versionPath)) {
                 await fs.promises.rm(versionPath, { recursive: true, force: true });
                 return { success: true };
             } else {
-                return { success: false, error: "Version folder not found." };
+                return { success: false, error: "Version not found" };
             }
         } catch (error) {
             console.error("Error deleting version:", error);
@@ -249,44 +296,70 @@ function setupIpcHandlers() {
         }
     });
 
-    ipcMain.handle('get-default-version-images', async () => {
-        const defaultImagesDir = path.join(__dirname, '../assets', 'versions');
-        console.log("Attempting to read default images from:", defaultImagesDir);
-
+    ipcMain.handle("get-default-version-images", async () => {
         try {
-            const files = await fs.promises.readdir(defaultImagesDir);
-            console.log("Files found (raw):", files);
-
-            const imageFiles = files.filter(file => /\.(png|jpg|jpeg|gif)$/i.test(file));
-            console.log("Image files found (filtered):", imageFiles);
-
-            const imagePaths = imageFiles.map(file => {
-                const absolutePath = path.join(defaultImagesDir, file);
-                console.log("  - Absolute path:", absolutePath);
-                const fileURI = 'file://' + path.normalize(absolutePath).replace(/\\/g, '/');
-                console.log("    - file:// URI:", fileURI);
-
-                return fileURI;
-            });
-            console.log("Returning image paths:", imagePaths);
-            return imagePaths;
-
+            const imagesPath = path.join(__dirname, "..", "assets", "versions");
+            const images = [];
+            
+            if (fs.existsSync(imagesPath)) {
+                const files = await fs.promises.readdir(imagesPath);
+                for (const file of files) {
+                    if (file.match(/\.(png|jpg|jpeg|gif)$/i)) {
+                        const imagePath = path.join(imagesPath, file);
+                        const data = await fs.promises.readFile(imagePath);
+                        const base64Image = data.toString('base64');
+                        const ext = path.extname(file).substring(1).toLowerCase();
+                        const mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+                        const dataURL = `data:${mimeType};base64,${base64Image}`;
+                        images.push({
+                            name: path.basename(file, path.extname(file)),
+                            path: imagePath,
+                            dataURL: dataURL
+                        });
+                    }
+                }
+            }
+            return images;
         } catch (error) {
-            console.error('Error reading default version images:', error);
+            console.error("Error getting default version images:", error);
             return [];
         }
     });
 
-    // New handler for downloading a version
-    ipcMain.handle('download-version', async (event, versionNumber) => {
-      console.log("Received request to download version:", versionNumber);
-      return await downloadVersion(versionNumber);
+    ipcMain.handle("remove-version-image", async (event, versionId, instanceId) => {
+        try {
+            const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+            const versionPath = path.join(minecraftPath, "versions", versionId);
+            const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif'];
+            
+            for (const ext of imageExtensions) {
+                const imagePath = path.join(versionPath, `version-image${ext}`);
+                if (fs.existsSync(imagePath)) {
+                    await fs.promises.unlink(imagePath);
+                }
+            }
+            
+            return { success: true };
+        } catch (error) {
+            console.error("Error removing version image:", error);
+            return { success: false, error: error.message };
+        }
     });
 
-    //Get version manifest
-    ipcMain.handle('get-version-manifest', async () => {
-      const manifest = await fetchVersionManifest();
-      return manifest;
+    // Add new handler for instance icons
+    ipcMain.handle('get-instance-icon', async (event, iconPath) => {
+        if (!iconPath) return null;
+        try {
+            const data = await fs.promises.readFile(iconPath);
+            const ext = path.extname(iconPath).toLowerCase();
+            const mimeType = ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : 
+                            ext === '.png' ? 'image/png' : 
+                            ext === '.gif' ? 'image/gif' : 'image/png';
+            return `data:${mimeType};base64,${data.toString('base64')}`;
+        } catch (error) {
+            console.error('Error reading instance icon:', error);
+            return null;
+        }
     });
 }
 

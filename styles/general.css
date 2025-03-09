@@ -99,6 +99,39 @@ button:hover {
   z-index: 10;
 }
 
+/* Nueva estructura de sidebar para instancias */
+.instances-sidebar {
+  width: 70px;
+  background-color: var(--surface);
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 20;
+}
+
+.versions-sidebar {
+  width: 70px;
+  background-color: var(--surface-light);
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 10;
+  transform: translateX(-100%);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 70px;
+  transition: transform 0.3s ease;
+}
+
+.versions-sidebar.active {
+  transform: translateX(0);
+}
+
 .launcher-logo {
   width: 40px;
   height: 40px;
@@ -116,6 +149,7 @@ button:hover {
   transform: scale(1.05);
 }
 
+.instance-button,
 .version-button {
   width: 45px;
   height: 45px;
@@ -128,6 +162,7 @@ button:hover {
   transition: var(--transition);
 }
 
+.instance-logo,
 .version-logo {
   width: 100%;
   height: 100%;
@@ -143,20 +178,73 @@ button:hover {
   color: var(--text-secondary);
 }
 
+.instance-logo::after,
 .version-logo::after {
   position: absolute;
   font-size: 14px;
 }
 
+.instance-button:hover .instance-logo,
 .version-button:hover .version-logo {
   background-color: rgba(255, 107, 139, 0.1);
   transform: translateY(-2px);
 }
 
+.instance-logo.selected,
 .version-logo.selected {
   background-color: var(--primary);
   color: white;
   box-shadow: 0 2px 8px rgba(255, 107, 139, 0.3);
+}
+
+.instance-add-icon,
+.version-add-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.instance-add-icon:hover,
+.version-add-icon:hover {
+  background-color: rgba(255, 107, 139, 0.2);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.instance-edit-button,
+.version-edit-button {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  background-color: var(--surface);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: var(--transition);
+  color: var(--text-secondary);
+  z-index: 2;
+}
+
+.instance-button:hover .instance-edit-button,
+.version-button:hover .version-edit-button {
+  opacity: 1;
+}
+
+.instance-edit-button:hover,
+.version-edit-button:hover {
+  background-color: var(--primary);
+  color: white;
+  transform: scale(1.1);
 }
 
 .main-content {
@@ -167,6 +255,12 @@ button:hover {
   overflow-y: auto;
   overflow-x: hidden;
   background-color: var(--background);
+  transition: margin-left 0.3s ease;
+}
+
+/* When versions sidebar is active, push main content to the right */
+.versions-sidebar.active ~ .main-content {
+  margin-left: 70px;
 }
 
 /* --- Top Bar --- */
@@ -254,26 +348,36 @@ button:hover {
   display: block;
 }
 
-/* --- Minecraft Image --- */
-.minecraft-image {
-  max-width: 100%;
-  margin: 40px auto;
-  display: block;
-  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.2));
-  transition: var(--transition);
-  animation: float 6s ease-in-out infinite;
+/* --- Home Section --- */
+#home {
+  text-align: center;
+  padding-top: 50px;
 }
 
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
+#home h1 {
+  font-size: 32px;
+  margin-bottom: 15px;
+  background: linear-gradient(45deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+#home p {
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  font-size: 16px;
+  line-height: 1.5;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.minecraft-image {
+  max-width: 200px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  margin-top: 20px;
 }
 
 /* --- Status Message --- */
@@ -283,49 +387,113 @@ button:hover {
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(28, 28, 30, 0.9);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: none;
+  font-size: 14px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  color: var(--text);
-  padding: 12px 24px;
-  border-radius: var(--border-radius);
-  font-size: 14px;
-  max-width: 80%;
-  text-align: center;
-  z-index: 100;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  display: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   animation: slideUp 0.3s ease;
 }
 
 @keyframes slideUp {
   from {
-    transform: translate(-50%, 20px);
     opacity: 0;
+    transform: translate(-50%, 20px);
   }
   to {
-    transform: translate(-50%, 0);
     opacity: 1;
+    transform: translate(-50%, 0);
   }
 }
 
+/* --- Version Logo with Image --- */
+.version-logo.has-image {
+  background-size: cover;
+  background-position: center;
+  color: transparent;
+}
+
+/* --- Version Edit Button --- */
+.version-edit-button {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  background-color: var(--surface);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: var(--transition);
+  color: var(--text-secondary);
+  z-index: 2;
+}
+
+.version-button:hover .version-edit-button {
+  opacity: 1;
+}
+
+.version-edit-button:hover {
+  background-color: var(--primary);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* --- Version Name Input --- */
 #version-name-input {
   font-size: 18px;
+  font-weight: 600;
+  margin: 0;
   background-color: transparent;
   border: none;
   border-bottom: 2px solid var(--primary);
+  border-radius: 0;
+  padding: 0 0 5px 0;
   color: var(--text);
-  margin-right: 10px;
-  padding: 5px 0;
   width: auto;
-  font-weight: 600;
+  min-width: 200px;
 }
 
 #version-name-input:focus {
-  outline: none;
   box-shadow: none;
 }
 
-/* Media query for small screens */
+/* Agregar o modificar los estilos para las imágenes de instancia */
+.instance-logo.has-image {
+    background-size: cover;
+    background-position: center;
+    color: transparent;
+    text-indent: -9999px;
+}
+
+.instance-image-preview {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background-color: var(--surface-light);
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    color: var(--text-secondary);
+    background-size: cover;
+    background-position: center;
+}
+
+.instance-image-preview.has-image {
+    color: transparent;
+    text-indent: -9999px;
+}
+
+/* --- Responsive Adjustments --- */
 @media (max-width: 768px) {
   .sidebar {
     width: 60px;
@@ -333,8 +501,8 @@ button:hover {
   }
 
   .launcher-logo {
-    width: 36px;
-    height: 36px;
+    width: 35px;
+    height: 35px;
   }
 
   .version-button {
@@ -342,50 +510,18 @@ button:hover {
     height: 40px;
   }
 
-  .app-title {
-    font-size: 16px;
+  .main-content {
+    padding: 15px;
+    .content-section {
+      padding: 20px;
+    }
+
+    .top-bar {
+      padding: 12px 15px;
+    }
+
+    .app-title {
+      font-size: 16px;
+    }
   }
-
-  .minecraft-image {
-    max-width: 380px;
-  }
-
-  .content-section {
-    padding: 20px;
-  }
-}
-
-/* Home section specific styles */
-#home {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  height: calc(100vh - 70px);
-}
-
-#home h1 {
-  font-size: 2.2rem;
-  margin-bottom: 1rem;
-  background: linear-gradient(to right, var(--primary), var(--secondary));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: fadeIn 1s ease;
-  letter-spacing: -0.03em;
-}
-
-#home p {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  max-width: 500px;
-  margin-bottom: 2rem;
-  line-height: 1.6;
-  animation: fadeIn 1.2s ease;
-}
-
-#home-description{
-  text-align: center;
-  margin: 0 auto;
 }
