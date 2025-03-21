@@ -7,6 +7,8 @@
     "build": "electron-builder"
   },
   "dependencies": {
+    "adm-zip": "^0.5.16",
+    "drive-mediafire-downloader": "^1.0.0",
     "electron": "^28.0.0",
     "electron-store": "^10.0.1",
     "fabric": "^6.6.1",
