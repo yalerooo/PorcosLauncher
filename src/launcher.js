@@ -2,6 +2,7 @@
 const path = require('path');
 const { Client } = require('minecraft-launcher-core');
 const crypto = require('crypto');
+const { fabric, forge, quilt, neoforge, vanilla, liner } = require('tomate-loaders');
 
 const launcher = new Client();
 
@@ -16,35 +17,73 @@ function generateOfflineUUID(username) {
         .replace(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/, '$1-$2-$3-$4-$5');
 }
 
-function launchMinecraft(options, customMinecraftPath) {
-    const opts = {
-        authorization: {
-            access_token: "0",
-            client_token: "0",
-            uuid: generateOfflineUUID(options.username),
-            name: options.username,
-            user_properties: "{}",
-            meta: {
-                type: "mojang",
-                demo: false
-            }
-        },
-        root: customMinecraftPath,
-        version: {
-            number: options.versionId.split('-')[0],
-            type: "release",
-            custom: options.versionId
-        },
-        memory: {
-            max: options.maxMemory,
-            min: options.minMemory
+async function launchMinecraft(options, customMinecraftPath) {
+    const baseAuth = {
+        access_token: "0",
+        client_token: "0",
+        uuid: generateOfflineUUID(options.username),
+        name: options.username,
+        user_properties: "{}",
+        meta: {
+            type: "mojang",
+            demo: false
         }
     };
 
-    launcher.on('debug', (e) => console.log(e));
-    launcher.on('data', (e) => console.log(e));
+    const baseMemory = {
+        max: options.maxMemory,
+        min: options.minMemory
+    };
 
-    return launcher.launch(opts);
+    const gameVersion = options.versionId.split('-')[0];
+    let launchConfig;
+
+    // Determine which loader to use based on the version ID
+    if (options.versionId.includes('forge')) {
+        const forgeVersion = options.versionId.split('-')[1];
+        if (!forgeVersion) {
+            throw new Error('Forge version not specified in versionId');
+        }
+        launchConfig = await forge.getMCLCLaunchConfig({
+            gameVersion,
+            forgeVersion,
+            rootPath: customMinecraftPath
+        });
+    } else if (options.versionId.includes('fabric')) {
+        const loaders = await fabric.getLoaders();
+        launchConfig = await fabric.getMCLCLaunchConfig({
+            gameVersion,
+            rootPath: customMinecraftPath
+        });
+    } else if (options.versionId.includes('quilt')) {
+        launchConfig = await quilt.getMCLCLaunchConfig({
+            gameVersion,
+            rootPath: customMinecraftPath
+        });
+    } else if (options.versionId.includes('neoforge')) {
+        launchConfig = await neoforge.getMCLCLaunchConfig({
+            gameVersion,
+            rootPath: customMinecraftPath
+        });
+    } else {
+        // Vanilla Minecraft
+        launchConfig = await vanilla.getMCLCLaunchConfig({
+            gameVersion,
+            rootPath: customMinecraftPath
+        });
+    }
+
+    // Set up event listeners with liner for better output handling
+    launcher.on('debug', (e) => console.log('[Debug]', e));
+    launcher.on('data', liner((line) => console.log('[Minecraft]', line)));
+
+    // Launch the game with the configured loader
+    return launcher.launch({
+        ...launchConfig,
+        authorization: baseAuth,
+        memory: baseMemory,
+        javaPath: options.javaPath || 'javaw'
+    });
 }
 
 module.exports = { launchMinecraft };
