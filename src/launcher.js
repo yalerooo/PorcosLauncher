@@ -50,9 +50,20 @@ async function launchMinecraft(options, customMinecraftPath) {
             rootPath: customMinecraftPath
         });
     } else if (options.versionId.includes('fabric')) {
+        const versionParts = options.versionId.split('-');
+        if (versionParts.length < 4 || versionParts[0] !== 'fabric' || versionParts[1] !== 'loader') {
+            throw new Error('Invalid Fabric version format. Expected fabric-loader-<loaderVersion>-<minecraftVersion>');
+        }
+        const fabricLoaderVersion = versionParts[2];
+        const minecraftVersion = versionParts.slice(3).join('-');
         const loaders = await fabric.getLoaders();
+        const isValidLoader = loaders.some(loader => loader.version === fabricLoaderVersion);
+        if (!isValidLoader) {
+            throw new Error(`Fabric loader version ${fabricLoaderVersion} is not available.`);
+        }
         launchConfig = await fabric.getMCLCLaunchConfig({
-            gameVersion,
+            gameVersion: minecraftVersion,
+            fabricLoaderVersion: fabricLoaderVersion,
             rootPath: customMinecraftPath
         });
     } else if (options.versionId.includes('quilt')) {

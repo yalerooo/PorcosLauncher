@@ -771,6 +771,18 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <input type="text" id="modalCreateVersionName">
                 <label for="modalCreateVersionNumber">Versión de Minecraft:</label>
                 <select id="modalCreateVersionNumber"></select>
+                <label for="modalLoaderType">Tipo de Lanzador:</label>
+                <select id="modalLoaderType">
+                    <option value="vanilla">Vanilla</option>
+                    <option value="fabric">Fabric</option>
+                    <option value="forge">Forge</option>
+                    <option value="quilt">Quilt</option>
+                    <option value="neoforge">NeoForge</option>
+                </select>
+                <label for="modalLoaderVersion">Versión del Lanzador:</label>
+                <select id="modalLoaderVersion" disabled>
+                    <option>Selecciona una versión de Minecraft primero</option>
+                </select>
                 <div class="modal-buttons">
                     <button id="createVersion">Crear</button>
                     <button id="cancelVersionCreate">Cancelar</button>
@@ -789,6 +801,52 @@ document.addEventListener("DOMContentLoaded", async () => {
     function setupCreateModal() {
         document.getElementById('createVersion').addEventListener('click', createNewVersion);
         document.getElementById('cancelVersionCreate').addEventListener('click', closeCreateVersionModal);
+
+        const loaderTypeSelect = document.getElementById('modalLoaderType');
+        const loaderVersionSelect = document.getElementById('modalLoaderVersion');
+        const minecraftVersionSelect = document.getElementById('modalCreateVersionNumber');
+
+        minecraftVersionSelect.addEventListener('change', async function() {
+            const selectedVersion = this.value;
+            const selectedLoader = loaderTypeSelect.value;
+            
+            if (selectedLoader === 'vanilla') {
+                loaderVersionSelect.disabled = true;
+                loaderVersionSelect.innerHTML = '<option>No necesario para Vanilla</option>';
+                return;
+            }
+
+            loaderVersionSelect.disabled = false;
+            loaderVersionSelect.innerHTML = '<option>Cargando versiones...</option>';
+
+            try {
+                const versions = await window.api.getLoaderVersions(selectedLoader, selectedVersion);
+                loaderVersionSelect.innerHTML = versions.map(version => 
+                    `<option value="${version}">${version}</option>`
+                ).join('');
+            } catch (error) {
+                console.error('Error loading loader versions:', error);
+                loaderVersionSelect.innerHTML = '<option>Error al cargar versiones</option>';
+            }
+        });
+
+        loaderTypeSelect.addEventListener('change', function() {
+            const selectedLoader = this.value;
+            const selectedVersion = minecraftVersionSelect.value;
+
+            if (selectedLoader === 'vanilla') {
+                loaderVersionSelect.disabled = true;
+                loaderVersionSelect.innerHTML = '<option>No necesario para Vanilla</option>';
+                return;
+            }
+
+            if (selectedVersion) {
+                minecraftVersionSelect.dispatchEvent(new Event('change'));
+            } else {
+                loaderVersionSelect.disabled = true;
+                loaderVersionSelect.innerHTML = '<option>Selecciona una versión de Minecraft primero</option>';
+            }
+        });
 
         const modal = document.getElementById("versionCreateModal");
         window.onclick = (event) => {
@@ -820,9 +878,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function createNewVersion() {
         const versionName = document.getElementById('modalCreateVersionName').value.trim();
         const versionNumber = document.getElementById('modalCreateVersionNumber').value;
+        const loaderType = document.getElementById('modalLoaderType').value;
+        const loaderVersion = document.getElementById('modalLoaderVersion').value;
 
         if (!versionName || !versionNumber) {
-            showStatus("Please enter both name and version.");
+            showStatus("Por favor, ingresa nombre y versión.");
+            return;
+        }
+
+        if (loaderType !== 'vanilla' && (!loaderVersion || loaderVersion.includes('Error') || loaderVersion.includes('Selecciona'))) {
+            showStatus("Por favor, selecciona una versión válida del lanzador.");
             return;
         }
 
