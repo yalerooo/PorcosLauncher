@@ -1,5 +1,14 @@
 // --- FILE: script.js ---
 document.addEventListener("DOMContentLoaded", async () => {
+    // Configurar el manejador de eventos para la consola
+    window.api.onConsoleOutput((event, data) => {
+        addConsoleMessage(data.type, data.message);
+    });
+    
+    // Configurar el botón de limpiar consola
+    document.getElementById("clear-console").addEventListener("click", () => {
+        clearConsole();
+    });
     let selectedInstanceButton = null;
     let selectedVersionButton = null;
     let currentEditingVersion = null;
@@ -40,8 +49,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             document.getElementById("updateMinecraftButton").style.display = "block";
             document.getElementById("minecraftURLInput").style.display = "inline-block";
-            document.getElementById("updateModsButton").style.display = "block";
-            document.getElementById("downloadURLInput").style.display = "inline-block";
         }
     }
 
@@ -49,7 +56,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function loadSettings() {
         try {
             const settings = await window.api.getSettings();
-            document.getElementById('downloadURLInput').value = settings.modsURL;
             document.getElementById('minecraftURLInput').value = settings.minecraftURL;
             document.getElementById('minMemory').value = settings.minMemory;
             document.getElementById('maxMemory').value = settings.maxMemory;
@@ -73,7 +79,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     function saveCurrentSettings() {
         const settings = {
             username: document.getElementById("username").value,
-            modsURL: document.getElementById("downloadURLInput").value,
             minecraftURL: document.getElementById("minecraftURLInput").value,
             minMemory: document.getElementById("minMemory").value,
             maxMemory: document.getElementById("maxMemory").value,
@@ -1191,6 +1196,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         const minMemory = document.getElementById("minMemory").value;
         const maxMemory = document.getElementById("maxMemory").value;
 
+        // Limpiar la consola antes de iniciar
+        clearConsole();
+        addConsoleMessage("info", "Iniciando Minecraft...");
+        addConsoleMessage("info", `Versión: ${versionId}, Usuario: ${username}`);
+        addConsoleMessage("info", `Memoria: Min ${minMemory} - Max ${maxMemory}`);
+
         try {
             showStatus("Launching game...");
             const result = await window.api.launchGame({
@@ -1203,41 +1214,36 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (result.success) {
                 showStatus("Game launched successfully!");
+                addConsoleMessage("info", "Juego iniciado correctamente");
             } else {
                 showStatus(`Error launching game: ${result.error}`);
+                addConsoleMessage("error", `Error al iniciar el juego: ${result.error}`);
             }
         } catch (error) {
             console.error("Error launching game:", error);
             showStatus(`Error launching game: ${error.message}`);
+            addConsoleMessage("error", `Error al iniciar el juego: ${error.message}`);
         }
     };
+
+    // --- Funciones para la consola ---
+    function addConsoleMessage(type, message) {
+        const consoleContent = document.getElementById("console-content");
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("console-line", type);
+        messageElement.textContent = message;
+        consoleContent.appendChild(messageElement);
+        
+        // Auto-scroll al final
+        consoleContent.scrollTop = consoleContent.scrollHeight;
+    }
+
+    function clearConsole() {
+        const consoleContent = document.getElementById("console-content");
+        consoleContent.innerHTML = "";
+    }
 
     // --- Funciones de actualización ---
-    window.updateMods = async function() {
-        const downloadURL = document.getElementById("downloadURLInput").value.trim();
-        if (!downloadURL) {
-            showStatus("Please enter a download URL.");
-            return;
-        }
-
-        try {
-            const instances = await window.api.listInstances();
-            
-            // Si solo hay una instancia, actualizar directamente
-            if (instances.length === 1) {
-                await performModsUpdate(downloadURL, instances[0].id);
-                return;
-            }
-            
-            // Si hay múltiples instancias, mostrar modal de selección
-            await showInstanceSelectionModal('Update Mods', 'Select instance to update mods:', async (selectedInstanceId) => {
-                await performModsUpdate(downloadURL, selectedInstanceId);
-            });
-        } catch (error) {
-            console.error("Error in updateMods:", error);
-            showStatus(`Error updating mods: ${error.message}`);
-        }
-    };
 
     window.updateMinecraft = async function() {
         const downloadURL = document.getElementById("minecraftURLInput").value.trim();
@@ -1266,15 +1272,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     // Funciones auxiliares para la actualización
-    async function performModsUpdate(downloadURL, instanceId) {
-        showStatus("Updating mods...");
-        const result = await window.api.updateMods(downloadURL, instanceId);
-        if (result.success) {
-            showStatus("Mods updated successfully!");
-        } else {
-            showStatus(`Error updating mods: ${result.error}`);
-        }
-    }
 
     async function performMinecraftUpdate(downloadURL, instanceId) {
         showStatus("Updating Minecraft...");

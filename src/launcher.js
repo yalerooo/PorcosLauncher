@@ -17,7 +17,7 @@ function generateOfflineUUID(username) {
         .replace(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/, '$1-$2-$3-$4-$5');
 }
 
-async function launchMinecraft(options, customMinecraftPath) {
+async function launchMinecraft(options, customMinecraftPath, customLauncher = null) {
     const baseAuth = {
         access_token: "0",
         client_token: "0",
@@ -84,12 +84,17 @@ async function launchMinecraft(options, customMinecraftPath) {
         });
     }
 
-    // Set up event listeners with liner for better output handling
-    launcher.on('debug', (e) => console.log('[Debug]', e));
-    launcher.on('data', liner((line) => console.log('[Minecraft]', line)));
+    // Usar el launcher personalizado si se proporciona, de lo contrario usar el predeterminado
+    const gameLauncher = customLauncher || launcher;
+    
+    // Si no se proporcionó un launcher personalizado, configurar los listeners predeterminados
+    if (!customLauncher) {
+        gameLauncher.on('debug', (e) => console.log('[Debug]', e));
+        gameLauncher.on('data', liner((line) => console.log('[Minecraft]', line)));
+    }
 
     // Launch the game with the configured loader
-    return launcher.launch({
+    return gameLauncher.launch({
         ...launchConfig,
         authorization: baseAuth,
         memory: baseMemory,

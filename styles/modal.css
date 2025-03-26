@@ -13,15 +13,69 @@
 }
 
 .modal-content {
-    background-color: #1c1c1e;
-    color: white;
-    margin: 15% auto; /* 15% from the top and centered */
+    background-color: var(--surface);
+    margin: 10% auto;
     padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
-    max-width: 500px; /* Max width */
-    border-radius: var(--border-radius);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+/* News modal specific styles */
+#newsModal .modal-content {
+    max-width: 700px;
+}
+
+#news-modal-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+#news-modal-date {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+#news-modal-content {
+    line-height: 1.6;
+}
+
+#news-modal-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 5% auto;
+        width: 95%;
+        padding: 15px;
+    }
+    
+    #news-modal-title {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        margin: 2% auto;
+        padding: 12px;
+    }
+    
+    #news-modal-title {
+        font-size: 18px;
+    }
+    
+    #news-modal-date {
+        font-size: 12px;
+        margin-bottom: 15px;
+    }
 }
 
 .modal-content h2 {

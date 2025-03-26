@@ -6,7 +6,7 @@ contextBridge.exposeInMainWorld('api', {
     getVersions: (instanceId) => ipcRenderer.invoke('get-versions', instanceId),
     getMinecraftPath: (instanceId) => ipcRenderer.invoke('get-minecraft-path', instanceId),
     isForgeVersion: (versionId) => ipcRenderer.invoke('is-forge-version', versionId),
-    updateMods: (downloadURL, instanceId) => ipcRenderer.invoke('update-mods', downloadURL, instanceId),
+
     updateMinecraft: (downloadURL, instanceId) => ipcRenderer.invoke('update-minecraft', downloadURL, instanceId),
     openMinecraftFolder: (instanceId) => ipcRenderer.invoke('open-minecraft-folder', instanceId),
     getAppPath: () => ipcRenderer.invoke('get-app-path'),
@@ -35,5 +35,9 @@ contextBridge.exposeInMainWorld('api', {
     
     // Progress event handlers
     onDownloadProgress: (callback) => ipcRenderer.on('download-progress', callback),
-    offDownloadProgress: (callback) => ipcRenderer.removeListener('download-progress', callback)
+    offDownloadProgress: (callback) => ipcRenderer.removeListener('download-progress', callback),
+    
+    // Console output handlers
+    onConsoleOutput: (callback) => ipcRenderer.on('console-output', callback),
+    offConsoleOutput: (callback) => ipcRenderer.removeListener('console-output', callback)
 });

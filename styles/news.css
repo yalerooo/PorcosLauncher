@@ -1,0 +1,217 @@
+/* News Section Styles */
+.news-section {
+    padding: 20px;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.news-section h2 {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.news-section h2 svg {
+    margin-right: 10px;
+}
+
+.news-container {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 20px;
+    padding-bottom: 15px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) var(--surface-light);
+}
+
+.news-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.news-container::-webkit-scrollbar-track {
+    background: var(--surface-light);
+    border-radius: 4px;
+}
+
+.news-container::-webkit-scrollbar-thumb {
+    background-color: var(--primary);
+    border-radius: 4px;
+}
+
+.news-card {
+    flex: 0 0 300px;
+    min-width: 300px;
+    max-width: 350px;
+    background-color: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.news-card-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.news-card-date {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.news-card-content {
+    padding: 15px;
+}
+
+.news-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text);
+}
+
+.news-card-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+    line-height: 1.4;
+    max-height: 60px;
+    overflow: hidden;
+}
+
+.news-card-button {
+    display: inline-block;
+    background-color: var(--primary);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.news-card-button:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Major updates section */
+.major-updates {
+    margin-top: 30px;
+}
+
+#major-updates-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.update-card {
+    position: relative;
+    height: 250px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 0;
+}
+
+.update-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+    color: white;
+}
+
+.update-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.update-subtitle {
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+.news-update-button {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    background-color: var(--primary);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.news-update-button:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+    .news-container {
+        justify-content: flex-start;
+    }
+    
+    .news-card {
+        flex: 0 0 250px;
+        min-width: 250px;
+    }
+    
+    #major-updates-container {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+    
+    .update-card {
+        height: 200px;
+    }
+    
+    .update-title {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .news-card {
+        flex: 0 0 220px;
+        min-width: 220px;
+    }
+    
+    .news-card-image {
+        height: 180px;
+    }
+    
+    #major-updates-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .update-card {
+        height: 180px;
+    }
+}

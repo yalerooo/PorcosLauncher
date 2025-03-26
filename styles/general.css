@@ -101,7 +101,6 @@ button:hover {
 
 /* Nueva estructura de sidebar para instancias */
 .instances-sidebar {
-  width: 70px;
   background-color: var(--surface);
   padding: 20px 10px;
   display: flex;
@@ -124,7 +123,7 @@ button:hover {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 70px;
+  left: 65px;
   transition: transform 0.3s ease;
 }
 
@@ -328,7 +327,6 @@ button:hover {
   padding: 30px;
   width: 100%;
   box-sizing: border-box;
-  max-width: 900px;
   margin: 0 auto;
   animation: fadeIn 0.3s ease;
 }

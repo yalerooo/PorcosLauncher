@@ -2,6 +2,7 @@
 const { ipcMain, shell, app } = require('electron');
 const { detectInstalledVersions, downloadVersion, fetchVersionManifest } = require('./versions');
 const { launchMinecraft } = require('./launcher');
+const { liner } = require('tomate-loaders');
 const { downloadAndExtract } = require('./downloader');
 const fs = require('fs');
 const path = require('path');
@@ -45,27 +46,6 @@ function setupIpcHandlers() {
     });
 
     // --- Existing handlers ---
-    ipcMain.handle("update-mods", async (event, downloadURL, instanceId) => {
-        try {
-            const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
-            const modsFolder = path.join(minecraftPath, "mods");
-            if (!fs.existsSync(modsFolder)) {
-                fs.mkdirSync(modsFolder, { recursive: true });
-            }
-            const files = fs.readdirSync(modsFolder);
-            for (const file of files) {
-                const filePath = path.join(modsFolder, file);
-                if (fs.statSync(filePath).isFile()) {
-                    fs.unlinkSync(filePath);
-                }
-            }
-            const result = await downloadAndExtract(downloadURL, modsFolder);
-            return result;
-        } catch (error) {
-            console.error("Error in updateMods:", error);
-            return { success: false, error: error.message || error };
-        }
-    });
 
     ipcMain.handle("update-minecraft", async (event, downloadURL, instanceId) => {
         try {
@@ -82,7 +62,23 @@ function setupIpcHandlers() {
         try {
             const instanceId = options.instanceId || getActiveInstance();
             const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
-            await launchMinecraft(options, minecraftPath);
+            
+            // Configurar captura de mensajes de consola
+            const { Client } = require('minecraft-launcher-core');
+            const launcher = new Client();
+            
+            // Configurar listeners para capturar mensajes
+            launcher.on('debug', (e) => {
+                console.log('[Debug]', e);
+                event.sender.send('console-output', { type: 'debug', message: e });
+            });
+            
+            launcher.on('data', liner((line) => {
+                console.log('[Minecraft]', line);
+                event.sender.send('console-output', { type: 'minecraft', message: line });
+            }));
+            
+            await launchMinecraft(options, minecraftPath, launcher);
             return { success: true };
         } catch (error) {
             console.error("Error launching game:", error);
