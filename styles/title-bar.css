@@ -1,0 +1,79 @@
+/* title-bar.css */
+.title-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--background);
+    z-index: 1000;
+    overflow: hidden; /* Prevents scrollbar from appearing */
+    height: 45px; /* Fixed height for the title bar */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    -webkit-app-region: drag; /* Makes the title bar draggable */
+    user-select: none; /* Prevents text selection */ 
+    -webkit-app-region:drag;
+}
+
+.title-bar h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 500;
+    font-family: 'Redaction', sans-serif;
+}
+
+.window-controls {
+    display: flex;
+    align-items: center;
+    -webkit-app-region: no-drag; /* Makes the controls clickable */
+}
+
+.window-control-button {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.window-control-button img {
+    width: 20px;
+    height: 20px;
+}
+
+.window-control-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.window-control-button.close:hover {
+    background-color: rgba(232, 17, 35, 0.9);
+}
+
+.window-control-button.close:hover svg {
+    color: white;
+}
+
+.window-control-button svg {
+    width: 16px;
+    height: 16px;
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+}
+
+.window-control-button:hover svg {
+    color: var(--text);
+}
+
+/* Adjust container to account for fixed title bar */
+.container {
+    margin-top: 45px; /* Same as title-bar height */
+    height: calc(100vh - 45px); /* Adjust height to account for title bar */
+}

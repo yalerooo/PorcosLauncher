@@ -10,7 +10,42 @@ const { getCustomMinecraftPath, getInstanceMinecraftPath, getActiveInstance, set
 const { getSettings, setSettings } = require('./storage');
 const { listInstances, createInstance, updateInstance, deleteInstance } = require('./instances');
 
-function setupIpcHandlers() {
+function setupIpcHandlers(mainWindow) {
+    // Window control handlers
+    ipcMain.handle('minimize-window', () => {
+        if (mainWindow) mainWindow.minimize();
+        return true;
+    });
+    
+    ipcMain.handle('maximize-window', () => {
+        if (mainWindow) {
+            if (mainWindow.isMaximized()) {
+                mainWindow.unmaximize();
+            } else {
+                mainWindow.maximize();
+            }
+        }
+        return true;
+    });
+
+    // Manejar cambios de estado de la ventana
+    mainWindow.on('maximize', () => {
+        mainWindow.webContents.send('window-state-change', true);
+    });
+
+    mainWindow.on('unmaximize', () => {
+        mainWindow.webContents.send('window-state-change', false);
+    });
+    
+    ipcMain.handle('close-window', () => {
+        if (mainWindow) {
+            // Primero cerramos la ventana principal
+            mainWindow.close();
+            // Luego forzamos el cierre completo de la aplicación
+            app.exit(0);
+        }
+        return true;
+    });
     // --- Get and set all settings ---
     ipcMain.handle('get-settings', async () => {
         return await getSettings();

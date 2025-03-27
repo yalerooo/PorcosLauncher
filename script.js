@@ -1,5 +1,31 @@
 // --- FILE: script.js ---
 document.addEventListener("DOMContentLoaded", async () => {
+    // Window control buttons functionality
+    document.getElementById('minimize-button').addEventListener('click', () => {
+        window.api.minimizeWindow();
+    });
+    
+    // Función para actualizar el icono de maximizar
+function updateMaximizeIcon(isMaximized) {
+    const maximizeButton = document.getElementById('maximize-button');
+    const maximizeIcon = maximizeButton.querySelector('img');
+    maximizeIcon.src = isMaximized ? 'assets/window-controls/maximize2.png' : 'assets/window-controls/maximize.png';
+}
+
+// Escuchar eventos de cambio de estado de la ventana
+window.api.onWindowStateChange((event, isMaximized) => {
+    const maximizeButton = document.getElementById('maximize-button');
+    const maximizeIcon = maximizeButton.querySelector('img');
+    maximizeIcon.src = isMaximized ? 'assets/window-controls/maximize2.png' : 'assets/window-controls/maximize.png';
+});
+
+document.getElementById('maximize-button').addEventListener('click', () => {
+    window.api.maximizeWindow();
+    });
+    
+    document.getElementById('close-button').addEventListener('click', () => {
+        window.api.closeWindow();
+    });
     // Configurar el manejador de eventos para la consola
     window.api.onConsoleOutput((event, data) => {
         addConsoleMessage(data.type, data.message);
@@ -35,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         appTitle.style.display = "inline";
 
         if (sectionId === "home") {
-            appTitle.textContent = "Porcos Launcher";
+            appTitle.textContent = "PorcosLauncher";
             versionInfoHeader.textContent = "";
         } else if (sectionId === "version-details") {
             if (selectedVersionButton) {

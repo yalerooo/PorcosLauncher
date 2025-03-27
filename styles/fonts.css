@@ -1,0 +1,20 @@
+@font-face {
+    font-family: 'Redaction';
+    src: url('../assets/fonts/redaction/redaction-35-latin-400-normal.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Redaction';
+    src: url('../assets/fonts/redaction/redaction-35-latin-700-normal.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'minecraft';
+    src: url('../assets/fonts/minecraft/MinecraftRegular-Bmg3.otf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}

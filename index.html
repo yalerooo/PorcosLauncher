@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Porcos Launcher</title>
+    <title>PorcosLauncher</title>
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/settings.css">
     <link rel="stylesheet" href="styles/version-details.css">
@@ -15,8 +15,24 @@
     <link rel="stylesheet" href="styles/instance-edit.css"> <!--NEW-->
     <link rel="stylesheet" href="styles/news.css"> <!--NEW-->
     <link rel="stylesheet" href="styles/console.css"> <!--NEW-->
+    <link rel="stylesheet" href="styles/title-bar.css">
 </head>
 <body>
+    <div class="title-bar">
+        <h2></h2>
+        <div class="window-controls">
+            <div class="window-control-button minimize" id="minimize-button">
+                <img src="assets/window-controls/minimize.png" alt="Minimize">
+            </div>
+            <div class="window-control-button maximize" id="maximize-button">
+                <img src="assets/window-controls/maximize.png" alt="Maximize">
+            </div>
+            <div class="window-control-button close" id="close-button">
+                <img src="assets/window-controls/close.png" alt="Close">
+            </div>
+        </div>
+    </div>
+    <div class="container">
     <!-- Sidebar de Instancias -->
     <aside class="instances-sidebar" id="instances-sidebar">
         <div class="launcher-logo" id="launcher-logo"></div>
@@ -172,5 +188,6 @@
 
     <script src="src/newsLoader.js"></script>
     <script src="script.js"></script>
+    </div>
 </body>
 </html>

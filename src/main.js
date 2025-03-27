@@ -37,6 +37,8 @@ async function createWindow() { //  Make createWindow async
             nodeIntegration: false,
             contextIsolation: true,
         },
+        frame: false,
+        autoHideMenuBar: true,
         icon: path.join(__dirname, "../assets/pig-logo.png"),
         backgroundColor: "#300a24",
         show: false  // Create window hidden
@@ -48,6 +50,9 @@ async function createWindow() { //  Make createWindow async
     const activeInstance = getActiveInstance();
     const minecraftPath = activeInstance ? getInstanceMinecraftPath(activeInstance) : getCustomMinecraftPath();
     console.log("Minecraft Path:", minecraftPath);
+    
+    // Setup IPC handlers with mainWindow reference
+    setupIpcHandlers(mainWindow);
 
     // Show window when ready-to-show, prevents visual flash
     mainWindow.on('ready-to-show', () => {
@@ -88,7 +93,6 @@ async function initializeInstances() {
 }
 
 app.whenReady().then(async () => {
-    setupIpcHandlers();
     await createWindow();
 
     app.on("activate", function () {

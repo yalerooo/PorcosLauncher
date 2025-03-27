@@ -2,6 +2,11 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
+    // Window control functions
+    minimizeWindow: () => ipcRenderer.invoke('minimize-window'),
+    maximizeWindow: () => ipcRenderer.invoke('maximize-window'),
+    closeWindow: () => ipcRenderer.invoke('close-window'),
+    onWindowStateChange: (callback) => ipcRenderer.on('window-state-change', callback),
     launchGame: (options) => ipcRenderer.invoke('launch-game', options),
     getVersions: (instanceId) => ipcRenderer.invoke('get-versions', instanceId),
     getMinecraftPath: (instanceId) => ipcRenderer.invoke('get-minecraft-path', instanceId),

@@ -1,6 +1,7 @@
 /* general.css */
 /* --- General Styles --- */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("fonts.css");
 
 :root {
   --primary: #ff6b8b;
@@ -30,11 +31,14 @@ body {
   padding: 0;
   background-color: var(--background);
   color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
   display: flex;
   height: 100vh;
   overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 h1,
@@ -107,7 +111,12 @@ button:hover {
   flex-direction: column;
   align-items: center;
   border-right: 1px solid rgba(255, 255, 255, 0.05);
-  z-index: 20;
+  z-index: 950; /* Mayor que top-bar (900) para estar por encima */
+  width: 70px; /* Ancho fijo para mantener consistencia */
+  position: fixed; /* Fijar posición */
+  top: 45px; /* Posición debajo de la barra de título */
+  bottom: 0;
+  left: 0;
 }
 
 .versions-sidebar {
@@ -120,10 +129,10 @@ button:hover {
   border-right: 1px solid rgba(255, 255, 255, 0.05);
   z-index: 10;
   transform: translateX(-100%);
-  position: absolute;
-  top: 0;
+  position: fixed;
+  top: 45px; /* 45px (title-bar) + 60px (top-bar) */
   bottom: 0;
-  left: 65px;
+  left: 70px;
   transition: transform 0.3s ease;
 }
 
@@ -181,6 +190,17 @@ button:hover {
 .version-logo::after {
   position: absolute;
   font-size: 14px;
+}
+
+#version-name-input {
+  font-family: 'Redaction', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 4px 0;
 }
 
 .instance-button:hover .instance-logo,
@@ -255,6 +275,7 @@ button:hover {
   overflow-x: hidden;
   background-color: var(--background);
   transition: margin-left 0.3s ease;
+  padding-top: 60px; /* Espacio para la barra superior fija */
 }
 
 /* When versions sidebar is active, push main content to the right */
@@ -262,8 +283,19 @@ button:hover {
   margin-left: 70px;
 }
 
+/* When versions sidebar is active, push top bar further to the right */
+.versions-sidebar.active ~ .main-content .top-bar {
+  left: 140px; /* 70px (instances-sidebar) + 70px (versions-sidebar) */
+  width: calc(100% - 140px); /* Ajustar ancho para compensar el margen izquierdo */
+}
+
 /* --- Top Bar --- */
 .top-bar {
+  position: fixed;
+  top: 45px; /* Posición debajo de la barra de título */
+  left: 70px; /* Espacio para instances-sidebar */
+  right: 0;
+  width: calc(100% - 70px); /* Ajustar ancho para compensar el margen izquierdo */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -272,6 +304,8 @@ button:hover {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 900; /* Menor que la barra de título pero mayor que otros elementos */
+  transition: left 0.3s ease, width 0.3s ease; /* Añadir transición suave */
 }
 
 .version-info {
@@ -281,6 +315,7 @@ button:hover {
 }
 
 .app-title {
+  font-family: minecraft ;
   font-size: 18px;
   font-weight: 600;
   margin: 0;
@@ -325,10 +360,19 @@ button:hover {
 .content-section {
   display: none;
   padding: 30px;
+  margin-top: 60px;
+  max-width: 95%; /* Espacio para la barra superior fija */
   width: 100%;
   box-sizing: border-box;
   margin: 0 auto;
+  margin-left: 70px; /* Espacio para la barra lateral de instancias */
   animation: fadeIn 0.3s ease;
+  transition: margin-left 0.3s ease;
+}
+
+/* When versions sidebar is active, push content section further to the right */
+.versions-sidebar.active ~ .main-content .content-section {
+  margin-left: 140px; /* 70px (instances-sidebar) + 70px (versions-sidebar) */
 }
 
 @keyframes fadeIn {
@@ -522,4 +566,25 @@ button:hover {
       font-size: 16px;
     }
   }
+}
+
+/* --- Scrollbar Styles --- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary);
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
