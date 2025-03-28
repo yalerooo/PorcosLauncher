@@ -1,5 +1,92 @@
 // --- FILE: script.js ---
 document.addEventListener("DOMContentLoaded", async () => {
+    // Definir temas predefinidos
+    const themes = {
+        default: {
+            primaryColor: '#ff6b8b',
+            primaryHoverColor: '#ff4d73',
+            secondaryColor: '#ff8fa3',
+            secondaryHoverColor: '#ff7a91'
+        },
+        blue: {
+            primaryColor: '#4285F4',
+            primaryHoverColor: '#2A75F3',
+            secondaryColor: '#5C9CFF',
+            secondaryHoverColor: '#4A8DF5'
+        },
+        green: {
+            primaryColor: '#34A853',
+            primaryHoverColor: '#2D9249',
+            secondaryColor: '#5CBA7D',
+            secondaryHoverColor: '#4CAA6D'
+        },
+        purple: {
+            primaryColor: '#9C27B0',
+            primaryHoverColor: '#7B1FA2',
+            secondaryColor: '#BA68C8',
+            secondaryHoverColor: '#AB47BC'
+        }
+    };
+    
+    // Configurar event listener para el selector de temas
+    document.getElementById('themeSelector').addEventListener('change', function() {
+        const selectedTheme = this.value;
+        applyTheme(selectedTheme);
+    });
+    
+    // Función para aplicar un tema
+    function applyTheme(themeName) {
+        if (themes[themeName]) {
+            const theme = themes[themeName];
+            
+            // Actualizar los valores de los inputs de color
+            document.getElementById('primaryColor').value = theme.primaryColor;
+            document.getElementById('primaryHoverColor').value = theme.primaryHoverColor;
+            document.getElementById('secondaryColor').value = theme.secondaryColor;
+            document.getElementById('secondaryHoverColor').value = theme.secondaryHoverColor;
+            
+            // Aplicar los colores al CSS
+            document.documentElement.style.setProperty('--primary', theme.primaryColor);
+            document.documentElement.style.setProperty('--primary-hover', theme.primaryHoverColor);
+            document.documentElement.style.setProperty('--secondary', theme.secondaryColor);
+            document.documentElement.style.setProperty('--secondary-hover', theme.secondaryHoverColor);
+            
+            // Guardar la configuración
+            const settings = {
+                theme: themeName,
+                primaryColor: theme.primaryColor,
+                primaryHoverColor: theme.primaryHoverColor,
+                secondaryColor: theme.secondaryColor,
+                secondaryHoverColor: theme.secondaryHoverColor
+            };
+            window.api.setSettings(settings);
+            
+            showStatus(`Theme changed to ${themeName}.`);
+        }
+    }
+    
+    // Configurar event listeners para los controles de color
+    document.getElementById('primaryColor').addEventListener('input', function() {
+        document.documentElement.style.setProperty('--primary', this.value);
+    });
+    
+    document.getElementById('primaryHoverColor').addEventListener('input', function() {
+        document.documentElement.style.setProperty('--primary-hover', this.value);
+    });
+    
+    document.getElementById('secondaryColor').addEventListener('input', function() {
+        document.documentElement.style.setProperty('--secondary', this.value);
+    });
+    
+    document.getElementById('secondaryHoverColor').addEventListener('input', function() {
+        document.documentElement.style.setProperty('--secondary-hover', this.value);
+    });
+    
+    // Configurar el botón de reset de colores
+    document.getElementById('resetColorsButton').addEventListener('click', function() {
+        document.getElementById('themeSelector').value = 'default';
+        applyTheme('default');
+    });
     // Window control buttons functionality
     document.getElementById('minimize-button').addEventListener('click', () => {
         window.api.minimizeWindow();
@@ -85,6 +172,33 @@ document.getElementById('maximize-button').addEventListener('click', () => {
             document.getElementById('minecraftURLInput').value = settings.minecraftURL;
             document.getElementById('minMemory').value = settings.minMemory;
             document.getElementById('maxMemory').value = settings.maxMemory;
+            
+            // Cargar tema seleccionado
+            if (settings.theme) {
+                document.getElementById('themeSelector').value = settings.theme;
+            }
+            
+            // Cargar colores primarios
+            if (settings.primaryColor) {
+                document.getElementById('primaryColor').value = settings.primaryColor;
+                document.documentElement.style.setProperty('--primary', settings.primaryColor);
+            }
+            
+            if (settings.primaryHoverColor) {
+                document.getElementById('primaryHoverColor').value = settings.primaryHoverColor;
+                document.documentElement.style.setProperty('--primary-hover', settings.primaryHoverColor);
+            }
+            
+            // Cargar colores secundarios
+            if (settings.secondaryColor) {
+                document.getElementById('secondaryColor').value = settings.secondaryColor;
+                document.documentElement.style.setProperty('--secondary', settings.secondaryColor);
+            }
+            
+            if (settings.secondaryHoverColor) {
+                document.getElementById('secondaryHoverColor').value = settings.secondaryHoverColor;
+                document.documentElement.style.setProperty('--secondary-hover', settings.secondaryHoverColor);
+            }
         } catch (error) {
             console.error("Error loading settings:", error);
             showStatus("Error loading settings.");
@@ -96,6 +210,12 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         try {
             const settings = await window.api.getSettings();
             document.getElementById("username").value = settings.username || "";
+            
+            // Añadir event listener para guardar automáticamente el username al escribir
+            document.getElementById("username").addEventListener("input", function() {
+                const username = this.value.trim();
+                window.api.setSettings({ username: username });
+            });
         } catch (error) {
             console.error("Error loading username:", error);
         }
@@ -108,8 +228,21 @@ document.getElementById('maximize-button').addEventListener('click', () => {
             minecraftURL: document.getElementById("minecraftURLInput").value,
             minMemory: document.getElementById("minMemory").value,
             maxMemory: document.getElementById("maxMemory").value,
+            theme: document.getElementById("themeSelector").value,
+            primaryColor: document.getElementById("primaryColor").value,
+            primaryHoverColor: document.getElementById("primaryHoverColor").value,
+            secondaryColor: document.getElementById("secondaryColor").value,
+            secondaryHoverColor: document.getElementById("secondaryHoverColor").value,
         }
         window.api.setSettings(settings);
+        
+        // Aplicar colores inmediatamente
+        document.documentElement.style.setProperty('--primary', settings.primaryColor);
+        document.documentElement.style.setProperty('--primary-hover', settings.primaryHoverColor);
+        document.documentElement.style.setProperty('--secondary', settings.secondaryColor);
+        document.documentElement.style.setProperty('--secondary-hover', settings.secondaryHoverColor);
+        
+        showStatus("Settings saved successfully.");
     }
 
     async function loadVersionName(versionId) {
@@ -476,8 +609,10 @@ document.getElementById('maximize-button').addEventListener('click', () => {
                 if (iconDataUrl) {
                     imagePreview.style.backgroundImage = `url('${iconDataUrl}')`;
                     imagePreview.classList.add('has-image');
-                    imagePreview.textContent = '';
-                    return;
+                    imagePreview.textContent = "";
+                } else {
+                    imagePreview.classList.remove('has-image');
+                    imagePreview.textContent = instance.name.substring(0, 2).toUpperCase();
                 }
             }
             
@@ -802,18 +937,6 @@ document.getElementById('maximize-button').addEventListener('click', () => {
                 <input type="text" id="modalCreateVersionName">
                 <label for="modalCreateVersionNumber">Versión de Minecraft:</label>
                 <select id="modalCreateVersionNumber"></select>
-                <label for="modalLoaderType">Tipo de Lanzador:</label>
-                <select id="modalLoaderType">
-                    <option value="vanilla">Vanilla</option>
-                    <option value="fabric">Fabric</option>
-                    <option value="forge">Forge</option>
-                    <option value="quilt">Quilt</option>
-                    <option value="neoforge">NeoForge</option>
-                </select>
-                <label for="modalLoaderVersion">Versión del Lanzador:</label>
-                <select id="modalLoaderVersion" disabled>
-                    <option>Selecciona una versión de Minecraft primero</option>
-                </select>
                 <div class="modal-buttons">
                     <button id="createVersion">Crear</button>
                     <button id="cancelVersionCreate">Cancelar</button>
@@ -832,52 +955,6 @@ document.getElementById('maximize-button').addEventListener('click', () => {
     function setupCreateModal() {
         document.getElementById('createVersion').addEventListener('click', createNewVersion);
         document.getElementById('cancelVersionCreate').addEventListener('click', closeCreateVersionModal);
-
-        const loaderTypeSelect = document.getElementById('modalLoaderType');
-        const loaderVersionSelect = document.getElementById('modalLoaderVersion');
-        const minecraftVersionSelect = document.getElementById('modalCreateVersionNumber');
-
-        minecraftVersionSelect.addEventListener('change', async function() {
-            const selectedVersion = this.value;
-            const selectedLoader = loaderTypeSelect.value;
-            
-            if (selectedLoader === 'vanilla') {
-                loaderVersionSelect.disabled = true;
-                loaderVersionSelect.innerHTML = '<option>No necesario para Vanilla</option>';
-                return;
-            }
-
-            loaderVersionSelect.disabled = false;
-            loaderVersionSelect.innerHTML = '<option>Cargando versiones...</option>';
-
-            try {
-                const versions = await window.api.getLoaderVersions(selectedLoader, selectedVersion);
-                loaderVersionSelect.innerHTML = versions.map(version => 
-                    `<option value="${version}">${version}</option>`
-                ).join('');
-            } catch (error) {
-                console.error('Error loading loader versions:', error);
-                loaderVersionSelect.innerHTML = '<option>Error al cargar versiones</option>';
-            }
-        });
-
-        loaderTypeSelect.addEventListener('change', function() {
-            const selectedLoader = this.value;
-            const selectedVersion = minecraftVersionSelect.value;
-
-            if (selectedLoader === 'vanilla') {
-                loaderVersionSelect.disabled = true;
-                loaderVersionSelect.innerHTML = '<option>No necesario para Vanilla</option>';
-                return;
-            }
-
-            if (selectedVersion) {
-                minecraftVersionSelect.dispatchEvent(new Event('change'));
-            } else {
-                loaderVersionSelect.disabled = true;
-                loaderVersionSelect.innerHTML = '<option>Selecciona una versión de Minecraft primero</option>';
-            }
-        });
 
         const modal = document.getElementById("versionCreateModal");
         window.onclick = (event) => {
@@ -909,16 +986,9 @@ document.getElementById('maximize-button').addEventListener('click', () => {
     async function createNewVersion() {
         const versionName = document.getElementById('modalCreateVersionName').value.trim();
         const versionNumber = document.getElementById('modalCreateVersionNumber').value;
-        const loaderType = document.getElementById('modalLoaderType').value;
-        const loaderVersion = document.getElementById('modalLoaderVersion').value;
 
         if (!versionName || !versionNumber) {
             showStatus("Por favor, ingresa nombre y versión.");
-            return;
-        }
-
-        if (loaderType !== 'vanilla' && (!loaderVersion || loaderVersion.includes('Error') || loaderVersion.includes('Selecciona'))) {
-            showStatus("Por favor, selecciona una versión válida del lanzador.");
             return;
         }
 

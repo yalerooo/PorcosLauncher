@@ -20,6 +20,26 @@ const schema = {
       type: 'string',
       default: '4G',
     },
+    theme: {
+      type: 'string',
+      default: 'default',
+    },
+    primaryColor: {
+      type: 'string',
+      default: '#ff6b8b', // Color primario por defecto (rosa)
+    },
+    primaryHoverColor: {
+      type: 'string',
+      default: '#ff4d73', // Color primario hover por defecto
+    },
+    secondaryColor: {
+      type: 'string',
+      default: '#ff8fa3', // Color secundario por defecto (rosa)
+    },
+    secondaryHoverColor: {
+      type: 'string',
+      default: '#ff7a91', // Color secundario hover por defecto
+    },
     windowState: {
       // Add window state
       type: 'object',
@@ -47,6 +67,11 @@ const schema = {
       minecraftURL: store.get('minecraftURL'),
       minMemory: store.get('minMemory'),
       maxMemory: store.get('maxMemory'),
+      theme: store.get('theme'),
+      primaryColor: store.get('primaryColor'),
+      primaryHoverColor: store.get('primaryHoverColor'),
+      secondaryColor: store.get('secondaryColor'),
+      secondaryHoverColor: store.get('secondaryHoverColor'),
     };
   }
   
@@ -66,6 +91,21 @@ const schema = {
     }
     if (settings.maxMemory !== undefined) {
       store.set('maxMemory', settings.maxMemory);
+    }
+    if (settings.theme !== undefined) {
+      store.set('theme', settings.theme);
+    }
+    if (settings.primaryColor !== undefined) {
+      store.set('primaryColor', settings.primaryColor);
+    }
+    if (settings.primaryHoverColor !== undefined) {
+      store.set('primaryHoverColor', settings.primaryHoverColor);
+    }
+    if (settings.secondaryColor !== undefined) {
+      store.set('secondaryColor', settings.secondaryColor);
+    }
+    if (settings.secondaryHoverColor !== undefined) {
+      store.set('secondaryHoverColor', settings.secondaryHoverColor);
     }
   }
   

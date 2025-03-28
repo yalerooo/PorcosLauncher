@@ -19,7 +19,10 @@
 </head>
 <body>
     <div class="title-bar">
-        <h2></h2>
+        <div class="title-content">
+            <div class="title-logo"></div>
+            <h2>PorcosLauncher</h2>
+        </div>
         <div class="window-controls">
             <div class="window-control-button minimize" id="minimize-button">
                 <img src="assets/window-controls/minimize.png" alt="Minimize">
@@ -153,8 +156,6 @@
             </div>
 
             <div class="update-section">
-
-
                 <div class="update-row">
                     <label for="minecraftURLInput">Update Minecraft:</label>
                     <div class="input-container">
@@ -162,6 +163,42 @@
                         <button id="updateMinecraftButton" onclick="updateMinecraft()" class="update-button">Update</button>
                     </div>
                 </div>
+            </div>
+
+            <div class="color-settings-section">
+                <h3>Color Settings</h3>
+                
+                <div class="color-setting">
+                    <label for="themeSelector">Theme:</label>
+                    <select id="themeSelector" class="theme-selector">
+                        <option value="default">Default (Pink)</option>
+                        <option value="blue">Blue</option>
+                        <option value="green">Green</option>
+                        <option value="purple">Purple</option>
+                    </select>
+                </div>
+                
+                <div class="color-setting">
+                    <label for="primaryColor">Primary Color:</label>
+                    <input type="color" id="primaryColor" class="color-picker">
+                </div>
+
+                <div class="color-setting">
+                    <label for="primaryHoverColor">Primary Hover Color:</label>
+                    <input type="color" id="primaryHoverColor" class="color-picker">
+                </div>
+                
+                <div class="color-setting">
+                    <label for="secondaryColor">Secondary Color:</label>
+                    <input type="color" id="secondaryColor" class="color-picker">
+                </div>
+
+                <div class="color-setting">
+                    <label for="secondaryHoverColor">Secondary Hover Color:</label>
+                    <input type="color" id="secondaryHoverColor" class="color-picker">
+                </div>
+
+                <button id="resetColorsButton" class="reset-button">Reset to Default</button>
             </div>
 
             <div class="settings-buttons">

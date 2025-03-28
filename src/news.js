@@ -231,7 +231,7 @@ async function loadNews() {
             // Filter major updates by type
             const majorUpdates = newsData
                 .filter(item => item.type === 'major_update')
-                .slice(0, 20)
+                .slice(0, 100)
                 .reverse(); // Invertir el orden para que las más recientes aparezcan primero
                 
             if (majorUpdates.length > 0) {
