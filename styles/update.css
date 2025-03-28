@@ -1,0 +1,124 @@
+/* --- FILE: styles/update.css --- */
+.update-progress-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--surface);
+    border-radius: var(--border-radius);
+    padding: 15px 20px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.update-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.update-progress-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    margin: 0;
+}
+
+.update-progress-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    transition: var(--transition);
+}
+
+.update-progress-close:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+}
+
+.update-progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background-color: var(--surface-light);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.update-progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: var(--primary);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.update-progress-status {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 5px 0 0 0;
+}
+
+.update-progress-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.update-progress-button {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 8px 15px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.update-progress-button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.update-progress-button.secondary {
+    background-color: var(--surface-light);
+    color: var(--text);
+}
+
+.update-progress-button.secondary:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.update-available-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 10px;
+    height: 10px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    border: 2px solid var(--surface);
+    display: none;
+}
+
+.update-available-badge.visible {
+    display: block;
+}

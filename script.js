@@ -1,5 +1,7 @@
 // --- FILE: script.js ---
 document.addEventListener("DOMContentLoaded", async () => {
+    // Configurar manejadores de eventos para actualizaciones
+    setupUpdateHandlers(); // Configura los manejadores para el sistema de actualización automática
     // Definir temas predefinidos
     const themes = {
         default: {
@@ -86,6 +88,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById('resetColorsButton').addEventListener('click', function() {
         document.getElementById('themeSelector').value = 'default';
         applyTheme('default');
+    });
+    
+    // Configurar el botón de verificar actualizaciones
+    document.getElementById('checkUpdatesButton').addEventListener('click', async function() {
+        showStatus('Verificando actualizaciones...');
+        try {
+            const updateInfo = await window.api.checkForUpdates();
+            if (!updateInfo.hasUpdate) {
+                showStatus('El launcher está actualizado', 5000);
+            }
+        } catch (error) {
+            showStatus(`Error al verificar actualizaciones: ${error.message}`, 5000);
+        }
     });
     // Window control buttons functionality
     document.getElementById('minimize-button').addEventListener('click', () => {
@@ -349,6 +364,44 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         setTimeout(() => {
             statusElement.style.display = "none";
         }, duration);
+    }
+    
+    // Configurar manejadores de eventos para actualizaciones
+    function setupUpdateHandlers() {
+        const updateProgressContainer = document.getElementById('updateProgressContainer');
+        const updateProgressBar = document.getElementById('updateProgressBar');
+        const updateProgressStatus = document.getElementById('updateProgressStatus');
+        const closeUpdateProgress = document.getElementById('closeUpdateProgress');
+        const cancelUpdateButton = document.getElementById('cancelUpdateButton');
+        
+        // Mostrar el contenedor de progreso de actualización
+        window.api.onShowUpdateProgress(() => {
+            updateProgressContainer.style.display = 'flex';
+            updateProgressBar.style.width = '0%';
+            updateProgressStatus.textContent = 'Iniciando descarga...';
+        });
+        
+        // Actualizar el progreso de la descarga
+        window.api.onUpdateDownloadProgress(({ progress }) => {
+            updateProgressBar.style.width = `${progress}%`;
+            updateProgressStatus.textContent = `Descargando: ${progress.toFixed(1)}%`;
+        });
+        
+        // Manejar errores de descarga
+        window.api.onUpdateDownloadError(({ error }) => {
+            updateProgressStatus.textContent = `Error: ${error}`;
+            updateProgressBar.style.backgroundColor = 'var(--danger)';
+        });
+        
+        // Cerrar el contenedor de progreso
+        closeUpdateProgress.addEventListener('click', () => {
+            updateProgressContainer.style.display = 'none';
+        });
+        
+        // Cancelar la actualización
+        cancelUpdateButton.addEventListener('click', () => {
+            updateProgressContainer.style.display = 'none';
+        });
     }
 
     // --- Instancias ---

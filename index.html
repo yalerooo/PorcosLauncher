@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="styles/news.css"> <!--NEW-->
     <link rel="stylesheet" href="styles/console.css"> <!--NEW-->
     <link rel="stylesheet" href="styles/title-bar.css">
+    <link rel="stylesheet" href="styles/update.css"> <!--NEW-->
 </head>
 <body>
     <div class="title-bar">
@@ -200,6 +201,15 @@
 
                 <button id="resetColorsButton" class="reset-button">Reset to Default</button>
             </div>
+            
+            <h3>Actualizaciones</h3>
+            <div class="color-setting">
+                <label>Versión del Launcher:</label>
+                <span id="launcherVersion">1.0.0</span>
+            </div>
+            <div class="color-setting">
+                <button id="checkUpdatesButton" class="reset-button">Verificar Actualizaciones</button>
+            </div>
 
             <div class="settings-buttons">
                 <button id="saveSettingsButton" onclick="saveSettings()">Save Settings</button>
@@ -220,6 +230,26 @@
                 <button id="createInstance">Create</button>
                 <button id="cancelInstanceCreate">Cancel</button>
             </div>
+        </div>
+    </div>
+    
+    <!-- Update Progress Container -->
+    <div class="update-progress-container" id="updateProgressContainer">
+        <div class="update-progress-header">
+            <h3 class="update-progress-title">Descargando actualización</h3>
+            <button class="update-progress-close" id="closeUpdateProgress">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="update-progress-bar-container">
+            <div class="update-progress-bar" id="updateProgressBar"></div>
+        </div>
+        <p class="update-progress-status" id="updateProgressStatus">Iniciando descarga...</p>
+        <div class="update-progress-actions">
+            <button class="update-progress-button secondary" id="cancelUpdateButton">Cancelar</button>
         </div>
     </div>
 

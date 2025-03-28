@@ -9,6 +9,7 @@ const path = require('path');
 const { getCustomMinecraftPath, getInstanceMinecraftPath, getActiveInstance, setActiveInstance } = require('./config');
 const { getSettings, setSettings } = require('./storage');
 const { listInstances, createInstance, updateInstance, deleteInstance } = require('./instances');
+const { checkForUpdates, showUpdateDialog, downloadUpdate } = require('./updater');
 
 function setupIpcHandlers(mainWindow) {
     // Window control handlers
@@ -390,6 +391,23 @@ function setupIpcHandlers(mainWindow) {
         } catch (error) {
             console.error('Error reading instance icon:', error);
             return null;
+        }
+    });
+    
+    // --- Update handlers ---
+    ipcMain.handle("check-for-updates", async () => {
+        try {
+            const currentVersion = app.getVersion();
+            const updateInfo = await checkForUpdates(currentVersion);
+            
+            if (updateInfo.hasUpdate) {
+                showUpdateDialog(mainWindow, updateInfo);
+            }
+            
+            return updateInfo;
+        } catch (error) {
+            console.error("Error checking for updates:", error);
+            return { hasUpdate: false, error: error.message };
         }
     });
 }

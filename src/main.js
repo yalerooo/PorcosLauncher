@@ -7,6 +7,7 @@ const { getCustomMinecraftPath, getInstanceMinecraftPath, getActiveInstance } = 
 const { getWindowState, setWindowState } = require('./storage'); // Import window state functions
 const { initializeMinecraftFolder } = require('./minecraftInitializer'); // Import minecraft initializer
 const { listInstances, createInstance } = require('./instances'); // Import instances functions
+const { checkForUpdates, showUpdateDialog } = require('./updater'); // Import updater functions
 
 
 let mainWindow;
@@ -94,6 +95,22 @@ async function initializeInstances() {
 
 app.whenReady().then(async () => {
     await createWindow();
+
+    // Verificar actualizaciones al iniciar
+    try {
+        const currentVersion = app.getVersion();
+        console.log(`Versión actual del launcher: ${currentVersion}`);
+        
+        const updateInfo = await checkForUpdates(currentVersion);
+        if (updateInfo.hasUpdate) {
+            console.log(`Nueva versión disponible: ${updateInfo.latestVersion}`);
+            showUpdateDialog(mainWindow, updateInfo);
+        } else {
+            console.log('El launcher está actualizado');
+        }
+    } catch (error) {
+        console.error('Error al verificar actualizaciones:', error);
+    }
 
     app.on("activate", function () {
         if (BrowserWindow.getAllWindows().length === 0) createWindow();

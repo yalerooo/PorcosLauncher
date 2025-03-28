@@ -44,5 +44,11 @@ contextBridge.exposeInMainWorld('api', {
     
     // Console output handlers
     onConsoleOutput: (callback) => ipcRenderer.on('console-output', callback),
-    offConsoleOutput: (callback) => ipcRenderer.removeListener('console-output', callback)
+    offConsoleOutput: (callback) => ipcRenderer.removeListener('console-output', callback),
+    
+    // Update handlers
+    onShowUpdateProgress: (callback) => ipcRenderer.on('show-update-progress', callback),
+    onUpdateDownloadProgress: (callback) => ipcRenderer.on('update-download-progress', callback),
+    onUpdateDownloadError: (callback) => ipcRenderer.on('update-download-error', callback),
+    checkForUpdates: () => ipcRenderer.invoke('check-for-updates')
 });
