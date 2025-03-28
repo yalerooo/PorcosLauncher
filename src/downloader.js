@@ -107,6 +107,9 @@ async function downloadAndExtract(url, destinationDir, keepArchive = false, save
           } catch (error) {
             reject(new Error(`Extraction failed: ${error.message}`));
           }
+        } else if (state === 'interrupted') {
+          console.log('Download interrupted, retrying...');
+          item.resume();
         } else {
           reject(new Error(`Download failed: ${state}`));
         }
@@ -244,17 +247,17 @@ app.on('will-download', (event, item, webContents) => {
     }
   });
 
-  item.once('done', (event, state) => {
+  item.once('done', async (event, state) => {
     if (state === 'completed') {
       console.log('Descarga completada en:', downloadPath);
       if (mainWindow && mainWindow.webContents) {
         mainWindow.webContents.send('download-status', `Descarga completada en: ${downloadPath}`);
       }
+    } else if (state === 'interrupted') {
+      console.log('Download interrupted, retrying...');
+      item.resume();
     } else {
-      console.log(`Descarga fallida: ${state}`);
-      if (mainWindow && mainWindow.webContents) {
-        mainWindow.webContents.send('download-status', `Descarga fallida: ${state}`);
-      }
+      reject(new Error(`Download failed: ${state}`));
     }
   });
 

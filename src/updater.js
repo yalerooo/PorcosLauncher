@@ -6,7 +6,7 @@ const path = require('path');
 const { downloadAndExtract } = require('./downloader');
 
 // URL del archivo JSON que contiene la información de la última versión
-const UPDATE_URL = 'https://raw.githubusercontent.com/yalerooo/PorcosLauncher/main/version.json';
+const UPDATE_URL = 'https://raw.githubusercontent.com/yalerooo/PorcosLauncher/refs/heads/main/version.json';
 
 /**
  * Compara dos versiones en formato semántico (x.y.z)
