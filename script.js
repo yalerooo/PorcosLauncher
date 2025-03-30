@@ -2,6 +2,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     // Configurar manejadores de eventos para actualizaciones
     setupUpdateHandlers(); // Configura los manejadores para el sistema de actualización automática
+    setupMinecraftUpdateHandlers(); // Configura los manejadores para la actualización de Minecraft
     // Definir temas predefinidos
     const themes = {
         default: {
@@ -401,6 +402,79 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         // Cancelar la actualización
         cancelUpdateButton.addEventListener('click', () => {
             updateProgressContainer.style.display = 'none';
+        });
+    }
+    
+    // Configurar manejadores para la actualización de Minecraft
+    function setupMinecraftUpdateHandlers() {
+        const updateProgressContainer = document.getElementById('updateProgressContainer');
+        const updateProgressBar = document.getElementById('updateProgressBar');
+        const updateProgressStatus = document.getElementById('updateProgressStatus');
+        const closeUpdateProgress = document.getElementById('closeUpdateProgress');
+        const cancelUpdateButton = document.getElementById('cancelUpdateButton');
+        
+        // Cerrar el contenedor de progreso
+        closeUpdateProgress.addEventListener('click', () => {
+            updateProgressContainer.style.display = 'none';
+            // Intentar eliminar los event listeners de progreso
+            try {
+                window.api.offDownloadProgress();
+            } catch (error) {
+                console.error('Error removing download progress listeners:', error);
+            }
+        });
+        
+        // Cancelar la actualización
+        cancelUpdateButton.addEventListener('click', () => {
+            updateProgressContainer.style.display = 'none';
+            // Intentar eliminar los event listeners de progreso
+            try {
+                window.api.offDownloadProgress();
+            } catch (error) {
+                console.error('Error removing download progress listeners:', error);
+            }
+            showStatus('Update cancelled');
+        });
+        
+        // Manejar eventos de progreso de descarga y extracción
+        window.api.onDownloadProgress((event, data) => {
+            if (data.progress === 'extracting') {
+                // Estamos extrayendo, mostrar spinner y mensaje de instalación
+                updateProgressBar.style.display = 'none';
+                
+                // Crear spinner si no existe
+                let spinner = document.querySelector('.update-progress-spinner');
+                if (!spinner) {
+                    spinner = document.createElement('div');
+                    spinner.className = 'loading-spinner update-progress-spinner';
+                    updateProgressBar.parentNode.insertBefore(spinner, updateProgressBar);
+                }
+                
+                // Mostrar spinner
+                spinner.style.display = 'block';
+                updateProgressStatus.textContent = 'Installing...';
+            } else if (data.progress === 'completed') {
+                // Extracción completada
+                const spinner = document.querySelector('.update-progress-spinner');
+                if (spinner) {
+                    spinner.style.display = 'none';
+                }
+                updateProgressStatus.textContent = 'Installation completed!';
+                
+                // Mostrar el botón de cerrar
+                setTimeout(() => {
+                    updateProgressContainer.style.display = 'none';
+                }, 2000);
+            } else {
+                // Progreso normal de descarga
+                updateProgressBar.style.display = 'block';
+                const spinner = document.querySelector('.update-progress-spinner');
+                if (spinner) {
+                    spinner.style.display = 'none';
+                }
+                updateProgressBar.style.width = `${data.progress}%`;
+                updateProgressStatus.textContent = `Descargando: ${data.progress.toFixed(1)}%`;
+            }
         });
     }
 
@@ -1424,7 +1498,37 @@ document.getElementById('maximize-button').addEventListener('click', () => {
 
     async function performMinecraftUpdate(downloadURL, instanceId) {
         showStatus("Updating Minecraft...");
+        
+        // Show the update progress container
+        const updateProgressContainer = document.getElementById('updateProgressContainer');
+        const updateProgressBar = document.getElementById('updateProgressBar');
+        const updateProgressStatus = document.getElementById('updateProgressStatus');
+        
+        // Update the title and initial status
+        document.querySelector('.update-progress-title').textContent = 'Updating Minecraft';
+        updateProgressStatus.textContent = 'Starting download...';
+        updateProgressBar.style.width = '0%';
+        updateProgressContainer.style.display = 'flex';
+        
+        // Set up progress event handler
+        const handleProgress = (event, data) => {
+            const progress = data.progress;
+            updateProgressBar.style.width = `${progress}%`;
+            updateProgressStatus.textContent = `Downloading: ${progress.toFixed(1)}%`;
+        };
+        
+        // Register the event handler
+        window.api.onDownloadProgress(handleProgress);
+        
+        // Start the update process
         const result = await window.api.updateMinecraft(downloadURL, instanceId);
+        
+        // Remove the event handler
+        window.api.offDownloadProgress(handleProgress);
+        
+        // Hide the progress container
+        updateProgressContainer.style.display = 'none';
+        
         if (result.success) {
             showStatus("Minecraft updated successfully!");
             loadVersions(instanceId);

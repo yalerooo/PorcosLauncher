@@ -5,7 +5,12 @@ const { URL } = require('url');
 const AdmZip = require('adm-zip');
 const unrar = require('node-unrar-js');
 
-async function extractRarFile(rarBuffer, destinationDir, keepArchive, savePath) {
+async function extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, progressCallback) {
+    // Notificar que estamos extrayendo
+    if (progressCallback) {
+        progressCallback('extracting');
+    }
+    
     const extractor = await unrar.createExtractorFromData({ data: rarBuffer });
     const list = extractor.getFileList();
     const fileNames = [];
@@ -29,6 +34,12 @@ async function extractRarFile(rarBuffer, destinationDir, keepArchive, savePath) 
     if (!keepArchive) {
         fs.unlinkSync(savePath);
     }
+    
+    // Notificar que la extracción ha completado
+    if (progressCallback) {
+        progressCallback('completed');
+    }
+    
     return { success: true, path: destinationDir };
 }
 
@@ -67,6 +78,10 @@ async function downloadAndExtract(url, destinationDir, keepArchive = false, save
                         if (signature.startsWith('4D5A')) {
                             console.log('Detected EXE file, keeping for installation...');
                             try {
+                                // Notificar que la descarga ha completado
+                                if (progressCallback) {
+                                    progressCallback('completed');
+                                }
                                 // Don't execute the file, just keep it for later installation
                                 resolve({ success: true, path: destinationDir, filePath: savePath, isExecutable: true });
                             } catch (error) {
@@ -75,11 +90,22 @@ async function downloadAndExtract(url, destinationDir, keepArchive = false, save
                         } else if (['504B0304', '504B0506'].includes(signature)) {
                             console.log('Extracting ZIP file...');
                             try {
+                                // Notificar que estamos extrayendo
+                                if (progressCallback) {
+                                    progressCallback('extracting');
+                                }
+                                
                                 const zip = new AdmZip(savePath);
                                 zip.extractAllTo(destinationDir, true);
                                 if (!keepArchive) {
                                     fs.unlinkSync(savePath);
                                 }
+                                
+                                // Notificar que la extracción ha completado
+                                if (progressCallback) {
+                                    progressCallback('completed');
+                                }
+                                
                                 resolve({ success: true, path: destinationDir });
                             } catch (error) {
                                 throw new Error(`ZIP extraction failed: ${error.message}`);
@@ -88,7 +114,7 @@ async function downloadAndExtract(url, destinationDir, keepArchive = false, save
                             console.log('Extracting RAR file...');
                             try {
                                 const rarBuffer = fs.readFileSync(savePath);
-                                const result = await extractRarFile(rarBuffer, destinationDir, keepArchive, savePath);
+                                const result = await extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, progressCallback);
                                 resolve(result);
                             } catch (error) {
                                 throw new Error(`RAR extraction failed: ${error.message}`);

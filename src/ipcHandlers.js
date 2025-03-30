@@ -86,7 +86,15 @@ function setupIpcHandlers(mainWindow) {
     ipcMain.handle("update-minecraft", async (event, downloadURL, instanceId) => {
         try {
             const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
-            const result = await downloadAndExtract(downloadURL, minecraftPath);
+            
+            // Add progress callback to send download progress to renderer
+            const progressCallback = (progress) => {
+                // Si progress es un número, es el progreso de descarga
+                // Si es 'extracting' o 'completed', es el estado de extracción
+                event.sender.send('download-progress', { progress });
+            };
+            
+            const result = await downloadAndExtract(downloadURL, minecraftPath, false, null, progressCallback);
             return result;
         } catch (error) {
             console.error("Error in updateMinecraft:", error);
