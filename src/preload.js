@@ -20,6 +20,8 @@ contextBridge.exposeInMainWorld('api', {
     getVersionManifest: () => ipcRenderer.invoke('get-version-manifest'),
     getVersionImage: (versionId, instanceId) => ipcRenderer.invoke('get-version-image', versionId, instanceId),
     setVersionImage: (versionId, imageDataURL, instanceId) => ipcRenderer.invoke('set-version-image', versionId, imageDataURL, instanceId),
+    getVersionBackground: (versionId, instanceId) => ipcRenderer.invoke('get-version-background', versionId, instanceId),
+    setVersionBackground: (versionId, imageDataURL, instanceId) => ipcRenderer.invoke('set-version-background', versionId, imageDataURL, instanceId),
     deleteVersion: (versionId, instanceId) => ipcRenderer.invoke('delete-version', versionId, instanceId),
     getDefaultVersionImages: () => ipcRenderer.invoke('get-default-version-images'),
     removeVersionImage: (versionId, instanceId) => ipcRenderer.invoke('remove-version-image', versionId, instanceId),

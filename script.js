@@ -273,9 +273,34 @@ document.getElementById('maximize-button').addEventListener('click', () => {
                 selectedVersionButton.title = storedName || "Installation Name";
                 updateVersionLogo(selectedVersionButton, versionId);
             }
+            
+            // Cargar el fondo personalizado para esta versión
+            await loadVersionBackground(versionId);
         } catch (error) {
             console.error("Error loading version name:", error);
             showStatus("Error loading version name.");
+        }
+    }
+    
+    async function loadVersionBackground(versionId) {
+        try {
+            const versionDetailsElement = document.getElementById("version-details");
+            const backgroundImage = await window.api.getVersionBackground(versionId, activeInstanceId);
+            
+            if (backgroundImage) {
+                versionDetailsElement.style.backgroundImage = `url('${backgroundImage}')`;
+                versionDetailsElement.classList.remove('no-background');
+            } else {
+                // Si no hay imagen de fondo, usar el gradiente predeterminado
+                versionDetailsElement.style.backgroundImage = '';
+                versionDetailsElement.classList.add('no-background');
+            }
+        } catch (error) {
+            console.error("Error loading version background:", error);
+            // En caso de error, usar el fondo predeterminado
+            const versionDetailsElement = document.getElementById("version-details");
+            versionDetailsElement.style.backgroundImage = '';
+            versionDetailsElement.classList.add('no-background');
         }
     }
 
@@ -1195,8 +1220,10 @@ document.getElementById('maximize-button').addEventListener('click', () => {
                 
                 <div class="version-image-preview" id="versionImagePreview"></div>
                 
-                <label for="modalEditVersionName">Name:</label>
-                <input type="text" id="modalEditVersionName" placeholder="Enter version name">
+                <div class="input-group">
+                    <label for="modalEditVersionName">Version Name:</label>
+                    <input type="text" id="modalEditVersionName" placeholder="Enter version name">
+                </div>
                 
                 <div class="image-upload-container">
                     <label for="versionImageUpload">Version Image:</label>
@@ -1206,6 +1233,21 @@ document.getElementById('maximize-button').addEventListener('click', () => {
                 <label>Or select from default images:</label>
                 <div class="default-images-container" id="defaultImagesContainer">
                     <!-- Default images will be loaded here -->
+                </div>
+                
+                <div class="background-section">
+                    <h3>Background Image</h3>
+                    <div class="version-background-preview" id="versionBackgroundPreview"></div>
+                    
+                    <div class="image-upload-container">
+                        <label for="versionBackgroundUpload">Background Image:</label>
+                        <input type="file" id="versionBackgroundUpload" accept="image/*">
+                    </div>
+                    
+                    <label>Or select from default backgrounds:</label>
+                    <div class="default-images-container" id="defaultBackgroundsContainer">
+                        <!-- Default backgrounds will be loaded here -->
+                    </div>
                 </div>
                 
                 <div class="modal-buttons">
@@ -1225,9 +1267,11 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         document.getElementById('cancelVersionEdit').addEventListener('click', closeVersionEditModal);
         document.getElementById('deleteVersion').addEventListener('click', deleteSelectedVersion);
         document.getElementById('versionImageUpload').addEventListener('change', handleVersionImageUpload);
+        document.getElementById('versionBackgroundUpload').addEventListener('change', handleVersionBackgroundUpload);
         
         // Load default images
         loadDefaultVersionImages();
+        loadDefaultBackgroundImages();
         
         const modal = document.getElementById("versionEditModal");
         window.onclick = (event) => {
@@ -1254,6 +1298,18 @@ document.getElementById('maximize-button').addEventListener('click', () => {
                 imagePreview.style.backgroundImage = '';
                 imagePreview.textContent = versionName.substring(0, 2).toUpperCase();
             }
+            
+            // Get current version background
+            const backgroundPath = await window.api.getVersionBackground(versionId, activeInstanceId);
+            const backgroundPreview = document.getElementById('versionBackgroundPreview');
+            
+            if (backgroundPath) {
+                backgroundPreview.style.backgroundImage = `url('${backgroundPath}')`;
+                backgroundPreview.textContent = '';
+            } else {
+                backgroundPreview.style.backgroundImage = '';
+                backgroundPreview.textContent = 'No background image selected';
+            }
         } catch (error) {
             console.error("Error loading version data for edit:", error);
             showStatus("Error loading version data.");
@@ -1276,6 +1332,25 @@ document.getElementById('maximize-button').addEventListener('click', () => {
             });
         }).catch(error => {
             console.error("Error loading default images:", error);
+        });
+    }
+    
+    function loadDefaultBackgroundImages() {
+        const container = document.getElementById('defaultBackgroundsContainer');
+        container.innerHTML = '';
+        
+        // Load images from assets/versions folder (reutilizamos las mismas imágenes por ahora)
+        window.api.getDefaultVersionImages().then(images => {
+            images.forEach(image => {
+                const imgElement = document.createElement('img');
+                imgElement.src = image.dataURL;
+                imgElement.classList.add('default-version-image');
+                imgElement.title = image.name;
+                imgElement.addEventListener('click', () => selectDefaultBackground(image.dataURL));
+                container.appendChild(imgElement);
+            });
+        }).catch(error => {
+            console.error("Error loading default background images:", error);
         });
     }
     
@@ -1308,12 +1383,49 @@ document.getElementById('maximize-button').addEventListener('click', () => {
                 imagePreview.textContent = '';
                 
                 // Remove selection from default images
-                document.querySelectorAll('.default-version-image').forEach(img => {
+                document.querySelectorAll('#defaultImagesContainer .default-version-image').forEach(img => {
                     img.classList.remove('selected-image');
                 });
             };
             reader.readAsDataURL(file);
         }
+    }
+    
+    function handleVersionBackgroundUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Update preview
+                const backgroundPreview = document.getElementById('versionBackgroundPreview');
+                backgroundPreview.style.backgroundImage = `url('${e.target.result}')`;
+                backgroundPreview.textContent = '';
+                
+                // Remove selection from default backgrounds
+                document.querySelectorAll('#defaultBackgroundsContainer .default-version-image').forEach(img => {
+                    img.classList.remove('selected-image');
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    function selectDefaultBackground(imagePath) {
+        // Remove selection from all images
+        document.querySelectorAll('#defaultBackgroundsContainer .default-version-image').forEach(img => {
+            img.classList.remove('selected-image');
+        });
+        
+        // Add selection to clicked image
+        const clickedImage = Array.from(document.querySelectorAll('#defaultBackgroundsContainer .default-version-image')).find(img => img.src === imagePath);
+        if (clickedImage) {
+            clickedImage.classList.add('selected-image');
+        }
+        
+        // Update preview
+        const backgroundPreview = document.getElementById('versionBackgroundPreview');
+        backgroundPreview.style.backgroundImage = `url('${imagePath}')`;
+        backgroundPreview.textContent = '';
     }
     
     async function saveVersionChanges() {
@@ -1329,22 +1441,58 @@ document.getElementById('maximize-button').addEventListener('click', () => {
             
             // Save image if selected
             const imageUpload = document.getElementById('versionImageUpload').files[0];
-            const selectedDefaultImage = document.querySelector('.default-version-image.selected-image');
+            const selectedDefaultImage = document.querySelector('#defaultImagesContainer .default-version-image.selected-image');
             
+            // Save background if selected
+            const backgroundUpload = document.getElementById('versionBackgroundUpload').files[0];
+            const selectedDefaultBackground = document.querySelector('#defaultBackgroundsContainer .default-version-image.selected-image');
+            
+            // Variables para controlar el flujo asíncrono
+            let pendingOperations = 0;
+            let completedOperations = 0;
+            
+            // Función para verificar si todas las operaciones han terminado
+            function checkCompletion() {
+                completedOperations++;
+                if (completedOperations === pendingOperations) {
+                    finishSaving();
+                }
+            }
+            
+            // Procesar imagen de versión
             if (imageUpload) {
-                // For file uploads, create a FileReader to get the data URL
+                pendingOperations++;
                 const reader = new FileReader();
                 reader.onload = async function(e) {
                     await window.api.setVersionImage(currentEditingVersion, e.target.result, activeInstanceId);
-                    finishSaving();
+                    checkCompletion();
                 };
                 reader.readAsDataURL(imageUpload);
-                return; // Exit early as we'll finish in the onload callback
             } else if (selectedDefaultImage) {
+                pendingOperations++;
                 await window.api.setVersionImage(currentEditingVersion, selectedDefaultImage.src, activeInstanceId);
+                checkCompletion();
             }
             
-            finishSaving();
+            // Procesar imagen de fondo
+            if (backgroundUpload) {
+                pendingOperations++;
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    await window.api.setVersionBackground(currentEditingVersion, e.target.result, activeInstanceId);
+                    checkCompletion();
+                };
+                reader.readAsDataURL(backgroundUpload);
+            } else if (selectedDefaultBackground) {
+                pendingOperations++;
+                await window.api.setVersionBackground(currentEditingVersion, selectedDefaultBackground.src, activeInstanceId);
+                checkCompletion();
+            }
+            
+            // Si no hay operaciones pendientes, terminar inmediatamente
+            if (pendingOperations === 0) {
+                finishSaving();
+            }
         } catch (error) {
             console.error("Error saving version changes:", error);
             showStatus("Error saving version changes.");

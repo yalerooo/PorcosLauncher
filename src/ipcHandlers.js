@@ -336,6 +336,101 @@ function setupIpcHandlers(mainWindow) {
         }
     });
 
+    ipcMain.handle("get-version-background", async (event, versionId, instanceId) => {
+        const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+        const versionPath = path.join(minecraftPath, "versions", versionId);
+        const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif']; // Check all extensions
+
+        try {
+            for (const ext of imageExtensions) {
+                const imagePath = path.join(versionPath, `version-background${ext}`);
+                if (fs.existsSync(imagePath)) {
+                    const data = await fs.promises.readFile(imagePath);
+                    const base64Image = data.toString('base64');
+                    const mimeType = `image/${ext.substring(1)}`;
+                    const dataURL = `data:${mimeType};base64,${base64Image}`;
+                    return dataURL;
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error("Error getting version background:", error);
+            return null;
+        }
+    });
+
+    ipcMain.handle("set-version-background", async (event, versionId, imageDataURL, instanceId) => {
+        const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+        const versionPath = path.join(minecraftPath, "versions", versionId);
+
+        try {
+            if (!fs.existsSync(versionPath)) {
+                fs.mkdirSync(versionPath, { recursive: true });
+            }
+
+            // 1. Delete any existing background image files
+            const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif'];
+            for (const ext of imageExtensions) {
+                const existingImagePath = path.join(versionPath, `version-background${ext}`);
+                if (fs.existsSync(existingImagePath)) {
+                    try {
+                        await fs.promises.unlink(existingImagePath);
+                        console.log(`Deleted existing background image: ${existingImagePath}`);
+                    } catch (deleteError) {
+                        console.error(`Error deleting existing background image ${existingImagePath}:`, deleteError);
+                    }
+                }
+            }
+
+            // 2. Determine if it's a data URL or a file path
+            if (imageDataURL.startsWith('data:')) {
+                // Data URL: Process as before
+                let mimeType;
+                let fileExtension;
+
+                if (imageDataURL.startsWith('data:image/jpeg')) {
+                    mimeType = 'image/jpeg';
+                    fileExtension = '.jpg';
+                } else if (imageDataURL.startsWith('data:image/png')) {
+                    mimeType = 'image/png';
+                    fileExtension = '.png';
+                } else if (imageDataURL.startsWith('data:image/gif')) {
+                    mimeType = 'image/gif';
+                    fileExtension = '.gif';
+                } else {
+                    return { success: false, error: 'Unsupported image format.' };
+                }
+                const imagePath = path.join(versionPath, `version-background${fileExtension}`);
+                const base64Data = imageDataURL.replace(/^data:image\/(png|jpeg|gif);base64,/, "");
+                const imageBuffer = Buffer.from(base64Data, 'base64');
+                await fs.promises.writeFile(imagePath, imageBuffer);
+
+            } else if (imageDataURL.startsWith('file:///')) {
+                // File Path: Copy the file
+                const originalFilePath = decodeURI(imageDataURL.substring(8));
+                const fileExtension = path.extname(originalFilePath).toLowerCase();
+                const imagePath = path.join(versionPath, `version-background${fileExtension}`);
+
+                // Copy the file
+                try {
+                    await fs.promises.copyFile(originalFilePath, imagePath);
+                    console.log(`Copied background image from ${originalFilePath} to ${imagePath}`);
+                } catch (copyError) {
+                    console.error(`Error copying background image from ${originalFilePath} to ${imagePath}:`, copyError);
+                    return { success: false, error: `Error copying background image: ${copyError.message}` };
+                }
+            } else {
+                return { success: false, error: 'Invalid image data provided.' };
+            }
+
+            return { success: true };
+
+        } catch (error) {
+            console.error("Error saving version background:", error);
+            return { success: false, error: error.message };
+        }
+    });
+
     ipcMain.handle("get-default-version-images", async () => {
         try {
             const imagesPath = path.join(__dirname, "..", "assets", "versions");

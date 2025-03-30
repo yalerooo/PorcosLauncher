@@ -6,11 +6,43 @@
   align-items: center;
   justify-content: center;
   height: calc(100vh - 70px);
+  width: 100vw;
   animation: fadeIn 0.3s ease;
   background-color: var(--background);
-  background-image: radial-gradient(circle at 50% 10%, rgba(255, 107, 139, 0.1) 0%, transparent 70%);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   padding: 20px;
   overflow: hidden;
+  position: relative;
+  margin: 0;
+  box-sizing: border-box;
+  left: 0;
+  right: 0;
+}
+
+/* Clase para cuando no hay fondo personalizado */
+#version-details.no-background {
+  background-image: radial-gradient(circle at 50% 10%, rgba(255, 107, 139, 0.1) 0%, transparent 70%);
+}
+
+/* Overlay para mejorar la legibilidad del contenido */
+#version-details::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Aseguramos que el contenido esté por encima del overlay */
+#version-details > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Decorative elements */
