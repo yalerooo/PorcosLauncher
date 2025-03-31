@@ -4,6 +4,9 @@ const { Client } = require('minecraft-launcher-core');
 const crypto = require('crypto');
 const { fabric, forge, quilt, neoforge, vanilla, liner } = require('tomate-loaders');
 
+// Ruta al Java incluido en runtime/jdk-24
+const JAVA_PATH = path.join(process.cwd(), 'runtime', 'jdk-24', 'bin', 'javaw.exe');
+
 const launcher = new Client();
 
 function generateOfflineUUID(username) {
@@ -98,7 +101,7 @@ async function launchMinecraft(options, customMinecraftPath, customLauncher = nu
         ...launchConfig,
         authorization: baseAuth,
         memory: baseMemory,
-        javaPath: options.javaPath || 'javaw'
+        javaPath: options.javaPath || JAVA_PATH
     });
 }
 

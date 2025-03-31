@@ -104,33 +104,13 @@ app.whenReady().then(async () => {
         console.error('Error al verificar carpeta de miniaturas:', error);
     }
     
-    // Verificar si Java está instalado y es compatible
+    // Verificar el Java incluido en runtime/jdk-24
     try {
-        console.log('Verificando instalación de Java...');
+        console.log('Verificando Java incluido en runtime/jdk-24...');
         const javaInfo = await checkJavaVersion();
-        
-        if (!javaInfo.installed || !javaInfo.isCompatible) {
-            // Crear una ventana temporal para mostrar el diálogo
-            const tempWindow = new BrowserWindow({
-                width: 100,
-                height: 100,
-                show: false,
-                webPreferences: {
-                    nodeIntegration: false,
-                    contextIsolation: true
-                }
-            });
-            
-            // Mostrar diálogo de requisito de Java
-            const response = await showJavaRequirementDialog(tempWindow, javaInfo);
-            tempWindow.destroy(); // Cerrar la ventana temporal después de mostrar el diálogo
-            
-            console.log(`Respuesta del usuario al diálogo de Java: ${response === 0 ? 'Descargar Java' : 'Continuar sin Java'}`);
-        } else {
-            console.log(`Java está instalado y es compatible. Versión: ${javaInfo.version}`);
-        }
+        console.log(`Usando Java incluido. Versión: ${javaInfo.version}`);
     } catch (error) {
-        console.error('Error al verificar Java:', error);
+        console.error('Error al verificar Java incluido:', error);
     }
     
     await createWindow();
