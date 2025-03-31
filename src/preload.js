@@ -24,6 +24,7 @@ contextBridge.exposeInMainWorld('api', {
     setVersionBackground: (versionId, imageDataURL, instanceId) => ipcRenderer.invoke('set-version-background', versionId, imageDataURL, instanceId),
     deleteVersion: (versionId, instanceId) => ipcRenderer.invoke('delete-version', versionId, instanceId),
     getDefaultVersionImages: () => ipcRenderer.invoke('get-default-version-images'),
+    getDefaultBackgroundImages: () => ipcRenderer.invoke('get-default-background-images'),
     removeVersionImage: (versionId, instanceId) => ipcRenderer.invoke('remove-version-image', versionId, instanceId),
     getSettings: () => ipcRenderer.invoke('get-settings'),
     setSettings: (settings) => ipcRenderer.invoke('set-settings', settings),

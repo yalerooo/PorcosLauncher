@@ -94,6 +94,15 @@ async function initializeInstances() {
 }
 
 app.whenReady().then(async () => {
+    // Verificar carpeta de miniaturas
+    try {
+        const { generateThumbnails } = require('./thumbnailGenerator');
+        await generateThumbnails();
+        console.log('Carpeta de miniaturas verificada correctamente');
+    } catch (error) {
+        console.error('Error al verificar carpeta de miniaturas:', error);
+    }
+    
     await createWindow();
 
     // Verificar actualizaciones al iniciar

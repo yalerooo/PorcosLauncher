@@ -16,11 +16,11 @@
       "icon": "resources/ico.ico"
     },
     "nsis": {
-  "oneClick": false,
-  "allowToChangeInstallationDirectory": true,
-  "installerIcon": "resources/ico.ico",
-  "language": "1033"
-}
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "resources/ico.ico",
+      "language": "1033"
+    }
   },
   "dependencies": {
     "@electron/remote": "^2.1.2",
@@ -34,6 +34,7 @@
     "minecraft-launcher-core": "^3.18.2",
     "node-unrar-js": "^2.0.2",
     "quilt": "^0.1.3",
+    "sharp": "^0.33.5",
     "tomate-loaders": "^2.0.2",
     "unzipper": "^0.12.3",
     "uuid": "^9.0.1"

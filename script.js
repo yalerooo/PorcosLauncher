@@ -1339,14 +1339,15 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         const container = document.getElementById('defaultBackgroundsContainer');
         container.innerHTML = '';
         
-        // Load images from assets/versions folder (reutilizamos las mismas imágenes por ahora)
-        window.api.getDefaultVersionImages().then(images => {
+        // Load images from assets/backgrounds folder
+        window.api.getDefaultBackgroundImages().then(images => {
             images.forEach(image => {
                 const imgElement = document.createElement('img');
-                imgElement.src = image.dataURL;
+                imgElement.src = image.dataURL; // Usar la miniatura para la vista previa
                 imgElement.classList.add('default-version-image');
                 imgElement.title = image.name;
-                imgElement.addEventListener('click', () => selectDefaultBackground(image.dataURL));
+                imgElement.dataset.originalImage = image.originalDataURL; // Guardar la URL de la imagen original
+                imgElement.addEventListener('click', () => selectDefaultBackground(image.dataURL, image.originalDataURL));
                 container.appendChild(imgElement);
             });
         }).catch(error => {
@@ -1410,7 +1411,7 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         }
     }
     
-    function selectDefaultBackground(imagePath) {
+    function selectDefaultBackground(imagePath, originalImagePath) {
         // Remove selection from all images
         document.querySelectorAll('#defaultBackgroundsContainer .default-version-image').forEach(img => {
             img.classList.remove('selected-image');
@@ -1420,9 +1421,11 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         const clickedImage = Array.from(document.querySelectorAll('#defaultBackgroundsContainer .default-version-image')).find(img => img.src === imagePath);
         if (clickedImage) {
             clickedImage.classList.add('selected-image');
+            // Guardar la ruta de la imagen original como atributo de datos
+            clickedImage.dataset.originalImage = originalImagePath;
         }
         
-        // Update preview
+        // Update preview - mostrar la miniatura en la vista previa
         const backgroundPreview = document.getElementById('versionBackgroundPreview');
         backgroundPreview.style.backgroundImage = `url('${imagePath}')`;
         backgroundPreview.textContent = '';
@@ -1485,7 +1488,9 @@ document.getElementById('maximize-button').addEventListener('click', () => {
                 reader.readAsDataURL(backgroundUpload);
             } else if (selectedDefaultBackground) {
                 pendingOperations++;
-                await window.api.setVersionBackground(currentEditingVersion, selectedDefaultBackground.src, activeInstanceId);
+                // Usar la imagen original en lugar de la miniatura
+                const originalImageURL = selectedDefaultBackground.dataset.originalImage || selectedDefaultBackground.src;
+                await window.api.setVersionBackground(currentEditingVersion, originalImageURL, activeInstanceId);
                 checkCompletion();
             }
             

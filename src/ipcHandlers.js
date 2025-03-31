@@ -460,6 +460,52 @@ function setupIpcHandlers(mainWindow) {
             return [];
         }
     });
+    
+    ipcMain.handle("get-default-background-images", async () => {
+        try {
+            const backgroundsPath = path.join(__dirname, "..", "assets", "backgrounds");
+            const thumbnailPath = path.join(__dirname, "..", "assets", "thumbnail");
+            const images = [];
+            
+            if (fs.existsSync(backgroundsPath)) {
+                const files = await fs.promises.readdir(backgroundsPath);
+                for (const file of files) {
+                    if (file.match(/\.(png|jpg|jpeg|gif)$/i)) {
+                        // Ruta de la imagen original para usar cuando se aplique el fondo
+                        const originalImagePath = path.join(backgroundsPath, file);
+                        // Ruta de la miniatura para mostrar en la vista previa
+                        const thumbnailImagePath = path.join(thumbnailPath, file);
+                        
+                        // Verificar si existe la miniatura, si no, usar la imagen original
+                        const previewImagePath = fs.existsSync(thumbnailImagePath) ? thumbnailImagePath : originalImagePath;
+                        
+                        // Leer la miniatura para la vista previa
+                        const thumbnailData = await fs.promises.readFile(previewImagePath);
+                        const thumbnailBase64 = thumbnailData.toString('base64');
+                        const ext = path.extname(file).substring(1).toLowerCase();
+                        const mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+                        const thumbnailDataURL = `data:${mimeType};base64,${thumbnailBase64}`;
+                        
+                        // Leer la imagen original para el fondo
+                        const originalData = await fs.promises.readFile(originalImagePath);
+                        const originalBase64 = originalData.toString('base64');
+                        const originalDataURL = `data:${mimeType};base64,${originalBase64}`;
+                        
+                        images.push({
+                            name: path.basename(file, path.extname(file)),
+                            path: originalImagePath,
+                            dataURL: thumbnailDataURL, // Miniatura para la vista previa
+                            originalDataURL: originalDataURL // Imagen original para aplicar como fondo
+                        });
+                    }
+                }
+            }
+            return images;
+        } catch (error) {
+            console.error("Error getting default background images:", error);
+            return [];
+        }
+    });
 
     ipcMain.handle("remove-version-image", async (event, versionId, instanceId) => {
         try {
