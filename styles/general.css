@@ -274,21 +274,29 @@ button:hover {
   overflow-y: auto;
   overflow-x: hidden;
   background-color: var(--background);
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.3s ease, margin-right 0.3s ease, width 0.3s ease;
   padding-top: 60px; /* Espacio para la barra superior fija */
-  width: 100%;
+  width: calc(100% - 140px); /* Ajustar ancho para compensar los márgenes */
   box-sizing: border-box;
+  margin-left: 70px; /* Espacio para la barra lateral de instancias por defecto */
+  margin-right: 0px; /* Espacio simétrico en el lado derecho */
 }
 
 /* When versions sidebar is active, push main content to the right */
-.versions-sidebar.active ~ .main-content {
-  margin-left: 70px;
-}
+
 
 /* When versions sidebar is active, push top bar further to the right */
 .versions-sidebar.active ~ .main-content .top-bar {
   left: 140px; /* 70px (instances-sidebar) + 70px (versions-sidebar) */
-  width: calc(100% - 140px); /* Ajustar ancho para compensar el margen izquierdo */
+  right: 30px; /* Mantener el espacio a la derecha */
+  width: calc(100% - 140px); /* Ajustar ancho para compensar ambos márgenes */
+}
+
+/* When versions sidebar is not active, maintain consistent right margin */
+.main-content .top-bar {
+  left: 70px; /* Espacio para instances-sidebar */
+  right: 70px; /* Mantener el mismo espacio a la derecha */
+  width: calc(100% - 70px); /* Ajustar ancho para compensar ambos márgenes */
 }
 
 /* --- Top Bar --- */
@@ -296,8 +304,7 @@ button:hover {
   position: fixed;
   top: 45px; /* Posición debajo de la barra de título */
   left: 70px; /* Espacio para instances-sidebar */
-  right: 0;
-  width: calc(100% - 70px); /* Ajustar ancho para compensar el margen izquierdo */
+  right: 70px; /* Espacio simétrico en el lado derecho */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -366,16 +373,15 @@ button:hover {
   width: 100%;
   box-sizing: border-box;
   margin: 0;
-  margin-left: 70px; /* Espacio para la barra lateral de instancias */
+  margin-right: 70px; /* Espacio simétrico en el lado derecho */
   animation: fadeIn 0.3s ease;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.3s ease, margin-right 0.3s ease;
 }
 
 /* When versions sidebar is active, push content section further to the right */
 .versions-sidebar.active ~ .main-content .content-section {
-  margin-left: 0;
-  margin-right: 0;
-  width: 100%;
+  margin-left: 35px;
+  margin-right: 55px;
 }
 
 @keyframes fadeIn {

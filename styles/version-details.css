@@ -19,11 +19,18 @@
   box-sizing: border-box;
   left: 0;
   right: 0;
+  transition: background-image 0.5s ease-in-out;
 }
 
 /* Clase para cuando no hay fondo personalizado */
 #version-details.no-background {
   background-image: radial-gradient(circle at 50% 10%, rgba(255, 107, 139, 0.1) 0%, transparent 70%);
+}
+
+/* Clase para la transición de fondo */
+#version-details.changing-background {
+  opacity: 0.7;
+  transition: opacity 0.3s ease-in-out, background-image 0.5s ease-in-out;
 }
 
 /* Overlay para mejorar la legibilidad del contenido */

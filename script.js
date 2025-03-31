@@ -289,13 +289,29 @@ document.getElementById('maximize-button').addEventListener('click', () => {
             const versionDetailsElement = document.getElementById("version-details");
             const backgroundImage = await window.api.getVersionBackground(versionId, activeInstanceId);
             
+            // Añadir clase para iniciar la transición
+            versionDetailsElement.classList.add('changing-background');
+            
             if (backgroundImage) {
-                versionDetailsElement.style.backgroundImage = `url('${backgroundImage}')`;
-                versionDetailsElement.classList.remove('no-background');
+                // Pequeña pausa para que la transición sea visible
+                setTimeout(() => {
+                    versionDetailsElement.style.backgroundImage = `url('${backgroundImage}')`;
+                    versionDetailsElement.classList.remove('no-background');
+                    // Quitar la clase después de completar la transición
+                    setTimeout(() => {
+                        versionDetailsElement.classList.remove('changing-background');
+                    }, 500);
+                }, 50);
             } else {
                 // Si no hay imagen de fondo, usar el gradiente predeterminado
-                versionDetailsElement.style.backgroundImage = '';
-                versionDetailsElement.classList.add('no-background');
+                setTimeout(() => {
+                    versionDetailsElement.style.backgroundImage = '';
+                    versionDetailsElement.classList.add('no-background');
+                    // Quitar la clase después de completar la transición
+                    setTimeout(() => {
+                        versionDetailsElement.classList.remove('changing-background');
+                    }, 500);
+                }, 50);
             }
         } catch (error) {
             console.error("Error loading version background:", error);
@@ -410,9 +426,20 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         });
         
         // Actualizar el progreso de la descarga
-        window.api.onUpdateDownloadProgress(({ progress }) => {
-            updateProgressBar.style.width = `${progress}%`;
-            updateProgressStatus.textContent = `Descargando: ${progress.toFixed(1)}%`;
+        window.api.onUpdateDownloadProgress((event, data) => {
+            console.log('Progreso de actualización recibido:', data);
+            const progress = data.progress;
+            
+            if (typeof progress === 'number') {
+                const progressValue = Math.max(0, Math.min(100, progress));
+                updateProgressBar.style.width = `${progressValue}%`;
+                updateProgressStatus.textContent = `Descargando: ${progressValue.toFixed(1)}%`;
+            } else if (progress === 'extracting') {
+                updateProgressStatus.textContent = 'Extrayendo archivos...';
+            } else if (progress === 'completed') {
+                updateProgressStatus.textContent = 'Descarga completada';
+                updateProgressBar.style.width = '100%';
+            }
         });
         
         // Manejar errores de descarga
@@ -1408,6 +1435,26 @@ document.getElementById('maximize-button').addEventListener('click', () => {
                 document.querySelectorAll('#defaultBackgroundsContainer .default-version-image').forEach(img => {
                     img.classList.remove('selected-image');
                 });
+                
+                // Guardar temporalmente el fondo seleccionado para previsualización
+                window.tempSelectedBackgroundFile = e.target.result;
+                
+                // Si la versión que se está editando es la misma que está seleccionada actualmente,
+                // actualizar el fondo en la vista principal para previsualización
+                if (currentEditingVersion && selectedVersionButton && 
+                    selectedVersionButton.dataset.version === currentEditingVersion) {
+                    const versionDetailsElement = document.getElementById("version-details");
+                    versionDetailsElement.classList.add('changing-background');
+                    
+                    setTimeout(() => {
+                        versionDetailsElement.style.backgroundImage = `url('${e.target.result}')`;
+                        versionDetailsElement.classList.remove('no-background');
+                        
+                        setTimeout(() => {
+                            versionDetailsElement.classList.remove('changing-background');
+                        }, 500);
+                    }, 50);
+                }
             };
             reader.readAsDataURL(file);
         }
@@ -1431,6 +1478,28 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         const backgroundPreview = document.getElementById('versionBackgroundPreview');
         backgroundPreview.style.backgroundImage = `url('${imagePath}')`;
         backgroundPreview.textContent = '';
+        
+        // Aplicar inmediatamente el fondo si estamos en el modal de edición
+        if (currentEditingVersion && document.getElementById('versionEditModal').style.display === 'block') {
+            // Guardar temporalmente el fondo seleccionado para previsualización
+            window.tempSelectedBackground = originalImagePath || imagePath;
+            
+            // Si la versión que se está editando es la misma que está seleccionada actualmente,
+            // actualizar el fondo en la vista principal para previsualización
+            if (selectedVersionButton && selectedVersionButton.dataset.version === currentEditingVersion) {
+                const versionDetailsElement = document.getElementById("version-details");
+                versionDetailsElement.classList.add('changing-background');
+                
+                setTimeout(() => {
+                    versionDetailsElement.style.backgroundImage = `url('${imagePath}')`;
+                    versionDetailsElement.classList.remove('no-background');
+                    
+                    setTimeout(() => {
+                        versionDetailsElement.classList.remove('changing-background');
+                    }, 500);
+                }, 50);
+            }
+        }
     }
     
     async function saveVersionChanges() {
@@ -1507,15 +1576,38 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         
         function finishSaving() {
             showStatus("Version updated successfully!");
+            
+            // Guardar la versión que estaba seleccionada
+            const wasSelectedVersion = currentEditingVersion;
+            const wasSelectedButton = selectedVersionButton;
+            
             closeVersionEditModal();
             
             // Reload versions to reflect changes
-            loadVersions(activeInstanceId);
+            loadVersions(activeInstanceId).then(() => {
+                // Si había una versión seleccionada, volver a seleccionarla
+                if (wasSelectedVersion) {
+                    // Buscar el botón de la versión que estaba seleccionada
+                    const versionButtons = document.querySelectorAll('.version-button');
+                    let newSelectedButton = null;
+                    
+                    versionButtons.forEach(button => {
+                        if (button.dataset.version === wasSelectedVersion) {
+                            newSelectedButton = button;
+                        }
+                    });
+                    
+                    // Si se encontró el botón, seleccionarlo
+                    if (newSelectedButton) {
+                        // Simular un clic en el botón para seleccionarlo
+                        newSelectedButton.click();
+                    }
+                }
+            });
             
-            // Update version name in UI if this version is currently selected
-            if (selectedVersionButton && selectedVersionButton.dataset.version === currentEditingVersion) {
-                loadVersionName(currentEditingVersion);
-            }
+            // Limpiar variables temporales
+            window.tempSelectedBackground = null;
+            window.tempSelectedBackgroundFile = null;
         }
     }
     

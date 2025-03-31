@@ -107,7 +107,16 @@ async function downloadUpdate(mainWindow, downloadUrl) {
         
         // Descargar el archivo de actualización
         const progressCallback = (progress) => {
-            mainWindow.webContents.send('update-download-progress', { progress });
+            // Asegurarse de que el progreso sea un número para la barra de progreso
+            if (typeof progress === 'number') {
+                // Enviar el progreso actualizado al proceso de renderizado
+                console.log('Enviando progreso de descarga:', progress);
+                mainWindow.webContents.send('update-download-progress', { progress });
+            } else {
+                // Si es un estado como 'extracting' o 'completed', enviarlo también
+                console.log('Enviando estado de descarga:', progress);
+                mainWindow.webContents.send('update-download-progress', { progress });
+            }
         };
         
         const result = await downloadAndExtract(downloadUrl, tempDir, true, 'update.exe', progressCallback);
