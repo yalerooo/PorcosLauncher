@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('api', {
     isForgeVersion: (versionId) => ipcRenderer.invoke('is-forge-version', versionId),
 
     updateMinecraft: (downloadURL, instanceId) => ipcRenderer.invoke('update-minecraft', downloadURL, instanceId),
+    updateMods: (downloadURL, instanceId) => ipcRenderer.invoke('update-mods', downloadURL, instanceId),
     openMinecraftFolder: (instanceId) => ipcRenderer.invoke('open-minecraft-folder', instanceId),
     getAppPath: () => ipcRenderer.invoke('get-app-path'),
     getVersionName: (versionId, instanceId) => ipcRenderer.invoke('get-version-name', versionId, instanceId),

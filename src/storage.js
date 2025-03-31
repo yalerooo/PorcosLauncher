@@ -8,6 +8,10 @@ const schema = {
       type: 'string',
       default: '',
     },
+    updateModsURL: {
+      type: 'string',
+      default: '',
+    },
     minecraftURL: {
       type: 'string',
       default: '',
@@ -64,6 +68,7 @@ const schema = {
     return {
       username: store.get('username'),
       modsURL: store.get('modsURL'),
+      updateModsURL: store.get('updateModsURL'),
       minecraftURL: store.get('minecraftURL'),
       minMemory: store.get('minMemory'),
       maxMemory: store.get('maxMemory'),
@@ -82,6 +87,9 @@ const schema = {
     }
     if (settings.modsURL !== undefined) {
       store.set('modsURL', settings.modsURL);
+    }
+    if (settings.updateModsURL !== undefined) {
+      store.set('updateModsURL', settings.updateModsURL);
     }
     if (settings.minecraftURL !== undefined) {
       store.set('minecraftURL', settings.minecraftURL);

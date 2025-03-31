@@ -10,6 +10,7 @@ const { getCustomMinecraftPath, getInstanceMinecraftPath, getActiveInstance, set
 const { getSettings, setSettings } = require('./storage');
 const { listInstances, createInstance, updateInstance, deleteInstance } = require('./instances');
 const { checkForUpdates, showUpdateDialog, downloadUpdate } = require('./updater');
+const { promises: fsPromises } = require('fs');
 
 function setupIpcHandlers(mainWindow) {
     // Window control handlers
@@ -98,6 +99,39 @@ function setupIpcHandlers(mainWindow) {
             return result;
         } catch (error) {
             console.error("Error in updateMinecraft:", error);
+            return { success: false, error: error.message || error };
+        }
+    });
+    
+    ipcMain.handle("update-mods", async (event, downloadURL, instanceId) => {
+        try {
+            const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
+            const modsPath = path.join(minecraftPath, "mods");
+            
+            // Asegurarse de que la carpeta mods existe
+            if (!fs.existsSync(modsPath)) {
+                await fsPromises.mkdir(modsPath, { recursive: true });
+            }
+            
+            // Eliminar todos los mods existentes
+            const existingMods = await fsPromises.readdir(modsPath);
+            for (const mod of existingMods) {
+                const modPath = path.join(modsPath, mod);
+                await fsPromises.unlink(modPath);
+            }
+            
+            // Add progress callback to send download progress to renderer
+            const progressCallback = (progress) => {
+                // Si progress es un número, es el progreso de descarga
+                // Si es 'extracting' o 'completed', es el estado de extracción
+                event.sender.send('download-progress', { progress });
+            };
+            
+            // Descargar y extraer los nuevos mods
+            const result = await downloadAndExtract(downloadURL, modsPath, false, null, progressCallback);
+            return result;
+        } catch (error) {
+            console.error("Error in updateMods:", error);
             return { success: false, error: error.message || error };
         }
     });

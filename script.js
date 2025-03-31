@@ -186,6 +186,7 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         try {
             const settings = await window.api.getSettings();
             document.getElementById('minecraftURLInput').value = settings.minecraftURL;
+            document.getElementById('modsURLInput').value = settings.modsURL || '';
             document.getElementById('minMemory').value = settings.minMemory;
             document.getElementById('maxMemory').value = settings.maxMemory;
             
@@ -242,6 +243,7 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         const settings = {
             username: document.getElementById("username").value,
             minecraftURL: document.getElementById("minecraftURLInput").value,
+            modsURL: document.getElementById("modsURLInput").value,
             minMemory: document.getElementById("minMemory").value,
             maxMemory: document.getElementById("maxMemory").value,
             theme: document.getElementById("themeSelector").value,
@@ -1646,6 +1648,32 @@ document.getElementById('maximize-button').addEventListener('click', () => {
             showStatus(`Error updating Minecraft: ${error.message}`);
         }
     };
+    
+    window.updateMods = async function() {
+        const downloadURL = document.getElementById("modsURLInput").value.trim();
+        if (!downloadURL) {
+            showStatus("Please enter a mods download URL.");
+            return;
+        }
+
+        try {
+            const instances = await window.api.listInstances();
+            
+            // Si solo hay una instancia, actualizar directamente
+            if (instances.length === 1) {
+                await performModsUpdate(downloadURL, instances[0].id);
+                return;
+            }
+            
+            // Si hay múltiples instancias, mostrar modal de selección
+            await showInstanceSelectionModal('Update Mods', 'Select instance to update mods:', async (selectedInstanceId) => {
+                await performModsUpdate(downloadURL, selectedInstanceId);
+            });
+        } catch (error) {
+            console.error("Error in updateMods:", error);
+            showStatus(`Error updating mods: ${error.message}`);
+        }
+    };
 
     // Funciones auxiliares para la actualización
 
@@ -1687,6 +1715,54 @@ document.getElementById('maximize-button').addEventListener('click', () => {
             loadVersions(instanceId);
         } else {
             showStatus(`Error updating Minecraft: ${result.error}`);
+        }
+    }
+    
+    async function performModsUpdate(downloadURL, instanceId) {
+        showStatus("Updating Mods...");
+        
+        // Show the update progress container
+        const updateProgressContainer = document.getElementById('updateProgressContainer');
+        const updateProgressBar = document.getElementById('updateProgressBar');
+        const updateProgressStatus = document.getElementById('updateProgressStatus');
+        
+        // Update the title and initial status
+        document.querySelector('.update-progress-title').textContent = 'Updating Mods';
+        updateProgressStatus.textContent = 'Starting download...';
+        updateProgressBar.style.width = '0%';
+        updateProgressContainer.style.display = 'flex';
+        
+        // Set up progress event handler
+        const handleProgress = (event, data) => {
+            const progress = data.progress;
+            if (progress === 'extracting') {
+                updateProgressStatus.textContent = 'Extracting mods...';
+            } else if (progress === 'completed') {
+                updateProgressStatus.textContent = 'Mods updated successfully!';
+            } else {
+                updateProgressBar.style.width = `${progress}%`;
+                updateProgressStatus.textContent = `Downloading: ${progress.toFixed(1)}%`;
+            }
+        };
+        
+        // Register the event handler
+        window.api.onDownloadProgress(handleProgress);
+        
+        // Start the update process
+        const result = await window.api.updateMods(downloadURL, instanceId);
+        
+        // Remove the event handler
+        window.api.offDownloadProgress(handleProgress);
+        
+        // Hide the progress container after a delay
+        setTimeout(() => {
+            updateProgressContainer.style.display = 'none';
+        }, 2000);
+        
+        if (result.success) {
+            showStatus("Mods updated successfully!");
+        } else {
+            showStatus(`Error updating mods: ${result.error}`);
         }
     }
 
