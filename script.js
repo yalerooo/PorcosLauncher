@@ -103,6 +103,26 @@ document.addEventListener("DOMContentLoaded", async () => {
             showStatus(`Error al verificar actualizaciones: ${error.message}`, 5000);
         }
     });
+    
+    // Configurar el botón de verificar Java (si existe)
+    const checkJavaButton = document.getElementById('checkJavaButton');
+    if (checkJavaButton) {
+        checkJavaButton.addEventListener('click', async function() {
+            showStatus('Verificando instalación de Java...');
+            try {
+                const javaInfo = await window.api.checkJavaVersion();
+                if (javaInfo.installed && javaInfo.isCompatible) {
+                    showStatus(`Java ${javaInfo.version} está instalado correctamente`, 5000);
+                } else if (javaInfo.installed && !javaInfo.isCompatible) {
+                    showStatus(`Java ${javaInfo.version} está instalado pero no es compatible. Se requiere Java 21 o superior.`, 5000);
+                } else {
+                    showStatus('Java no está instalado. Se requiere Java 21 o superior.', 5000);
+                }
+            } catch (error) {
+                showStatus(`Error al verificar Java: ${error.message}`, 5000);
+            }
+        });
+    }
     // Window control buttons functionality
     document.getElementById('minimize-button').addEventListener('click', () => {
         window.api.minimizeWindow();

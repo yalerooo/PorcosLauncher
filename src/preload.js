@@ -54,5 +54,6 @@ contextBridge.exposeInMainWorld('api', {
     onShowUpdateProgress: (callback) => ipcRenderer.on('show-update-progress', callback),
     onUpdateDownloadProgress: (callback) => ipcRenderer.on('update-download-progress', callback),
     onUpdateDownloadError: (callback) => ipcRenderer.on('update-download-error', callback),
-    checkForUpdates: () => ipcRenderer.invoke('check-for-updates')
+    checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+    checkJavaVersion: () => ipcRenderer.invoke('check-java-version')
 });

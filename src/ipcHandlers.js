@@ -593,6 +593,25 @@ function setupIpcHandlers(mainWindow) {
             return { hasUpdate: false, error: error.message };
         }
     });
+    
+    // Manejador para verificar la versión de Java
+    ipcMain.handle("check-java-version", async () => {
+        try {
+            const { checkJavaVersion, showJavaRequirementDialog } = require('./javaChecker');
+            const javaInfo = await checkJavaVersion();
+            
+            if (!javaInfo.installed || !javaInfo.isCompatible) {
+                // Mostrar diálogo de requisito de Java
+                const response = await showJavaRequirementDialog(mainWindow, javaInfo);
+                return { ...javaInfo, userResponse: response };
+            }
+            
+            return javaInfo;
+        } catch (error) {
+            console.error("Error checking Java version:", error);
+            return { installed: false, error: error.message };
+        }
+    });
 }
 
 module.exports = { setupIpcHandlers };

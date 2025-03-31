@@ -8,6 +8,7 @@ const { getWindowState, setWindowState } = require('./storage'); // Import windo
 const { initializeMinecraftFolder } = require('./minecraftInitializer'); // Import minecraft initializer
 const { listInstances, createInstance } = require('./instances'); // Import instances functions
 const { checkForUpdates, showUpdateDialog } = require('./updater'); // Import updater functions
+const { checkJavaVersion, showJavaRequirementDialog } = require('./javaChecker'); // Import Java checker functions
 
 
 let mainWindow;
@@ -101,6 +102,35 @@ app.whenReady().then(async () => {
         console.log('Carpeta de miniaturas verificada correctamente');
     } catch (error) {
         console.error('Error al verificar carpeta de miniaturas:', error);
+    }
+    
+    // Verificar si Java está instalado y es compatible
+    try {
+        console.log('Verificando instalación de Java...');
+        const javaInfo = await checkJavaVersion();
+        
+        if (!javaInfo.installed || !javaInfo.isCompatible) {
+            // Crear una ventana temporal para mostrar el diálogo
+            const tempWindow = new BrowserWindow({
+                width: 100,
+                height: 100,
+                show: false,
+                webPreferences: {
+                    nodeIntegration: false,
+                    contextIsolation: true
+                }
+            });
+            
+            // Mostrar diálogo de requisito de Java
+            const response = await showJavaRequirementDialog(tempWindow, javaInfo);
+            tempWindow.destroy(); // Cerrar la ventana temporal después de mostrar el diálogo
+            
+            console.log(`Respuesta del usuario al diálogo de Java: ${response === 0 ? 'Descargar Java' : 'Continuar sin Java'}`);
+        } else {
+            console.log(`Java está instalado y es compatible. Versión: ${javaInfo.version}`);
+        }
+    } catch (error) {
+        console.error('Error al verificar Java:', error);
     }
     
     await createWindow();
