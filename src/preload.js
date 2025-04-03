@@ -42,6 +42,12 @@ contextBridge.exposeInMainWorld('api', {
     // Add new method for instance icons
     getInstanceIcon: (iconPath) => ipcRenderer.invoke('get-instance-icon', iconPath),
     
+    // Modpack functions
+    fetchModpacks: () => ipcRenderer.invoke('fetch-modpacks'),
+    installModpack: (modpackId, instanceName) => ipcRenderer.invoke('install-modpack', modpackId, instanceName),
+    checkModpackUpdates: () => ipcRenderer.invoke('check-modpack-updates'),
+    updateModpack: (instanceId, modpackId) => ipcRenderer.invoke('update-modpack', instanceId, modpackId),
+    
     // Progress event handlers
     onDownloadProgress: (callback) => ipcRenderer.on('download-progress', callback),
     offDownloadProgress: (callback) => ipcRenderer.removeListener('download-progress', callback),
@@ -54,6 +60,12 @@ contextBridge.exposeInMainWorld('api', {
     onShowUpdateProgress: (callback) => ipcRenderer.on('show-update-progress', callback),
     onUpdateDownloadProgress: (callback) => ipcRenderer.on('update-download-progress', callback),
     onUpdateDownloadError: (callback) => ipcRenderer.on('update-download-error', callback),
+    
+    // Modpack event handlers
+    onModpackInstallProgress: (callback) => ipcRenderer.on('modpack-install-progress', callback),
+    offModpackInstallProgress: (callback) => ipcRenderer.removeListener('modpack-install-progress', callback),
+    onModpackUpdateProgress: (callback) => ipcRenderer.on('modpack-update-progress', callback),
+    offModpackUpdateProgress: (callback) => ipcRenderer.removeListener('modpack-update-progress', callback),
     checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
     checkJavaVersion: () => ipcRenderer.invoke('check-java-version')
 });

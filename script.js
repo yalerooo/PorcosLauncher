@@ -164,43 +164,48 @@ document.getElementById('maximize-button').addEventListener('click', () => {
     let activeInstanceId = null;
 
     // --- Helper Functions ---
-    function showSection(sectionId) {
-        document.querySelectorAll(".content-section").forEach((section) => {
-            section.classList.remove("active");
-            section.style.display = "none";
+    window.showSection = function showSection(sectionId) {
+        // Ocultar todas las secciones
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
+            section.style.display = 'none';
         });
-
-        const section = document.getElementById(sectionId);
-        if (section) {
-            section.classList.add("active");
-            section.style.display = "block";
-        }
-
-        const appTitle = document.getElementById("app-title");
-        const versionInfoHeader = document.getElementById("version-info-header");
-        const versionNameInput = document.getElementById("version-name-input");
-
-        versionNameInput.style.display = "none";
-        appTitle.style.display = "inline";
-
-        if (sectionId === "home") {
-            appTitle.textContent = "PorcosLauncher";
-            versionInfoHeader.textContent = "";
-        } else if (sectionId === "version-details") {
-            if (selectedVersionButton) {
-                const versionId = selectedVersionButton.dataset.version;
-                versionInfoHeader.textContent = `Version: ${versionId}`;
-                loadUsername();
+        
+        // Mostrar la sección seleccionada
+        const selectedSection = document.getElementById(sectionId);
+        if (selectedSection) {
+            selectedSection.classList.add('active');
+            selectedSection.style.display = 'block';
+            
+            // Actualizar el título de la aplicación según la sección
+            const appTitle = document.getElementById('app-title');
+            if (appTitle) {
+                if (sectionId === "home") {
+                    appTitle.textContent = "Porco's Launcher";
+                    document.getElementById('version-info-header').textContent = '';
+                } else if (sectionId === "settings") {
+                    appTitle.textContent = "Settings";
+                    document.getElementById('version-info-header').textContent = '';
+                } else if (sectionId === "modpacks") {
+                    appTitle.textContent = "Modpacks";
+                    document.getElementById('version-info-header').textContent = '';
+                } else if (sectionId === "version-details" && selectedVersionButton) {
+                    // Si es la sección de detalles de versión y hay una versión seleccionada
+                    const versionName = selectedVersionButton.querySelector('.version-name').textContent;
+                    appTitle.textContent = versionName;
+                    const versionId = selectedVersionButton.getAttribute('data-version-id');
+                    loadVersionBackground(versionId, activeInstanceId);
+                }
             }
-        } else if (sectionId === "settings") {
-            appTitle.textContent = "Settings";
-            versionInfoHeader.textContent = "";
-
-            document.getElementById("updateMinecraftButton").style.display = "block";
-            document.getElementById("minecraftURLInput").style.display = "inline-block";
+        }
+        
+        // Ocultar la barra lateral de versiones si no estamos en la vista de instancia
+        const versionsSidebar = document.getElementById('versions-sidebar');
+        if (sectionId !== "version-details") {
+            versionsSidebar.classList.remove('active');
         }
     }
-
+    
     // --- Load and Apply Settings ---
     async function loadSettings() {
         try {
@@ -1965,6 +1970,11 @@ document.getElementById('maximize-button').addEventListener('click', () => {
     async function init() {
         await loadSettings();
         await loadInstances();
+        
+        // Inicializar el módulo de modpacks
+        if (typeof window.initModpacksModule === 'function') {
+            window.initModpacksModule();
+        }
         
         // Asegurar que siempre se inicie en la pantalla de inicio
         showSection("home");

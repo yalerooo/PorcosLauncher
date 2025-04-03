@@ -3,7 +3,8 @@ const { app, BrowserWindow, screen } = require("electron"); // Import 'screen'
 const path = require("path");
 const { setupIpcHandlers } = require("./ipcHandlers");
 const { ensureAssets } = require("./assetManager");
-const { getCustomMinecraftPath, getInstanceMinecraftPath, getActiveInstance } = require('./config');
+const { getCustomMinecraftPath, getInstanceMinecraftPath, getActiveInstance, copyJavaRuntime, getPorcoslandPath } = require('./config');
+const fs = require('fs');
 const { getWindowState, setWindowState } = require('./storage'); // Import window state functions
 const { initializeMinecraftFolder } = require('./minecraftInitializer'); // Import minecraft initializer
 const { listInstances, createInstance } = require('./instances'); // Import instances functions
@@ -104,9 +105,26 @@ app.whenReady().then(async () => {
         console.error('Error al verificar carpeta de miniaturas:', error);
     }
     
-    // Verificar el Java incluido en runtime/jdk-24
+    // Copiar el JDK a .porcosland y verificar la versión
     try {
-        console.log('Verificando Java incluido en runtime/jdk-24...');
+        // Primero, asegurarse de que existe la carpeta .porcosLauncher
+        const porcoslandPath = getPorcoslandPath();
+        if (!fs.existsSync(porcoslandPath)) {
+            fs.mkdirSync(porcoslandPath, { recursive: true });
+            console.log(`Carpeta ${porcoslandPath} creada correctamente`);
+        }
+        
+        // Copiar el JDK de assets/runtime/jdk-24 a .porcosLauncher/runtime/jdk-24
+        console.log('Copiando JDK a', porcoslandPath);
+        const jdkCopied = await copyJavaRuntime();
+        if (jdkCopied) {
+            console.log('JDK copiado correctamente a .porcosLauncher');
+        } else {
+            console.log('No se pudo copiar el JDK a .porcosLauncher, se usará el JDK incluido en el paquete');
+        }
+        
+        // Verificar el Java incluido en .porcosLauncher/runtime/jdk-24
+        console.log('Verificando Java incluido en .porcosLauncher...');
         const javaInfo = await checkJavaVersion();
         console.log(`Usando Java incluido. Versión: ${javaInfo.version}`);
     } catch (error) {

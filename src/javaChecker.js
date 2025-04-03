@@ -3,15 +3,19 @@ const path = require('path');
 const { exec } = require('child_process');
 const { dialog } = require('electron');
 const { shell } = require('electron');
+const { getJavaPath, copyJavaRuntime } = require('./config');
 
 /**
- * Verifica si Java está instalado y devuelve información sobre la versión incluida en runtime/jdk-24
+ * Copia el JDK incluido a .porcosLauncher y verifica la versión
  * @returns {Promise<{installed: boolean, version: string|null, isCompatible: boolean}>}
  */
 async function checkJavaVersion() {
+    // Primer paso: asegurarnos de que el JDK está copiado en .porcosland
+    await copyJavaRuntime();
+    
     return new Promise((resolve) => {
-        // Usar el Java incluido en runtime/jdk-24
-        const javaPath = path.join(process.cwd(), 'runtime', 'jdk-24', 'bin', 'java.exe');
+        // Usar el Java incluido en .porcosLauncher/runtime/jdk-24
+        const javaPath = getJavaPath().replace('javaw.exe', 'java.exe');
         const command = `"${javaPath}" -version`;
         
         console.log('Verificando Java incluido en:', javaPath);
@@ -22,9 +26,19 @@ async function checkJavaVersion() {
             
             if (error) {
                 console.error('Error al verificar Java incluido:', error);
-                // Algo salió mal con el Java incluido
-                console.log('Usando Java incluido por defecto');
-                resolve({ installed: true, version: '24', isCompatible: true });
+                // Algo salió mal con el Java incluido, intentar usar el Java incluido en el paquete
+                const fallbackJavaPath = path.join(process.cwd(), 'assets', 'runtime', 'jdk-24', 'bin', 'java.exe');
+                console.log('Intentando usar Java alternativo en:', fallbackJavaPath);
+                
+                // Verificar si existe este Java alternativo
+                const fs = require('fs');
+                if (fs.existsSync(fallbackJavaPath)) {
+                    console.log('Usando Java alternativo encontrado');
+                    resolve({ installed: true, version: '24', isCompatible: true });
+                } else {
+                    console.log('No se encontró Java alternativo, usando valores por defecto');
+                    resolve({ installed: true, version: '24', isCompatible: true });
+                }
                 return;
             }
             

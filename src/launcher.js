@@ -3,9 +3,10 @@ const path = require('path');
 const { Client } = require('minecraft-launcher-core');
 const crypto = require('crypto');
 const { fabric, forge, quilt, neoforge, vanilla, liner } = require('tomate-loaders');
+const { getJavaPath } = require('./config');
 
-// Ruta al Java incluido en runtime/jdk-24
-const JAVA_PATH = path.join(process.cwd(), 'runtime', 'jdk-24', 'bin', 'javaw.exe');
+// Ruta al Java incluido en .porcosland/runtime/jdk-24
+const JAVA_PATH = getJavaPath();
 
 const launcher = new Client();
 

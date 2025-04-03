@@ -10,6 +10,7 @@ const { getCustomMinecraftPath, getInstanceMinecraftPath, getActiveInstance, set
 const { getSettings, setSettings } = require('./storage');
 const { listInstances, createInstance, updateInstance, deleteInstance } = require('./instances');
 const { checkForUpdates, showUpdateDialog, downloadUpdate } = require('./updater');
+const { fetchModpacks, filterLatestModpacks, installModpack, updateModpack, checkModpackUpdates, isModpackInstalled, getInstalledModpackByID, getInstalledModpacks, removeModpackFromRegistry } = require('./modpacks');
 const { promises: fsPromises } = require('fs');
 
 function setupIpcHandlers(mainWindow) {
@@ -71,6 +72,8 @@ function setupIpcHandlers(mainWindow) {
     });
 
     ipcMain.handle('delete-instance', async (event, instanceId) => {
+        // Eliminar también el modpack del registro si existe
+        await removeModpackFromRegistry(instanceId);
         return await deleteInstance(instanceId);
     });
 
@@ -82,6 +85,105 @@ function setupIpcHandlers(mainWindow) {
         return setActiveInstance(instanceId);
     });
 
+    // --- Modpack handlers ---
+    ipcMain.handle('fetch-modpacks', async () => {
+        try {
+            const modpacksData = await fetchModpacks();
+            const registry = await getInstalledModpacks();
+            const latestModpacks = filterLatestModpacks(modpacksData.modpacks);
+            
+            // Marcar modpacks que están instalados y con actualizaciones
+            for (const modpack of latestModpacks) {
+                // Verificar si el modpack está instalado
+                const installedModpack = registry.installedModpacks.find(m => m.id === modpack.id);
+                if (installedModpack) {
+                    modpack.installed = true;
+                    modpack.installedVersion = installedModpack.version;
+                    modpack.instanceId = installedModpack.instanceId;
+                    
+                    // Verificar si hay una actualización disponible
+                    if (modpack.version !== installedModpack.version) {
+                        modpack.updateAvailable = true;
+                    }
+                }
+            }
+            
+            return { success: true, modpacks: latestModpacks };
+        } catch (error) {
+            console.error('Error fetching modpacks:', error);
+            return { success: false, error: error.message };
+        }
+    });
+    
+    ipcMain.handle('install-modpack', async (event, modpackId, instanceName) => {
+        try {
+            // Obtener los datos del modpack
+            const modpacksData = await fetchModpacks();
+            const modpack = modpacksData.modpacks.find(m => m.id === modpackId);
+            
+            if (!modpack) {
+                return { success: false, error: 'Modpack no encontrado' };
+            }
+            
+            // Crear una nueva instancia para el modpack
+            const instanceResult = await createInstance(instanceName);
+            
+            if (!instanceResult.success) {
+                return { success: false, error: `Error al crear la instancia: ${instanceResult.error}` };
+            }
+            
+            const instanceId = instanceResult.instance.id;
+            
+            // Crear una función para enviar el progreso
+            const progressHandler = (progress) => {
+                event.sender.send('modpack-install-progress', { progress });
+            };
+            
+            // Instalar el modpack en la instancia
+            const installResult = await installModpack(modpack, instanceId, progressHandler);
+            
+            if (!installResult.success) {
+                // Si falla, eliminar la instancia creada
+                await deleteInstance(instanceId);
+                return { success: false, error: `Error al instalar el modpack: ${installResult.error}` };
+            }
+            
+            return { 
+                success: true, 
+                instanceId,
+                instanceName
+            };
+        } catch (error) {
+            console.error('Error installing modpack:', error);
+            return { success: false, error: error.message };
+        }
+    });
+    
+    ipcMain.handle('check-modpack-updates', async () => {
+        try {
+            const updates = await checkModpackUpdates();
+            return { success: true, updates };
+        } catch (error) {
+            console.error('Error checking modpack updates:', error);
+            return { success: false, error: error.message };
+        }
+    });
+    
+    ipcMain.handle('update-modpack', async (event, instanceId, modpackId) => {
+        try {
+            // Crear una función para enviar el progreso
+            const progressHandler = (progress) => {
+                event.sender.send('modpack-update-progress', { progress });
+            };
+            
+            const updateResult = await updateModpack(instanceId, modpackId, progressHandler);
+            return updateResult;
+        } catch (error) {
+            console.error('Error updating modpack:', error);
+            return { success: false, error: error.message };
+        }
+    });
+    
     // --- Existing handlers ---
 
     ipcMain.handle("update-minecraft", async (event, downloadURL, instanceId) => {
