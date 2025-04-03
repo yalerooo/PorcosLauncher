@@ -16,13 +16,21 @@
 
 /* Estilos para el dropdown del filtro de modpacks */
 #modpack-filter {
-    background-color: #000000;
+    background-color: var(--surface);
     color: white;
-    border: 1px solid var(--tertiary);
-    border-radius: 5px;
-    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 14px;
     outline: none;
     appearance: auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+#modpack-filter:focus {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(255, 107, 139, 0.15);
 }
 
 /* Forzar colores para las opciones */
@@ -49,69 +57,109 @@
 }
 
 .modpacks-header h2 {
-    font-size: 1.8rem;
+    font-size: 2rem;
     margin: 0;
-    color: var(--primary);
+    color: var(--text);
+    position: relative;
+    display: inline-block;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    animation: fadeInScale 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.modpacks-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-hover));
+    border-radius: 3px;
 }
 
 .modpacks-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    gap: 24px;
     width: 100%;
+    padding: 0 4px; /* Previene que las sombras se corten en los bordes */
+    animation: slideUpIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+    transform: translateY(20px);
+    animation-fill-mode: forwards;
 }
 
 .modpack-card {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
+    background-color: var(--surface);
+    border-radius: 12px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     height: 100%;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     position: relative;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    animation: fadeInScale 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .modpack-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    transform: translateY(-8px) rotateX(2deg);
+    box-shadow: var(--card-shadow), 0 0 0 1px rgba(255, 107, 139, 0.2);
+    border-color: rgba(255, 107, 139, 0.2);
+}
+
+.modpack-card:hover .modpack-card-header img {
+    transform: scale(1.05);
 }
 
 .modpack-card-header {
     position: relative;
-    height: 150px;
+    height: 160px;
     overflow: hidden;
+    background: linear-gradient(180deg, rgba(20, 20, 26, 0.5), rgba(12, 12, 18, 0.9));
 }
 
 .modpack-card-header img {
     width: 100%;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
     height: 100%;
     object-fit: cover;
 }
 
 .modpack-version-badge {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 12px;
+    right: 12px;
     background-color: var(--primary);
     color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
+    padding: 6px 12px;
+    border-radius: 20px;
     font-size: 0.8rem;
     font-weight: bold;
+    box-shadow: 0 2px 8px rgba(255, 107, 139, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    animation: pulse 2s infinite;
 }
 
 .update-available-badge {
     position: absolute;
     top: 10px;
     left: 10px;
-    background-color: #FFD700;
-    color: #333;
+    background-color: rgba(255, 153, 0, 0.9);
+    color: white;
     padding: 5px 10px;
     border-radius: 15px;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: bold;
+    z-index: 2;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 15px rgba(255, 153, 0, 0.5);
 }
 
 .modpack-card-content {
@@ -122,10 +170,39 @@
 }
 
 .modpack-title {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: bold;
     margin: 0 0 10px 0;
     color: white;
+    letter-spacing: -0.3px;
+    position: relative;
+    display: inline-block;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.modpack-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: var(--primary);
+    opacity: 0;
+    transform: scaleX(0.7);
+    transform-origin: left;
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.modpack-card:hover .modpack-title::after {
+    opacity: 1;
+    transform: scaleX(1);
+    box-shadow: 0 0 8px rgba(255, 107, 139, 0.5);
+}
+
+.modpack-card:hover .modpack-title {
+    color: var(--primary);
+    transform: translateX(3px);
 }
 
 .modpack-description {
@@ -173,20 +250,62 @@
     background-color: var(--primary);
     color: white;
     border: none;
-    border-radius: 5px;
-    padding: 8px 15px;
+    border-radius: 8px;
+    padding: 10px 15px;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 600;
     flex-grow: 1;
-    transition: background-color 0.2s ease;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    letter-spacing: 0.3px;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    z-index: 1;
 }
 
 .install-button:hover, .update-button:hover, .uninstall-button:hover {
     background-color: var(--primary-hover);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.install-button::after, .update-button::after, .uninstall-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+    z-index: -1;
+}
+
+.install-button::before, .update-button::before, .uninstall-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+}
+
+.install-button:hover::before, .update-button:hover::before, .uninstall-button:hover::before {
+    opacity: 1;
+}
+
+.install-button:hover::after, .update-button:hover::after, .uninstall-button:hover::after {
+    left: 100%;
 }
 
 .install-button svg, .update-button svg, .uninstall-button svg {
@@ -241,27 +360,56 @@
 .search-box {
     display: flex;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    padding: 8px 15px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    padding: 10px 18px;
     flex-grow: 1;
     max-width: 400px;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 
 .search-box input {
     background: none;
     border: none;
     color: white;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     flex-grow: 1;
     outline: none;
+    padding: 2px 4px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
 }
 
 .search-box svg {
     width: 18px;
     height: 18px;
-    margin-right: 10px;
+    margin-right: 12px;
     opacity: 0.7;
+    transition: all 0.3s ease;
+    color: var(--text);
+}
+
+.search-box:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-box:focus-within {
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 6px 15px rgba(255, 107, 139, 0.15);
+    border: 1px solid rgba(255, 107, 139, 0.3);
+}
+
+.search-box:focus-within svg {
+    opacity: 1;
+    color: var(--primary);
+    transform: scale(1.1);
 }
 
 .modpack-select-label {
@@ -291,6 +439,103 @@
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     width: 100%;
+}
+
+/* Estilos para el modal de confirmación */
+#modpackConfirmModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+#modpackConfirmModal .modal-content {
+    background-color: var(--primary-bg);
+    border-radius: 10px;
+    border: 1px solid var(--tertiary);
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    color: white;
+    position: relative;
+}
+
+#modpackConfirmModal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#modpackConfirmModal h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--primary);
+}
+
+#modpackConfirmModal .close-modal {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#modpackConfirmModal .close-modal:hover {
+    color: white;
+}
+
+#modpackConfirmModal p {
+    padding: 20px;
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+#modpackConfirmModal .modal-buttons {
+    display: flex;
+    padding: 0 20px 20px;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+#modpackConfirmModal .confirm-button {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#modpackConfirmModal .confirm-button:hover {
+    background-color: var(--primary-hover);
+}
+
+#modpackConfirmModal .cancel-button {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#modpackConfirmModal .cancel-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .no-modpacks svg {

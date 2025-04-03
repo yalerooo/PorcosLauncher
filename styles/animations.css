@@ -1,0 +1,381 @@
+/* 
+ * Animations CSS
+ * Animaciones y efectos visuales avanzados para el launcher
+ */
+
+/* ===== ANIMACIONES BÁSICAS ===== */
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes rotateIn {
+  from { opacity: 0; transform: rotateY(-10deg) translateZ(-20px); }
+  to { opacity: 1; transform: rotateY(0) translateZ(0); }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+@keyframes shakeX {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(255, 107, 139, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(255, 107, 139, 0.8); }
+  100% { box-shadow: 0 0 5px rgba(255, 107, 139, 0.5); }
+}
+
+@keyframes spotlight {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ===== CLASES DE UTILIDAD PARA ANIMACIONES ===== */
+
+.float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.bounce {
+  animation: bounce 2s ease infinite;
+}
+
+.rotate-in {
+  animation: rotateIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+.fade-in-scale {
+  animation: fadeInScale 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(
+    90deg, 
+    rgba(255, 255, 255, 0) 0%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
+  pointer-events: none;
+}
+
+.glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Efecto de partículas al hacer hover */
+.particle-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.particle-effect::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  background-image: 
+    radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 15px 15px;
+  background-position: 0 0, 7.5px 7.5px;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.particle-effect:hover::before {
+  opacity: 1;
+  animation: spotlight 5s linear infinite;
+}
+
+/* Animación para el botón de play */
+.play-button-animation {
+  position: relative;
+  overflow: hidden;
+}
+
+.play-button-animation::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 107, 139, 0.4) 0%, rgba(255, 107, 139, 0) 70%);
+  opacity: 0;
+  transform: scale(0.5);
+  transform-origin: center;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.play-button-animation:hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Efecto de energía en botones importantes */
+.energy-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.energy-effect::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  width: 300%;
+  height: 300%;
+  background: conic-gradient(
+    from 0deg, 
+    rgba(255, 107, 139, 0), 
+    rgba(255, 107, 139, 0.3), 
+    rgba(255, 107, 139, 0)
+  );
+  opacity: 0;
+  transform: rotate(0deg);
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.energy-effect:hover::after {
+  opacity: 1;
+  animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Efecto de enfoque/desenfoque */
+.focus-blur {
+  transition: filter 0.4s ease;
+}
+
+.focus-blur:not(:hover) {
+  filter: blur(2px);
+}
+
+/* Efectos para tarjetas */
+.card-hover-effect {
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-8px) rotateX(3deg);
+  box-shadow: 
+    0 20px 30px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 107, 139, 0.2);
+}
+
+/* Efecto de expansión */
+.expand-on-hover {
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.expand-on-hover:hover {
+  transform: scale(1.05);
+  z-index: 10;
+}
+
+/* Transición entre secciones */
+.slide-up-in {
+  animation: slideUpIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes slideUpIn {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Efecto de revelación para texto */
+.text-reveal {
+  position: relative;
+  overflow: hidden;
+}
+
+.text-reveal > * {
+  animation: textReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+@keyframes textReveal {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Animación para notificaciones */
+.notification-popup {
+  animation: notificationIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+             glow 2s ease-in-out infinite;
+}
+
+@keyframes notificationIn {
+  from { 
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Efecto de onda para botones */
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  top: calc(50% - 5px);
+  left: calc(50% - 5px);
+  width: 10px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  transform: scale(0);
+  opacity: 1;
+  pointer-events: none;
+  transition: none;
+}
+
+.ripple-effect:active::after {
+  animation: ripple 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(50);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(70);
+    opacity: 0;
+  }
+}
+
+/* Loader animado */
+.fancy-loader {
+  width: 40px;
+  height: 40px;
+  position: relative;
+  margin: 20px auto;
+}
+
+.fancy-loader:before, 
+.fancy-loader:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: var(--primary);
+  opacity: 0.6;
+  animation: pulse-ring 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.fancy-loader:after {
+  animation-delay: 0.5s;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.1);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Separadores animados */
+.animated-divider {
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  position: relative;
+  margin: 20px 0;
+  overflow: hidden;
+}
+
+.animated-divider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 2s infinite;
+}

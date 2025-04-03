@@ -18,6 +18,8 @@
     <link rel="stylesheet" href="styles/title-bar.css">
     <link rel="stylesheet" href="styles/update.css"> <!--NEW-->
     <link rel="stylesheet" href="styles/modpacks.css"> <!--NEW-->
+    <link rel="stylesheet" href="styles/glassmorphic-override.css"> <!--NEW-->
+    <link rel="stylesheet" href="styles/animations.css"> <!--NEW-->
 </head>
 <body>
     <div class="title-bar">
@@ -274,6 +276,26 @@
             <div class="modal-buttons">
                 <button id="createInstance">Create</button>
                 <button id="cancelInstanceCreate">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modpack Confirm Modal -->
+    <div class="modal" id="modpackConfirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="confirmModalTitle">Confirmar acción</h3>
+                <button id="closeConfirmModal" class="close-modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <p id="confirmModalText">¿Estás seguro de que deseas realizar esta acción?</p>
+            <div class="modal-buttons">
+                <button id="confirmModalAccept" class="confirm-button">Aceptar</button>
+                <button id="confirmModalCancel" class="cancel-button">Cancelar</button>
             </div>
         </div>
     </div>

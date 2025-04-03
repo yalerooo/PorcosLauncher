@@ -1,0 +1,153 @@
+/* 
+ * Glassmorphic Override CSS
+ * Aplica efectos glassmórficos y mejoras visuales al launcher
+ */
+
+:root {
+  /* Actualizando sombras para efecto glassmórfico */
+  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+  --glass-bg: rgba(15, 15, 24, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  
+  /* Transiciones suaves */
+  --transition-fast: 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-normal: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-slow: 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Efecto glassmórfico base */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+}
+
+/* Título glassmórfico */
+.title-bar {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+}
+
+/* Secciones de navegación con efecto glassmórfico */
+.sidebar {
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-right: 1px solid var(--glass-border);
+}
+
+/* Efecto glassmórfico para ventanas modales */
+.modal-content {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+}
+
+/* Botones con efecto glassmórfico */
+.glass-button {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  transition: all var(--transition-normal);
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--glass-highlight);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Inputs con estilo glassmórfico */
+input.glass-input, select.glass-input {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: white;
+  transition: all var(--transition-normal);
+}
+
+input.glass-input:focus, select.glass-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(255, 107, 139, 0.2);
+  outline: none;
+}
+
+/* Scrollbar personalizada para efecto glassmórfico */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Animaciones suaves */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-normal) forwards;
+}
+
+.float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Efectos de transición para elementos que aparecen */
+.section {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+
+.section.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Efectos de hover para tarjetas */
+.glass-card {
+  transition: all var(--transition-normal);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.glass-card:hover {
+  transform: translateY(-8px) rotateX(2deg);
+}

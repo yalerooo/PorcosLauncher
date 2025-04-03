@@ -353,13 +353,15 @@ async function handleUpdateClick(event) {
         return;
     }
     
-    // Pedir confirmación al usuario
-    if (!confirm(`¿Estás seguro de que deseas actualizar el modpack ${modpack.name} a la versión ${modpack.version}?`)) {
-        return;
-    }
-    
-    // Iniciar la actualización
-    startModpackUpdate(instanceId, modpackId);
+    // Pedir confirmación al usuario usando el modal personalizado
+    showConfirmModal(
+        'Actualizar modpack',
+        `¿Estás seguro de que deseas actualizar el modpack ${modpack.name} a la versión ${modpack.version}?`,
+        async () => {
+            // Esta función se ejecuta cuando el usuario acepta
+            await startModpackUpdate(instanceId, modpackId);
+        }
+    );
 }
 
 // Función para iniciar la actualización del modpack
@@ -517,34 +519,84 @@ async function handleUninstallClick(event) {
         return;
     }
     
-    // Pedir confirmación al usuario
-    if (!confirm(`¿Estás seguro de que deseas desinstalar el modpack ${modpack.name}? Se eliminará la instancia asociada y todos sus archivos.`)) {
-        return;
-    }
-    
-    try {
-        // Mostrar estado
-        showStatus(`Desinstalando modpack ${modpack.name}...`);
-        isModpackOperationInProgress = true;
-        
-        // Eliminar la instancia asociada al modpack
-        const result = await window.api.deleteInstance(instanceId);
-        
-        if (result.success) {
-            showStatus(`Modpack ${modpack.name} desinstalado correctamente`, 5000);
-            // Recargar la lista de modpacks para reflejar el cambio
-            await loadModpacks();
-        } else {
-            showStatus(`Error al desinstalar el modpack: ${result.error}`, 5000);
+    // Pedir confirmación al usuario usando el modal personalizado
+    showConfirmModal(
+        'Desinstalar modpack',
+        `¿Estás seguro de que deseas desinstalar el modpack ${modpack.name}? Se eliminará la instancia asociada y todos sus archivos.`,
+        async () => {
+            try {
+                // Mostrar estado
+                showStatus(`Desinstalando modpack ${modpack.name}...`);
+                isModpackOperationInProgress = true;
+                
+                // Eliminar la instancia asociada al modpack
+                const result = await window.api.deleteInstance(instanceId);
+                
+                if (result.success) {
+                    showStatus(`Modpack ${modpack.name} desinstalado correctamente`, 5000);
+                    // Recargar la lista de modpacks para reflejar el cambio
+                    await loadModpacks();
+                } else {
+                    showStatus(`Error al desinstalar el modpack: ${result.error}`, 5000);
+                }
+            } catch (error) {
+                console.error('Error durante la desinstalación del modpack:', error);
+                showStatus('Error durante la desinstalación del modpack', 5000);
+            } finally {
+                isModpackOperationInProgress = false;
+            }
         }
-    } catch (error) {
-        console.error('Error durante la desinstalación del modpack:', error);
-        showStatus('Error durante la desinstalación del modpack', 5000);
-    } finally {
-        isModpackOperationInProgress = false;
-    }
+    );
+}
+
+// Función para mostrar el modal de confirmación personalizado
+function showConfirmModal(title, message, onConfirm) {
+    const modal = document.getElementById('modpackConfirmModal');
+    const titleElement = document.getElementById('confirmModalTitle');
+    const textElement = document.getElementById('confirmModalText');
+    const acceptButton = document.getElementById('confirmModalAccept');
+    const cancelButton = document.getElementById('confirmModalCancel');
+    const closeButton = document.getElementById('closeConfirmModal');
+    
+    // Establecer título y mensaje
+    titleElement.textContent = title;
+    textElement.textContent = message;
+    
+    // Mostrar el modal
+    modal.style.display = 'flex';
+    
+    // Limpiar event listeners anteriores
+    const newAcceptButton = acceptButton.cloneNode(true);
+    const newCancelButton = cancelButton.cloneNode(true);
+    const newCloseButton = closeButton.cloneNode(true);
+    
+    acceptButton.parentNode.replaceChild(newAcceptButton, acceptButton);
+    cancelButton.parentNode.replaceChild(newCancelButton, cancelButton);
+    closeButton.parentNode.replaceChild(newCloseButton, closeButton);
+    
+    // Configurar nuevos event listeners
+    newAcceptButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+        if (onConfirm) onConfirm();
+    });
+    
+    newCancelButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+    
+    newCloseButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+    
+    // Cerrar al hacer clic fuera del modal
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
 }
 
 // Exportar funciones para uso global
 window.initModpacksModule = initModpacksModule;
 window.loadModpacks = loadModpacks;
+window.showConfirmModal = showConfirmModal; // Exportar la función de confirmación

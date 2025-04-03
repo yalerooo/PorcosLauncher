@@ -4,19 +4,38 @@
 @import url("fonts.css");
 
 :root {
+  /* Colores principales */
   --primary: #ff6b8b;
   --primary-hover: #ff4d73;
   --secondary: #ff8fa3;
   --secondary-hover: #ff7a91;
-  --background: #000000;
-  --surface: #1c1c1e;
-  --surface-light: #2c2c2e;
+  
+  /* Fondos y superficies con transparencia para efecto glassmórfico */
+  --background: #0f0f14;
+  --surface: rgba(22, 22, 29, 0.75);
+  --surface-light: rgba(30, 30, 41, 0.8);
+  
+  /* Colores de texto */
   --text: #ffffff;
-  --text-secondary: #adadad;
+  --text-secondary: #b8b8c0;
+  
+  /* Estados */
   --success: #30d158;
   --danger: #ff453a;
-  --border-radius: 12px;
-  --transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  
+  /* Bordes y forma */
+  --border-radius: 14px;
+  --border-color: rgba(255, 255, 255, 0.08);
+  
+  /* Efectos */
+  --accent-glow: 0 0 20px rgba(255, 107, 139, 0.25);
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  --button-shadow: 0 6px 15px rgba(255, 107, 139, 0.2);
+  
+  /* Transiciones */
+  --transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-fast: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-slow: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -33,6 +52,12 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-image: 
+    radial-gradient(circle at 80% 10%, rgba(255, 107, 139, 0.15), transparent 30%),
+    radial-gradient(circle at 20% 90%, rgba(48, 209, 88, 0.1), transparent 35%),
+    radial-gradient(circle at 50% 50%, rgba(30, 30, 90, 0.08), transparent 60%);
+  background-attachment: fixed;
+  overflow: hidden;
 }
 
 .container {
@@ -62,33 +87,60 @@ button {
 
 input,
 select {
-  background-color: var(--surface-light);
+  background-color: rgba(30, 30, 41, 0.5);
   color: var(--text);
   padding: 12px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   font-size: 14px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 input:focus,
 select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(255, 107, 139, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 107, 139, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
+  outline: none;
 }
 
 button {
   background-color: var(--primary);
   color: white;
-  font-weight: 500;
+  font-weight: 600;
   padding: 12px 18px;
   cursor: pointer;
   border: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--button-shadow);
   font-size: 14px;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 button:hover {
   background-color: var(--primary-hover);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 107, 139, 0.3);
+}
+
+button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+  z-index: -1;
+}
+
+button:hover::after {
+  left: 100%;
 }
 
 /* --- Layout Principal (Sidebar y Contenido) --- */
@@ -99,8 +151,11 @@ button:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid var(--border-color);
   z-index: 10;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Nueva estructura de sidebar para instancias */
@@ -110,13 +165,16 @@ button:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid var(--border-color);
   z-index: 950; /* Mayor que top-bar (900) para estar por encima */
   width: 70px; /* Ancho fijo para mantener consistencia */
   position: fixed; /* Fijar posición */
   top: 45px; /* Posición debajo de la barra de título */
   bottom: 0;
   left: 0;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
 }
 
 .versions-sidebar {
@@ -126,14 +184,17 @@ button:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid var(--border-color);
   z-index: 10;
   transform: translateX(-100%);
   position: fixed;
   top: 45px; /* 45px (title-bar) + 60px (top-bar) */
   bottom: 0;
   left: 70px;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
 }
 
 .versions-sidebar.active {
@@ -141,20 +202,41 @@ button:hover {
 }
 
 .launcher-logo {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   margin-bottom: 30px;
   background-image: url("../assets/logo.jpg");
   background-size: cover;
   background-position: center;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05);
   transition: var(--transition);
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  animation: float 6s ease-in-out infinite, fadeInScale 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .launcher-logo:hover {
-  transform: scale(1.05);
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(255, 107, 139, 0.2);
+}
+
+.launcher-logo::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.launcher-logo:hover::after {
+  opacity: 1;
 }
 
 .instance-button,
@@ -206,7 +288,8 @@ button:hover {
 .instance-button:hover .instance-logo,
 .version-button:hover .version-logo {
   background-color: rgba(255, 107, 139, 0.1);
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(255, 107, 139, 0.2);
 }
 
 .instance-logo.selected,
@@ -214,6 +297,7 @@ button:hover {
   background-color: var(--primary);
   color: white;
   box-shadow: 0 2px 8px rgba(255, 107, 139, 0.3);
+  animation: pulse 2s infinite;
 }
 
 .instance-add-icon,
@@ -350,18 +434,45 @@ button:hover {
 }
 /* Top bar icon styles */
 .top-bar-icon {
-    width: 20px;
-    height: 20px;
+    width: 32px;
+    height: 32px;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin-left: 10px;
     cursor: pointer;
     opacity: 0.7;
     transition: var(--transition);
     color: white; /* Default color */
+    animation: fadeInScale 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    position: relative;
+    overflow: hidden;
 }
 
 .top-bar-icon:hover {
     opacity: 1;
     color: var(--primary); /* Hover color */
     transform: scale(1.1);
+    animation: pulse 2s infinite;
+}
+
+.top-bar-icon::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 107, 139, 0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 8px;
+}
+
+.top-bar-icon:hover::after {
+    opacity: 1;
 }
 
 
@@ -397,6 +508,7 @@ button:hover {
 
 .content-section.active {
   display: block;
+  animation: rotateIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* --- Home Section --- */
@@ -406,22 +518,30 @@ button:hover {
 }
 
 #home h1 {
-  font-size: 32px;
-  margin-bottom: 15px;
+  font-size: 34px;
+  margin-bottom: 18px;
   background: linear-gradient(45deg, var(--primary), var(--secondary));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
+  position: relative;
+  letter-spacing: -0.5px;
+  text-shadow: 0 4px 12px rgba(255, 107, 139, 0.1);
+  animation: fadeInScale 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 #home p {
   color: var(--text-secondary);
   margin-bottom: 40px;
   font-size: 16px;
-  line-height: 1.5;
-  max-width: 600px;
+  line-height: 1.6;
+  max-width: 650px;
   margin-left: auto;
   margin-right: auto;
+  animation: fadeIn 0.6s ease-out;
+  font-weight: 400;
+  letter-spacing: 0.2px;
 }
 
 .minecraft-image {
@@ -437,18 +557,20 @@ button:hover {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(28, 28, 30, 0.9);
+  background-color: rgba(25, 25, 35, 0.8);
   color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 14px 24px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   display: none;
   font-size: 14px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  animation: slideUp 0.3s ease;
+  font-weight: 500;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  animation: slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  letter-spacing: 0.3px;
 }
 
 @keyframes slideUp {
@@ -584,16 +706,17 @@ button:hover {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--surface);
-  border-radius: 4px;
+  background: rgba(30, 30, 41, 0.3);
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--secondary);
-  border-radius: 4px;
-  transition: var(--transition);
+  background: rgba(255, 143, 163, 0.5);
+  border-radius: 8px;
+  border: 2px solid rgba(30, 30, 41, 0.3);
+  transition: var(--transition-fast);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
+  background: rgba(255, 107, 139, 0.7);
 }

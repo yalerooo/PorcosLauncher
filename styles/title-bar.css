@@ -4,20 +4,20 @@
     top: 0;
     left: 0;
     width: 100%;
-    background-color: var(--background);
+    background-color: rgba(15, 15, 20, 0.75);
     z-index: 1000;
     overflow: hidden; /* Prevents scrollbar from appearing */
     height: 45px; /* Fixed height for the title bar */
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    padding: 0 18px;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     -webkit-app-region: drag; /* Makes the title bar draggable */
     user-select: none; /* Prevents text selection */ 
-    -webkit-app-region: drag;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .title-content {
@@ -27,23 +27,34 @@
 }
 
 .title-logo {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     background-image: url('../assets/pigimage.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+    position: relative;
+    transition: var(--transition-fast);
+    animation: float 4s ease-in-out infinite;
 }
 
 .title-bar h2 {
     margin: 0;
     color: var(--text);
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
     font-family: 'Redaction', sans-serif;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     letter-spacing: 0.5px;
+    position: relative;
+    padding-left: 2px;
+    background: linear-gradient(90deg, var(--text), rgba(255, 255, 255, 0.8), var(--text));
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: spotlight 8s linear infinite;
 }
 
 .window-controls {
@@ -53,17 +64,21 @@
 }
 
 .window-control-button {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 4px;
-    border-radius: 4px;
+    margin-left: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transform-style: preserve-3d;
+    transform: translateZ(0);
 }
 
 .window-control-button img {
@@ -72,9 +87,18 @@
 }
 
 .window-control-button:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.window-control-button:hover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+    z-index: -1;
+    animation: spotlight 3s ease infinite;
 }
 
 .window-control-button:active {
@@ -83,8 +107,9 @@
 }
 
 .window-control-button.close:hover {
-    background-color: rgba(232, 17, 35, 0.9);
-    box-shadow: 0 2px 4px rgba(232, 17, 35, 0.4);
+    background-color: rgba(232, 17, 35, 0.85);
+    box-shadow: 0 4px 10px rgba(232, 17, 35, 0.4);
+    animation: shakeX 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .window-control-button.close:hover svg {
@@ -95,11 +120,13 @@
     width: 16px;
     height: 16px;
     color: var(--text-secondary);
-    transition: color 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
 }
 
 .window-control-button:hover svg {
     color: var(--text);
+    transform: scale(1.1);
 }
 
 /* Adjust container to account for fixed title bar */

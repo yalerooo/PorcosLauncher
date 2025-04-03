@@ -953,33 +953,36 @@ document.getElementById('maximize-button').addEventListener('click', () => {
     }
     
     async function deleteSelectedInstance() {
-        if (!confirm(`Are you sure you want to delete this instance? This action cannot be undone.`)) {
-            return;
-        }
-        
-        try {
-            const result = await window.api.deleteInstance(currentEditingInstance);
-            if (result.success) {
-                showStatus("Instance deleted successfully!");
-                closeInstanceEditModal();
-                
-                // If this was the active instance, clear it
-                if (activeInstanceId === currentEditingInstance) {
-                    activeInstanceId = null;
-                    await window.api.setActiveInstance(null);
-                    document.getElementById("versions-sidebar").classList.remove("active");
-                    showSection("home");
+        // Usar el modal personalizado para la confirmación
+        window.showConfirmModal(
+            'Eliminar instancia',
+            `¿Estás seguro de que deseas eliminar esta instancia? Esta acción no se puede deshacer.`,
+            async () => {
+                try {
+                    const result = await window.api.deleteInstance(currentEditingInstance);
+                    if (result.success) {
+                        showStatus("Instancia eliminada correctamente");
+                        closeInstanceEditModal();
+                        
+                        // Si esta era la instancia activa, limpiarla
+                        if (activeInstanceId === currentEditingInstance) {
+                            activeInstanceId = null;
+                            await window.api.setActiveInstance(null);
+                            document.getElementById("versions-sidebar").classList.remove("active");
+                            showSection("home");
+                        }
+                        
+                        // Recargar instancias
+                        await loadInstances();
+                    } else {
+                        showStatus(`Error al eliminar instancia: ${result.error}`);
+                    }
+                } catch (error) {
+                    console.error("Error al eliminar instancia:", error);
+                    showStatus("Error al eliminar instancia.");
                 }
-                
-                // Reload instances
-                await loadInstances();
-            } else {
-                showStatus(`Error deleting instance: ${result.error}`);
             }
-        } catch (error) {
-            console.error("Error deleting instance:", error);
-            showStatus("Error deleting instance.");
-        }
+        );
     }
     
     async function createInstanceFromModal() {
