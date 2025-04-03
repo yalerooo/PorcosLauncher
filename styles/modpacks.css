@@ -7,6 +7,40 @@
     padding: 20px;
 }
 
+.modpacks-filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+/* Estilos para el dropdown del filtro de modpacks */
+#modpack-filter {
+    background-color: #000000;
+    color: white;
+    border: 1px solid var(--tertiary);
+    border-radius: 5px;
+    padding: 8px 12px;
+    outline: none;
+    appearance: auto;
+}
+
+/* Forzar colores para las opciones */
+#modpack-filter option {
+    background-color: #000000 !important;
+    color: white !important;
+    text-shadow: none !important;
+}
+
+/* Estilos para el hover en las opciones */
+#modpack-filter option:hover,
+#modpack-filter option:focus,
+#modpack-filter option:checked {
+    background-color: var(--primary) !important;
+    color: white !important;
+    box-shadow: none !important;
+}
+
 .modpacks-header {
     display: flex;
     justify-content: space-between;
@@ -237,8 +271,8 @@
 }
 
 .modpack-filter select {
-    background-color: rgba(255, 255, 255, 0.1);
-    border: none;
+    background-color: var(--primary-bg);
+    border: 1px solid var(--tertiary);
     color: white;
     padding: 8px 15px;
     border-radius: 5px;

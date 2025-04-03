@@ -55,7 +55,8 @@ async function downloadAndExtract(url, destinationDir, keepArchive = false, save
                     if (state === 'progressing') {
                         const received = item.getReceivedBytes();
                         const total = item.getTotalBytes();
-                        const progress = total > 0 ? (received / total) * 100 : 0;
+                        // Enviar progreso como decimal (0-1) en lugar de porcentaje (0-100)
+                        const progress = total > 0 ? received / total : 0;
                         progressCallback(progress);
                     }
                 });

@@ -463,8 +463,23 @@ function showStatus(message, duration = 3000) {
 
 // Inicialización del módulo de modpacks
 function initModpacksModule() {
+    // Forzar estilos para el dropdown y sus opciones
+    const modpackFilter = document.getElementById('modpack-filter');
+    
+    // Estilos para el dropdown principal
+    modpackFilter.style.backgroundColor = '#000000';
+    modpackFilter.style.color = 'white';
+    modpackFilter.style.border = '1px solid #ff66c4'; // Borde con el color principal
+    
+    // Aplicar estilos inline a todas las opciones
+    const options = modpackFilter.options;
+    for (let i = 0; i < options.length; i++) {
+        options[i].style.backgroundColor = '#000000';
+        options[i].style.color = 'white';
+    }
+    
     // Configurar event listeners para el filtro y búsqueda
-    document.getElementById('modpack-filter').addEventListener('change', function() {
+    modpackFilter.addEventListener('change', function() {
         currentFilter = this.value;
         filterAndDisplayModpacks();
     });
