@@ -10,6 +10,21 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+/* Decorative elements for console */
+.console-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 107, 139, 0.2), rgba(79, 172, 254, 0.2), rgba(255, 107, 139, 0.2));
+  z-index: 5;
+  opacity: 0.5;
 }
 
 .console-header {
@@ -26,6 +41,18 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Add iconic element to console header */
+.console-header h3::before {
+  content: ">";
+  font-family: monospace;
+  font-size: 16px;
+  color: rgba(255, 107, 139, 0.8);
+  font-weight: bold;
 }
 
 .console-header .console-actions {
@@ -59,6 +86,9 @@
   font-size: 12px;
   line-height: 1.5;
   color: #e0e0e0;
+  position: relative;
+  z-index: 2;
+  background-color: rgba(20, 20, 22, 0.8);
 }
 
 .console-content::-webkit-scrollbar {
@@ -86,18 +116,38 @@
 
 .console-line.debug {
   color: #7986cb; /* Azul claro */
+  text-shadow: 0 0 5px rgba(121, 134, 203, 0.1);
 }
 
 .console-line.info {
   color: #81c784; /* Verde claro */
+  text-shadow: 0 0 5px rgba(129, 199, 132, 0.1);
 }
 
 .console-line.error {
   color: #e57373; /* Rojo claro */
+  text-shadow: 0 0 5px rgba(229, 115, 115, 0.2);
 }
 
 .console-line.minecraft {
   color: #ffb74d; /* Naranja claro */
+  text-shadow: 0 0 5px rgba(255, 183, 77, 0.1);
+}
+
+/* Background pattern for console */
+.console-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  z-index: 1;
 }
 
 /* Responsive adjustments */

@@ -297,7 +297,6 @@ button:hover::after {
   background-color: var(--primary);
   color: white;
   box-shadow: 0 2px 8px rgba(255, 107, 139, 0.3);
-  animation: pulse 2s infinite;
 }
 
 .instance-add-icon,
