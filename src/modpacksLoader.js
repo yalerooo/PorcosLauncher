@@ -317,6 +317,10 @@ async function startModpackInstallation(modpackId, instanceName) {
             showStatus(`Modpack instalado correctamente en la instancia "${result.instanceName}"`, 5000);
             // Recargar la lista de modpacks para reflejar el cambio
             await loadModpacks();
+            // Recargar la lista de instancias para mostrar la nueva instancia
+            if (window.loadInstances) {
+                await window.loadInstances();
+            }
         } else {
             showStatus(`Error al instalar el modpack: ${result.error}`, 5000);
         }
@@ -387,6 +391,10 @@ async function startModpackUpdate(instanceId, modpackId) {
             showStatus(`Modpack actualizado correctamente${result.message ? `: ${result.message}` : ''}`, 5000);
             // Recargar la lista de modpacks para reflejar el cambio
             await loadModpacks();
+            // Recargar la lista de instancias para mostrar los cambios
+            if (window.loadInstances) {
+                await window.loadInstances();
+            }
         } else {
             showStatus(`Error al actualizar el modpack: ${result.error}`, 5000);
         }

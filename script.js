@@ -713,6 +713,9 @@ window.showSection = function showSection(sectionId) {
         }
     }
     
+    // Exponer la función loadInstances al objeto window para que pueda ser llamada desde otros módulos
+    window.loadInstances = loadInstances;
+    
     function addCreateInstanceButton() {
         const instancesSidebar = document.getElementById("instances-sidebar");
         
@@ -1003,6 +1006,9 @@ window.showSection = function showSection(sectionId) {
     }
     
     async function deleteSelectedInstance() {
+        // Primero cerrar el modal de edición para evitar que quede por encima
+        closeInstanceEditModal();
+        
         // Usar el modal personalizado para la confirmación
         window.showConfirmModal(
             'Eliminar instancia',
@@ -1012,7 +1018,6 @@ window.showSection = function showSection(sectionId) {
                     const result = await window.api.deleteInstance(currentEditingInstance);
                     if (result.success) {
                         showStatus("Instancia eliminada correctamente");
-                        closeInstanceEditModal();
                         
                         // Si esta era la instancia activa, limpiarla
                         if (activeInstanceId === currentEditingInstance) {

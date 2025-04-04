@@ -104,6 +104,17 @@ async function installModpack(modpack, instanceId, progressCallback) {
         
         await saveModpacksRegistry(registry);
         
+        // Establecer el icono del modpack como icono de la instancia
+        if (modpack.icon) {
+            try {
+                const { updateInstance } = require('./instances');
+                await updateInstance(instanceId, { icon: modpack.icon });
+            } catch (iconError) {
+                console.error('Error al establecer el icono del modpack:', iconError);
+                // No interrumpimos la instalación si falla el establecimiento del icono
+            }
+        }
+        
         return { success: true };
     } catch (error) {
         console.error('Error installing modpack:', error);
