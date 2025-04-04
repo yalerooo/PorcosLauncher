@@ -188,13 +188,19 @@
             <h2>Settings</h2>
 
             <div class="memory-setting">
-                <label for="minMemory">Minimum Memory:</label>
-                <input type="text" id="minMemory" value="2G">
+                <div class="memory-label-container">
+                    <label for="minMemory">Minimum Memory:</label>
+                    <span class="memory-value" id="minMemoryValue">2G</span>
+                </div>
+                <input type="range" id="minMemory" min="1" max="8" value="2" step="1" class="memory-slider">
             </div>
 
             <div class="memory-setting">
-                <label for="maxMemory">Maximum Memory:</label>
-                <input type="text" id="maxMemory" value="4G">
+                <div class="memory-label-container">
+                    <label for="maxMemory">Maximum Memory:</label>
+                    <span class="memory-value" id="maxMemoryValue">4G</span>
+                </div>
+                <input type="range" id="maxMemory" min="2" max="32" value="4" step="1" class="memory-slider">
             </div>
 
             <div class="update-section">

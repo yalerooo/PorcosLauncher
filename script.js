@@ -214,8 +214,18 @@ window.showSection = function showSection(sectionId) {
             const settings = await window.api.getSettings();
             document.getElementById('minecraftURLInput').value = settings.minecraftURL;
             document.getElementById('modsURLInput').value = settings.modsURL || '';
-            document.getElementById('minMemory').value = settings.minMemory;
-            document.getElementById('maxMemory').value = settings.maxMemory;
+            
+            // Extraer el valor numérico de la memoria (quitar la 'G')
+            const minMemoryValue = parseInt(settings.minMemory);
+            const maxMemoryValue = parseInt(settings.maxMemory);
+            
+            // Actualizar los sliders
+            document.getElementById('minMemory').value = minMemoryValue;
+            document.getElementById('maxMemory').value = maxMemoryValue;
+            
+            // Actualizar los valores mostrados
+            document.getElementById('minMemoryValue').textContent = settings.minMemory;
+            document.getElementById('maxMemoryValue').textContent = settings.maxMemory;
             
             // Cargar tema seleccionado
             if (settings.theme) {
@@ -243,6 +253,31 @@ window.showSection = function showSection(sectionId) {
                 document.getElementById('secondaryHoverColor').value = settings.secondaryHoverColor;
                 document.documentElement.style.setProperty('--secondary-hover', settings.secondaryHoverColor);
             }
+            
+            // Configurar event listeners para los sliders de memoria
+            document.getElementById('minMemory').addEventListener('input', function() {
+                const value = this.value + 'G';
+                document.getElementById('minMemoryValue').textContent = value;
+                
+                // Asegurarse de que minMemory no sea mayor que maxMemory
+                const maxMemory = parseInt(document.getElementById('maxMemory').value);
+                if (parseInt(this.value) > maxMemory) {
+                    document.getElementById('maxMemory').value = this.value;
+                    document.getElementById('maxMemoryValue').textContent = value;
+                }
+            });
+
+            document.getElementById('maxMemory').addEventListener('input', function() {
+                const value = this.value + 'G';
+                document.getElementById('maxMemoryValue').textContent = value;
+                
+                // Asegurarse de que maxMemory no sea menor que minMemory
+                const minMemory = parseInt(document.getElementById('minMemory').value);
+                if (parseInt(this.value) < minMemory) {
+                    document.getElementById('minMemory').value = this.value;
+                    document.getElementById('minMemoryValue').textContent = value;
+                }
+            });
         } catch (error) {
             console.error("Error loading settings:", error);
             showStatus("Error loading settings.");
@@ -271,8 +306,8 @@ window.showSection = function showSection(sectionId) {
             username: document.getElementById("username").value,
             minecraftURL: document.getElementById("minecraftURLInput").value,
             modsURL: document.getElementById("modsURLInput").value,
-            minMemory: document.getElementById("minMemory").value,
-            maxMemory: document.getElementById("maxMemory").value,
+            minMemory: document.getElementById("minMemoryValue").textContent,
+            maxMemory: document.getElementById("maxMemoryValue").textContent,
             theme: document.getElementById("themeSelector").value,
             primaryColor: document.getElementById("primaryColor").value,
             primaryHoverColor: document.getElementById("primaryHoverColor").value,
