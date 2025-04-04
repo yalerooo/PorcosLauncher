@@ -1987,6 +1987,7 @@ window.showSection = function showSection(sectionId) {
     // --- Inicialización ---
     async function init() {
         await loadSettings();
+        await loadUsername(); // Añadir carga del nombre de usuario
         await loadInstances();
         
         // Inicializar el módulo de modpacks
