@@ -3,15 +3,19 @@
   width: 100%;
   max-width: 800px;
   height: 300px;
-  margin: 0 auto 20px;
-  background-color: rgba(20, 20, 22, 0.9);
-  border-radius: 12px;
+  margin: 30px auto 20px; /* Aumentado el margen superior para separarlo */
+  background-color: rgba(20, 20, 22, 0.5); /* Reducida la opacidad para el efecto glassmorphic */
+  border-radius: 16px; /* Incrementado el border-radius para un aspecto más moderno */
   border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
   position: relative;
+  
+  /* Efecto glassmorphic */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 /* Decorative elements for console */
@@ -22,18 +26,39 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, rgba(255, 107, 139, 0.2), rgba(79, 172, 254, 0.2), rgba(255, 107, 139, 0.2));
+  background: linear-gradient(90deg, rgba(255, 107, 139, 0.3), rgba(79, 172, 254, 0.3), rgba(255, 107, 139, 0.3));
   z-index: 5;
-  opacity: 0.5;
+  opacity: 0.8; /* Incrementada la opacidad del borde superior */
+}
+
+/* Nuevo efecto de brillo en las esquinas */
+.console-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 50%, rgba(255, 255, 255, 0.05));
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 .console-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 15px;
-  background-color: rgba(30, 30, 32, 0.9);
+  padding: 12px 15px; /* Incrementado padding vertical */
+  background-color: rgba(30, 30, 32, 0.6); /* Reducida la opacidad */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
 }
 
 .console-header h3 {
@@ -88,7 +113,7 @@
   color: #e0e0e0;
   position: relative;
   z-index: 2;
-  background-color: rgba(20, 20, 22, 0.8);
+  background-color: rgba(20, 20, 22, 0.4); /* Reducida la opacidad */
 }
 
 .console-content::-webkit-scrollbar {
@@ -96,16 +121,17 @@
 }
 
 .console-content::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
 }
 
 .console-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 4px;
 }
 
 .console-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .console-line {
@@ -116,22 +142,22 @@
 
 .console-line.debug {
   color: #7986cb; /* Azul claro */
-  text-shadow: 0 0 5px rgba(121, 134, 203, 0.1);
+  text-shadow: 0 0 5px rgba(121, 134, 203, 0.2); /* Incrementado el brillo del texto */
 }
 
 .console-line.info {
   color: #81c784; /* Verde claro */
-  text-shadow: 0 0 5px rgba(129, 199, 132, 0.1);
+  text-shadow: 0 0 5px rgba(129, 199, 132, 0.2); /* Incrementado el brillo del texto */
 }
 
 .console-line.error {
   color: #e57373; /* Rojo claro */
-  text-shadow: 0 0 5px rgba(229, 115, 115, 0.2);
+  text-shadow: 0 0 5px rgba(229, 115, 115, 0.3); /* Incrementado el brillo del texto */
 }
 
 .console-line.minecraft {
   color: #ffb74d; /* Naranja claro */
-  text-shadow: 0 0 5px rgba(255, 183, 77, 0.1);
+  text-shadow: 0 0 5px rgba(255, 183, 77, 0.2); /* Incrementado el brillo del texto */
 }
 
 /* Background pattern for console */
@@ -142,7 +168,7 @@
   right: 0;
   bottom: 0;
   pointer-events: none;
-  opacity: 0.03;
+  opacity: 0.05; /* Incrementada ligeramente la opacidad */
   background-image: 
     linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
@@ -154,5 +180,6 @@
 @media (max-width: 768px) {
   .console-container {
     height: 200px;
+    margin: 25px auto 20px; /* Ajustado el margen en pantallas pequeñas */
   }
 }
