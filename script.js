@@ -181,7 +181,7 @@ window.showSection = function showSection(sectionId) {
             const appTitle = document.getElementById('app-title');
             if (appTitle) {
                 if (sectionId === "home") {
-                    appTitle.textContent = "Porco's Launcher";
+                    appTitle.textContent = "Porcos Launcher";
                     document.getElementById('version-info-header').textContent = '';
                 } else if (sectionId === "settings") {
                     appTitle.textContent = "Settings";
