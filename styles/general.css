@@ -12,8 +12,8 @@
   
   /* Fondos y superficies con transparencia para efecto glassmórfico */
   --background: #0f0f14;
-  --surface: rgba(22, 22, 29, 0.75);
-  --surface-light: rgba(30, 30, 41, 0.8);
+  --surface: rgba(22, 22, 29, 0.65); /* Más transparente */
+  --surface-light: rgba(30, 30, 41, 0.7); /* Más transparente */
   
   /* Colores de texto */
   --text: #ffffff;
@@ -58,6 +58,11 @@ body {
     radial-gradient(circle at 50% 50%, rgba(30, 30, 90, 0.08), transparent 60%);
   background-attachment: fixed;
   overflow: hidden;
+  /* Añadir un sutil desenfoque al body si hay algo detrás (efecto limitado en apps de escritorio base) */
+  /* background-color: rgba(15, 15, 20, 0.85); /* Fondo ligeramente transparente */
+  /* backdrop-filter: blur(2px); */
+  /* -webkit-backdrop-filter: blur(2px); */
+  /* Nota: Aplicar backdrop-filter al body puede no ser muy efectivo sin un fondo en <html> o contenedor padre */
 }
 
 .container {
@@ -153,8 +158,8 @@ button:hover::after {
   align-items: center;
   border-right: 1px solid var(--border-color);
   z-index: 10;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(15px); /* Aumentado desenfoque */
+  -webkit-backdrop-filter: blur(15px); /* Aumentado desenfoque */
   box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -172,9 +177,9 @@ button:hover::after {
   top: 45px; /* Posición debajo de la barra de título */
   bottom: 0;
   left: 0;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(18px); /* Aumentado desenfoque */
+  -webkit-backdrop-filter: blur(18px); /* Aumentado desenfoque */
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15); /* Sombra ligeramente más pronunciada */
 }
 
 .versions-sidebar {
@@ -192,8 +197,8 @@ button:hover::after {
   bottom: 0;
   left: 70px;
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(18px); /* Aumentado desenfoque */
+  -webkit-backdrop-filter: blur(18px); /* Aumentado desenfoque */
   box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -387,17 +392,18 @@ button:hover::after {
   position: fixed;
   top: 45px; /* Posición debajo de la barra de título */
   left: 70px; /* Espacio para instances-sidebar */
-  right: 70px; /* Espacio simétrico en el lado derecho */
+  right: 0px; /* Ocupa todo el ancho restante */
+  background-color: var(--surface); /* Usa la variable actualizada */
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 25px;
+  height: 60px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 15px 25px;
-  background-color: rgba(28, 28, 30, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  z-index: 900; /* Menor que la barra de título pero mayor que otros elementos */
-  transition: left 0.3s ease, width 0.3s ease; /* Añadir transición suave */
+  justify-content: space-between;
+  z-index: 900;
+  backdrop-filter: blur(15px); /* Aumentado desenfoque */
+  -webkit-backdrop-filter: blur(15px); /* Aumentado desenfoque */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .version-info {
