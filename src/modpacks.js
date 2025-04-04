@@ -107,8 +107,13 @@ async function installModpack(modpack, instanceId, progressCallback) {
         // Establecer el icono del modpack como icono de la instancia
         if (modpack.icon) {
             try {
+                // Descargar la imagen y convertirla a base64
+                const iconResponse = await axios.get(modpack.icon, { responseType: 'arraybuffer' });
+                const contentType = iconResponse.headers['content-type'];
+                const iconBase64 = `data:${contentType};base64,${Buffer.from(iconResponse.data).toString('base64')}`;
+                
                 const { updateInstance } = require('./instances');
-                await updateInstance(instanceId, { icon: modpack.icon });
+                await updateInstance(instanceId, { icon: iconBase64 });
             } catch (iconError) {
                 console.error('Error al establecer el icono del modpack:', iconError);
                 // No interrumpimos la instalación si falla el establecimiento del icono
@@ -222,6 +227,22 @@ async function updateModpack(instanceId, modpackId, progressCallback) {
         registry.installedModpacks[installedIndex].installedDate = new Date().toISOString();
         
         await saveModpacksRegistry(registry);
+        
+        // Actualizar el icono de la instancia con el icono del modpack actualizado
+        if (latestVersion.icon) {
+            try {
+                // Descargar la imagen y convertirla a base64
+                const iconResponse = await axios.get(latestVersion.icon, { responseType: 'arraybuffer' });
+                const contentType = iconResponse.headers['content-type'];
+                const iconBase64 = `data:${contentType};base64,${Buffer.from(iconResponse.data).toString('base64')}`;
+                
+                const { updateInstance } = require('./instances');
+                await updateInstance(instanceId, { icon: iconBase64 });
+            } catch (iconError) {
+                console.error('Error al actualizar el icono del modpack:', iconError);
+                // No interrumpimos la actualización si falla el establecimiento del icono
+            }
+        }
         
         return { success: true };
     } catch (error) {
