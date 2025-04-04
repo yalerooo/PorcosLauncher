@@ -164,7 +164,7 @@ document.getElementById('maximize-button').addEventListener('click', () => {
     let activeInstanceId = null;
 
     // --- Helper Functions ---
-    window.showSection = function showSection(sectionId) {
+window.showSection = function showSection(sectionId) {
         // Ocultar todas las secciones
         document.querySelectorAll('.content-section').forEach(section => {
             section.classList.remove('active');
@@ -191,10 +191,12 @@ document.getElementById('maximize-button').addEventListener('click', () => {
                     document.getElementById('version-info-header').textContent = '';
                 } else if (sectionId === "version-details" && selectedVersionButton) {
                     // Si es la sección de detalles de versión y hay una versión seleccionada
-                    const versionName = selectedVersionButton.querySelector('.version-name').textContent;
-                    appTitle.textContent = versionName;
-                    const versionId = selectedVersionButton.getAttribute('data-version-id');
-                    loadVersionBackground(versionId, activeInstanceId);
+                    // No modificamos el título aquí ya que loadVersionName se encarga de eso
+                    // Solo cargamos el fondo si es necesario
+                    const versionId = selectedVersionButton.dataset.version; // Usar dataset.version que sabemos que existe
+                    if (versionId) {
+                        loadVersionBackground(versionId, activeInstanceId);
+                    }
                 }
             }
         }
@@ -292,9 +294,13 @@ document.getElementById('maximize-button').addEventListener('click', () => {
         try {
             const storedName = await window.api.getVersionName(versionId, activeInstanceId);
             const appTitle = document.getElementById("app-title");
+            const versionInfoHeader = document.getElementById("version-info-header");
 
             appTitle.textContent = storedName || "Installation Name";
             appTitle.dataset.versionId = versionId;
+            
+            // Mostrar el ID de la versión en el encabezado
+            versionInfoHeader.textContent = `Version: ${versionId}`;
 
             if (selectedVersionButton) {
                 selectedVersionButton.title = storedName || "Installation Name";
