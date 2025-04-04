@@ -395,6 +395,15 @@ window.showSection = function showSection(sectionId) {
 
     // --- Event Handlers ---
     document.getElementById("launcher-logo").addEventListener("click", async () => {
+        // Añadir clase de animación de pulsación
+        const logo = document.getElementById("launcher-logo");
+        logo.classList.add("pulse-click");
+        
+        // Quitar la clase después de que termine la animación
+        setTimeout(() => {
+            logo.classList.remove("pulse-click");
+        }, 500); // 500ms es la duración de la animación
+        
         if (selectedInstanceButton) {
             selectedInstanceButton.querySelector(".instance-logo").classList.remove("selected");
         }
