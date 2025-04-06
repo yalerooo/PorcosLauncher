@@ -34,9 +34,10 @@ async function launchMinecraft(options, customMinecraftPath, customLauncher = nu
         }
     };
 
-    const baseMemory = {
-        max: options.maxMemory,
-        min: options.minMemory
+    // Configuración de memoria base
+    let baseMemory = {
+        max: options.maxMemory + "G",
+        min: options.minMemory + "G"
     };
 
     const gameVersion = options.versionId.split('-')[0];
@@ -98,10 +99,20 @@ async function launchMinecraft(options, customMinecraftPath, customLauncher = nu
     }
 
     // Launch the game with the configured loader
+    // Asegurarse de que la configuración de memoria del usuario tenga prioridad
+    // sobre cualquier configuración que pueda venir de los loaders
+    if (launchConfig.memory) {
+        delete launchConfig.memory; // Eliminar cualquier configuración de memoria que venga del loader
+    }
+    
+    // Usar siempre la configuración de memoria del usuario
+    console.log(`Usando configuración de memoria: Min ${options.minMemory} - Max ${options.maxMemory}`);
+    // No forzar valores específicos para ningún loader
+    
     return gameLauncher.launch({
         ...launchConfig,
         authorization: baseAuth,
-        memory: baseMemory,
+        memory: baseMemory, // Usar siempre la memoria configurada por el usuario
         javaPath: options.javaPath || JAVA_PATH
     });
 }
