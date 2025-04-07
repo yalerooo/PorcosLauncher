@@ -44,6 +44,46 @@ async function extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, 
 }
 
 async function downloadAndExtract(url, destinationDir, keepArchive = false, saveAs = null, progressCallback = null) {
+    // Convertir url a array si es una cadena
+    const urls = Array.isArray(url) ? url : [url];
+    
+    // Resultado final
+    let finalResult = { success: true, path: destinationDir };
+    
+    // Procesar cada URL secuencialmente
+    for (let i = 0; i < urls.length; i++) {
+        const currentUrl = urls[i];
+        const currentIndex = i;
+        const totalUrls = urls.length;
+        
+        try {
+            // Notificar progreso de múltiples archivos
+            if (progressCallback && totalUrls > 1) {
+                progressCallback({ multipart: true, current: currentIndex + 1, total: totalUrls, status: 'downloading' });
+            }
+            
+            // Descargar y extraer el archivo actual
+            const result = await downloadSingleFile(currentUrl, destinationDir, keepArchive, saveAs, progressCallback);
+            
+            // Si hay un error en cualquier archivo, fallar toda la operación
+            if (!result.success) {
+                return result;
+            }
+            
+            // Actualizar el resultado con información adicional si es necesario
+            if (result.isExecutable) {
+                finalResult.isExecutable = true;
+                finalResult.filePath = result.filePath;
+            }
+        } catch (error) {
+            return { success: false, error: `Error en parte ${currentIndex + 1}/${totalUrls}: ${error.message}` };
+        }
+    }
+    
+    return finalResult;
+}
+
+async function downloadSingleFile(url, destinationDir, keepArchive = false, saveAs = null, progressCallback = null) {
     return new Promise((resolve, reject) => {
         const win = BrowserWindow.getFocusedWindow();
         win.webContents.downloadURL(url);

@@ -80,9 +80,25 @@ async function installModpack(modpack, instanceId, progressCallback) {
     try {
         const minecraftPath = getInstanceMinecraftPath(instanceId);
         
+        // Recopilar todas las URLs de descarga disponibles
+        const downloadUrls = [];
+        
+        // Añadir la URL principal
+        if (modpack.downloadUrl) {
+            downloadUrls.push(modpack.downloadUrl);
+        }
+        
+        // Añadir URLs adicionales (downloadUrl2, downloadUrl3, etc.)
+        for (let i = 2; i <= 10; i++) { // Soportar hasta 10 partes
+            const urlKey = `downloadUrl${i}`;
+            if (modpack[urlKey]) {
+                downloadUrls.push(modpack[urlKey]);
+            }
+        }
+        
         // Descargar y extraer el modpack
         const downloadResult = await downloadAndExtract(
-            modpack.downloadUrl, 
+            downloadUrls, 
             minecraftPath, 
             false, 
             null, 
@@ -209,9 +225,25 @@ async function updateModpack(instanceId, modpackId, progressCallback) {
             }
         }
         
+        // Recopilar todas las URLs de descarga disponibles
+        const downloadUrls = [];
+        
+        // Añadir la URL principal
+        if (latestVersion.downloadUrl) {
+            downloadUrls.push(latestVersion.downloadUrl);
+        }
+        
+        // Añadir URLs adicionales (downloadUrl2, downloadUrl3, etc.)
+        for (let i = 2; i <= 10; i++) { // Soportar hasta 10 partes
+            const urlKey = `downloadUrl${i}`;
+            if (latestVersion[urlKey]) {
+                downloadUrls.push(latestVersion[urlKey]);
+            }
+        }
+        
         // Descargar y extraer la nueva versión
         const downloadResult = await downloadAndExtract(
-            latestVersion.downloadUrl, 
+            downloadUrls, 
             minecraftPath, 
             false, 
             null, 

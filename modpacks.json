@@ -1,0 +1,58 @@
+{
+  "modpacks": [
+    {
+      "id": "porcosland3",
+      "name": "PorcosLand 3",
+      "version": "1.0.0",
+      "description": "Modpack oficial del servidor Porcos Survival",
+      "minecraftVersion": "1.20.1",
+      "forgeVersion": "47.2.0",
+      "downloadUrl": "https://github.com/yalerooo/myApis/releases/download/Porcosland3Prueba/porcospackPrueba.rar",
+      "filesToDelete": [
+        "mods/oldmod.jar",
+        "config/oldconfig.cfg"
+      ],
+      "icon": "https://github.com/yalerooo/myApis/blob/main/porcosLauncher/modpack-icons/Minecraft_Launcher.png?raw=true"
+    },
+    {
+      "id": "tilescubilet",
+      "name": "Tiles Cubilet",
+      "version": "1.0.0",
+      "description": "Modpack oficial de Entre Tiles",
+      "minecraftVersion": "1.21.4",
+      "forgeVersion": "36.2.39",
+      "downloadUrl": "https://github.com/yalerooo/myApis/releases/download/EntreTiles/EntreTiles.rar",
+      "filesToDelete": [
+      ],
+      "icon": "https://github.com/yalerooo/myApis/blob/main/porcosLauncher/modpack-icons/pack.png?raw=true"
+    },
+    {
+      "id": "tilescubilet",
+      "name": "Tiles Cubilet",
+      "version": "1.1.0",
+      "description": "Modpack oficial de Entre Tiles",
+      "minecraftVersion": "1.21.4",
+      "forgeVersion": "36.2.39",
+      "downloadUrl": "https://github.com/yalerooo/myApis/releases/download/EntreTilesv1.1/modstilers.rar",
+      "filesToDelete": [
+      ],
+      "icon": "https://github.com/yalerooo/myApis/blob/main/porcosLauncher/modpack-icons/pack.png?raw=true"
+    },
+    {
+      "id": "porcosland2",
+      "name": "PorcosLand 2",
+      "version": "1.0.0",
+      "description": "Modpack oficial de PorcosLand 2",
+      "minecraftVersion": "1.20.1",
+      "forgeVersion": "47.4.39",
+      "downloadUrl": "https://github.com/yalerooo/myApis/releases/download/Porcosland2/porcosland2_part1.rar",
+      "downloadUrl2": "https://github.com/yalerooo/myApis/releases/download/Porcosland2/porcosland2_part2.rar",
+      "downloadUrl3": "https://github.com/yalerooo/myApis/releases/download/Porcosland2/porcosland2_part3.rar",
+      "downloadUrl4": "https://github.com/yalerooo/myApis/releases/download/Porcosland2/porcosland2_part4.rar",
+      "downloadUrl5": "https://github.com/yalerooo/myApis/releases/download/Porcosland2/porcosland2_part5.rar",
+      "filesToDelete": [
+      ],
+      "icon": "https://github.com/yalerooo/myApis/blob/main/porcosLauncher/modpack-icons/porcosland.png?raw=true"
+    }
+  ]
+}
