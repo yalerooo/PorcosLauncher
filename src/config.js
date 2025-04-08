@@ -13,7 +13,9 @@ function getPorcoslandPath() {
 }
 
 function getJavaPath() {
-    return path.join(getPorcoslandPath(), 'runtime', 'jdk-24', 'bin', 'javaw.exe');
+    const isWindows = process.platform === 'win32';
+    const javaExecutable = isWindows ? 'javaw.exe' : 'java';
+    return path.join(getPorcoslandPath(), 'runtime', 'jdk-24', 'bin', javaExecutable);
 }
 
 function getCustomMinecraftPath() {
@@ -57,7 +59,8 @@ function setActiveInstance(instanceId) {
 // Función para copiar el JDK incluido a la carpeta .porcosLauncher
 async function copyJavaRuntime() {
     try {
-        const sourceDir = path.join(process.cwd(), 'assets', 'runtime', 'jdk-24');
+        const { app } = require('electron');
+        const sourceDir = path.join(app.getAppPath(), 'assets', 'runtime', 'jdk-24');
         const targetDir = path.join(getPorcoslandPath(), 'runtime', 'jdk-24');
         
         // Verificar si el directorio fuente existe

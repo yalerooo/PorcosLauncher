@@ -1,12 +1,14 @@
 {
   "name": "porcos-launcher",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "src/main.js",
   "description": "Minecraft Launcher for Porcos Server",
   "author": "Porcos Team",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
   },
   "build": {
     "appId": "com.porcos.launcher",
@@ -14,6 +16,18 @@
     "win": {
       "target": "nsis",
       "icon": "resources/ico.ico"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "resources/icon.png",
+      "category": "Game",
+      "executableName": "PorcosLauncher",
+      "maintainer": "Porcos Team",
+      "desktop": {
+        "Name": "PorcosLauncher",
+        "Comment": "Minecraft Launcher for Porcos Server",
+        "Categories": "Game;Utility"
+      }
     },
     "nsis": {
       "oneClick": false,

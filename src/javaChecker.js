@@ -15,7 +15,8 @@ async function checkJavaVersion() {
     
     return new Promise((resolve) => {
         // Usar el Java incluido en .porcosLauncher/runtime/jdk-24
-        const javaPath = getJavaPath().replace('javaw.exe', 'java.exe');
+        const isWindows = process.platform === 'win32';
+        const javaPath = isWindows ? getJavaPath().replace('javaw.exe', 'java.exe') : getJavaPath();
         const command = `"${javaPath}" -version`;
         
         console.log('Verificando Java incluido en:', javaPath);
@@ -27,7 +28,10 @@ async function checkJavaVersion() {
             if (error) {
                 console.error('Error al verificar Java incluido:', error);
                 // Algo salió mal con el Java incluido, intentar usar el Java incluido en el paquete
-                const fallbackJavaPath = path.join(process.cwd(), 'assets', 'runtime', 'jdk-24', 'bin', 'java.exe');
+                const { app } = require('electron');
+                const isWindows = process.platform === 'win32';
+                const javaExecutable = isWindows ? 'java.exe' : 'java';
+                const fallbackJavaPath = path.join(app.getAppPath(), 'assets', 'runtime', 'jdk-24', 'bin', javaExecutable);
                 console.log('Intentando usar Java alternativo en:', fallbackJavaPath);
                 
                 // Verificar si existe este Java alternativo

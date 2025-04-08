@@ -119,10 +119,12 @@ async function downloadUpdate(mainWindow, downloadUrl) {
             }
         };
         
-        const result = await downloadAndExtract(downloadUrl, tempDir, true, 'update.exe', progressCallback);
+        const isWindows = process.platform === 'win32';
+        const updateFileName = isWindows ? 'update.exe' : 'update.AppImage';
+        const result = await downloadAndExtract(downloadUrl, tempDir, true, updateFileName, progressCallback);
         
         if (result.success) {
-            const updateExePath = path.join(tempDir, 'update.exe');
+            const updateFilePath = path.join(tempDir, updateFileName);
             
             // Mostrar diálogo de confirmación para instalar
             dialog.showMessageBox(mainWindow, {
@@ -135,7 +137,7 @@ async function downloadUpdate(mainWindow, downloadUrl) {
             }).then(({ response }) => {
                 if (response === 0) {
                     // Ejecutar el instalador y cerrar la aplicación
-                    shell.openPath(updateExePath).then(() => {
+                    shell.openPath(updateFilePath).then(() => {
                         app.quit();
                     });
                 }

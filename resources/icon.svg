@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- This is a simple pig icon SVG based on the application name "PorcosLauncher" -->
+  <circle cx="256" cy="256" r="240" fill="#f48fb1" />
+  <!-- Pig face -->
+  <circle cx="180" cy="200" r="30" fill="#000" />
+  <circle cx="332" cy="200" r="30" fill="#000" />
+  <!-- Pig snout -->
+  <ellipse cx="256" cy="300" rx="80" ry="60" fill="#ffcdd2" />
+  <circle cx="230" cy="300" r="15" fill="#000" />
+  <circle cx="282" cy="300" r="15" fill="#000" />
+  <!-- Pig ears -->
+  <path d="M120 150 L180 180 L160 100 Z" fill="#f48fb1" />
+  <path d="M392 150 L332 180 L352 100 Z" fill="#f48fb1" />
+</svg>
