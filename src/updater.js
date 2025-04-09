@@ -50,10 +50,17 @@ async function checkForUpdates(currentVersion) {
                     const updateInfo = JSON.parse(data);
                     const hasUpdate = isNewerVersion(currentVersion, updateInfo.version);
                     
+                    // Seleccionar la URL de descarga según la plataforma
+                    const isWindows = process.platform === 'win32';
+                    const downloadUrl = isWindows ? updateInfo.downloadUrl : (updateInfo.downloadUrlLinux || updateInfo.downloadUrl);
+                    
+                    console.log(`Plataforma: ${process.platform}, usando URL: ${downloadUrl}`);
+                    console.log(`Versión actual: ${currentVersion}, última versión: ${updateInfo.version}, hay actualización: ${hasUpdate}`);
+                    
                     resolve({
                         hasUpdate,
                         latestVersion: updateInfo.version,
-                        downloadUrl: updateInfo.downloadUrl,
+                        downloadUrl: downloadUrl,
                         releaseNotes: updateInfo.releaseNotes
                     });
                 } catch (error) {
