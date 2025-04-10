@@ -15,7 +15,9 @@ const { checkJavaVersion, showJavaRequirementDialog } = require('./javaChecker')
 let mainWindow;
 
 async function createWindow() { //  Make createWindow async
-
+    // Importar el módulo downloader para establecer la referencia a la ventana principal
+    const { setMainWindow } = require('./downloader');
+    
     // Get saved window state (or defaults)
     const savedWindowState = await getWindowState();
 
@@ -48,6 +50,9 @@ async function createWindow() { //  Make createWindow async
     });
 
     mainWindow.loadFile("index.html");
+    
+    // Establecer la referencia a la ventana principal en el módulo downloader
+    setMainWindow(mainWindow);
     
     // Inicializar la instancia activa o la carpeta .minecraft por defecto
     const activeInstance = getActiveInstance();

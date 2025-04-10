@@ -6,41 +6,85 @@ const AdmZip = require('adm-zip');
 const unrar = require('node-unrar-js');
 
 async function extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, progressCallback) {
-    // Notificar que estamos extrayendo
-    if (progressCallback) {
-        progressCallback('extracting');
-    }
-    
-    const extractor = await unrar.createExtractorFromData({ data: rarBuffer });
-    const list = extractor.getFileList();
-    const fileNames = [];
-    for (const header of list.fileHeaders) {
-        fileNames.push(header.name);
-    }
-    const extracted = extractor.extract({ files: fileNames });
-    for (const file of extracted.files) {
-        if (file.fileHeader.flags.directory) {
-            continue;
+    try {
+        // Notificar que estamos extrayendo
+        if (progressCallback) {
+            progressCallback('extracting');
+            // No configuramos el intervalo aquí, lo haremos después de obtener la lista de archivos
         }
-        const filePath = path.join(destinationDir, file.fileHeader.name);
-        const dirPath = path.dirname(filePath);
-        if (!fs.existsSync(dirPath)) {
-            fs.mkdirSync(dirPath, { recursive: true });
+        
+        console.log('Iniciando extracción de archivo RAR...');
+        const extractor = await unrar.createExtractorFromData({ data: rarBuffer });
+        console.log('Obteniendo lista de archivos...');
+        const list = extractor.getFileList();
+        const fileNames = [];
+        for (const header of list.fileHeaders) {
+            fileNames.push(header.name);
         }
-        if (file.extraction) {
-            fs.writeFileSync(filePath, Buffer.from(file.extraction));
+        
+        console.log(`Extrayendo ${fileNames.length} archivos...`);
+        
+        // Configurar un intervalo para mostrar el progreso de extracción
+        let filesProcessed = 0;
+        const totalFiles = fileNames.length;
+        
+        // Crear un intervalo para actualizar el progreso
+        let extractionInterval;
+        if (progressCallback) {
+            extractionInterval = setInterval(() => {
+                const percentage = totalFiles > 0 ? filesProcessed / totalFiles : 0;
+                progressCallback({ extracting: true, progress: percentage });
+            }, 500); // Actualizar cada medio segundo
         }
+        
+        const extracted = extractor.extract({ files: fileNames });
+        
+        for (const file of extracted.files) {
+            if (file.fileHeader.flags.directory) {
+                continue;
+            }
+            const filePath = path.join(destinationDir, file.fileHeader.name);
+            const dirPath = path.dirname(filePath);
+            if (!fs.existsSync(dirPath)) {
+                fs.mkdirSync(dirPath, { recursive: true });
+            }
+            if (file.extraction) {
+                fs.writeFileSync(filePath, Buffer.from(file.extraction));
+            }
+            
+            filesProcessed++;
+            if (filesProcessed % 10 === 0) {
+                console.log(`Procesados ${filesProcessed} de ${totalFiles} archivos (${Math.round(filesProcessed / totalFiles * 100)}%)...`);
+            }
+        }
+        
+        if (!keepArchive) {
+            fs.unlinkSync(savePath);
+        }
+        
+        // Detener el intervalo de actualizaciones
+        if (progressCallback) {
+            if (typeof extractionInterval !== 'undefined') {
+                clearInterval(extractionInterval);
+            }
+            // Notificar que la extracción ha completado
+            progressCallback('completed');
+        }
+        
+        console.log('Extracción de RAR completada exitosamente');
+        return { success: true, path: destinationDir };
+    } catch (error) {
+        console.error('Error durante la extracción de RAR:', error);
+        // Asegurarse de detener el intervalo en caso de error
+        if (typeof extractionInterval !== 'undefined') {
+            clearInterval(extractionInterval);
+        }
+        // Notificar el error
+        if (progressCallback) {
+            progressCallback('error');
+        }
+        throw error;
     }
-    if (!keepArchive) {
-        fs.unlinkSync(savePath);
-    }
-    
-    // Notificar que la extracción ha completado
-    if (progressCallback) {
-        progressCallback('completed');
-    }
-    
-    return { success: true, path: destinationDir };
 }
 
 async function downloadAndExtract(url, destinationDir, keepArchive = false, saveAs = null, progressCallback = null) {
@@ -85,10 +129,27 @@ async function downloadAndExtract(url, destinationDir, keepArchive = false, save
 
 async function downloadSingleFile(url, destinationDir, keepArchive = false, saveAs = null, progressCallback = null) {
     return new Promise((resolve, reject) => {
-        const win = BrowserWindow.getFocusedWindow();
+        // Usar la ventana principal en lugar de la ventana enfocada para evitar problemas cuando se minimiza
+        const win = mainWindow || BrowserWindow.getAllWindows()[0] || BrowserWindow.getFocusedWindow();
+        if (!win) {
+            return reject(new Error('No se pudo obtener una referencia a la ventana'));
+        }
+        
+        // Configurar un timeout para detectar si la descarga no inicia
+        const downloadTimeout = setTimeout(() => {
+            console.log('Timeout de descarga alcanzado, reintentando...');
+            try {
+                win.webContents.downloadURL(url);
+            } catch (error) {
+                console.error('Error al reintentar descarga:', error);
+            }
+        }, 30000); // 30 segundos
+        
         win.webContents.downloadURL(url);
 
         win.webContents.session.once('will-download', (event, item) => {
+            // Limpiar el timeout de descarga ya que la descarga ha comenzado
+            clearTimeout(downloadTimeout);
             // Set up progress reporting
             if (progressCallback) {
                 item.on('updated', (event, state) => {
@@ -136,17 +197,36 @@ async function downloadSingleFile(url, destinationDir, keepArchive = false, save
                                     progressCallback('extracting');
                                 }
                                 
+                                // Configurar un intervalo para enviar actualizaciones periódicas
+                                const extractionInterval = setInterval(() => {
+                                    if (progressCallback) {
+                                        progressCallback('extracting');
+                                    }
+                                }, 2000); // Cada 2 segundos
+                                
+                                console.log('Iniciando extracción de archivo ZIP...');
                                 const zip = new AdmZip(savePath);
+                                
+                                // Obtener la lista de entradas para poder mostrar progreso
+                                const zipEntries = zip.getEntries();
+                                console.log(`Extrayendo ${zipEntries.length} archivos...`);
+                                
+                                // Extraer todos los archivos
                                 zip.extractAllTo(destinationDir, true);
+                                
                                 if (!keepArchive) {
                                     fs.unlinkSync(savePath);
                                 }
+                                
+                                // Detener el intervalo de actualizaciones
+                                clearInterval(extractionInterval);
                                 
                                 // Notificar que la extracción ha completado
                                 if (progressCallback) {
                                     progressCallback('completed');
                                 }
                                 
+                                console.log('Extracción de ZIP completada exitosamente');
                                 resolve({ success: true, path: destinationDir });
                             } catch (error) {
                                 throw new Error(`ZIP extraction failed: ${error.message}`);
@@ -178,6 +258,7 @@ async function downloadSingleFile(url, destinationDir, keepArchive = false, save
 }
 
 
+// Variable global para mantener referencia a la ventana principal
 let mainWindow;
 
 function createWindow() {
@@ -323,6 +404,12 @@ app.on('will-download', (event, item, webContents) => {
   item.resume();
 });
 
+// Función para establecer la referencia a la ventana principal desde otros módulos
+function setMainWindow(window) {
+  mainWindow = window;
+}
+
 module.exports = {
-  downloadAndExtract
+  downloadAndExtract,
+  setMainWindow
 };

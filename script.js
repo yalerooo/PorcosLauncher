@@ -545,6 +545,11 @@ window.showSection = function showSection(sectionId) {
         // Cerrar el contenedor de progreso
         closeUpdateProgress.addEventListener('click', () => {
             updateProgressContainer.style.display = 'none';
+            // Limpiar el intervalo de extracción si existe
+            if (window.extractionInterval) {
+                clearInterval(window.extractionInterval);
+                window.extractionInterval = null;
+            }
             // Intentar eliminar los event listeners de progreso
             try {
                 window.api.offDownloadProgress();
@@ -556,6 +561,11 @@ window.showSection = function showSection(sectionId) {
         // Cancelar la actualización
         cancelUpdateButton.addEventListener('click', () => {
             updateProgressContainer.style.display = 'none';
+            // Limpiar el intervalo de extracción si existe
+            if (window.extractionInterval) {
+                clearInterval(window.extractionInterval);
+                window.extractionInterval = null;
+            }
             // Intentar eliminar los event listeners de progreso
             try {
                 window.api.offDownloadProgress();
@@ -581,7 +591,16 @@ window.showSection = function showSection(sectionId) {
                 
                 // Mostrar spinner
                 spinner.style.display = 'block';
-                updateProgressStatus.textContent = 'Installing...';
+                updateProgressStatus.textContent = 'Installing...'
+                
+                // Configurar un intervalo para mantener la aplicación respondiendo
+                if (!window.extractionInterval) {
+                    window.extractionInterval = setInterval(() => {
+                        console.log('Manteniendo la aplicación activa durante la extracción...');
+                        // Forzar una pequeña actualización en la UI para mantener la aplicación respondiendo
+                        updateProgressStatus.textContent = 'Installing...' + (new Date().getSeconds() % 2 ? '.' : '');
+                    }, 1000);
+                }
             } else if (data.progress === 'completed') {
                 // Extracción completada
                 const spinner = document.querySelector('.update-progress-spinner');
@@ -590,10 +609,31 @@ window.showSection = function showSection(sectionId) {
                 }
                 updateProgressStatus.textContent = 'Installation completed!';
                 
+                // Limpiar el intervalo de extracción si existe
+                if (window.extractionInterval) {
+                    clearInterval(window.extractionInterval);
+                    window.extractionInterval = null;
+                }
+                
                 // Mostrar el botón de cerrar
                 setTimeout(() => {
                     updateProgressContainer.style.display = 'none';
                 }, 2000);
+            } else if (data.progress === 'error') {
+                // Error durante la extracción
+                const spinner = document.querySelector('.update-progress-spinner');
+                if (spinner) {
+                    spinner.style.display = 'none';
+                }
+                updateProgressBar.style.display = 'block';
+                updateProgressBar.style.backgroundColor = 'var(--danger)';
+                updateProgressStatus.textContent = 'Error during installation';
+                
+                // Limpiar el intervalo de extracción si existe
+                if (window.extractionInterval) {
+                    clearInterval(window.extractionInterval);
+                    window.extractionInterval = null;
+                }
             } else {
                 // Progreso normal de descarga
                 updateProgressBar.style.display = 'block';

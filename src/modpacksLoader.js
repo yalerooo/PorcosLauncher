@@ -457,6 +457,11 @@ function updateProgressBar(progress) {
     } else if (progress === 'completed') {
         progressBar.style.width = '100%';
         progressStatus.textContent = 'Completado';
+    } else if (progress && typeof progress === 'object' && progress.extracting) {
+        // Mostrar el progreso de extracción como porcentaje
+        const percentage = Math.min(Math.round(progress.progress * 100), 100);
+        progressBar.style.width = `${percentage}%`;
+        progressStatus.textContent = `Extrayendo archivos... ${percentage}%`;
     }
 }
 
