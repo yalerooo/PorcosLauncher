@@ -104,17 +104,107 @@ function setActiveInstance(instanceId) {
 async function copyJavaRuntime() {
     try {
         const { app } = require('electron');
-        const sourceDir = path.join(app.getAppPath(), 'assets', 'runtime', 'jdk-24');
-        const targetDir = path.join(getPorcoslandPath(), 'runtime', 'jdk-24');
-        
-        // Verificar si el directorio fuente existe
-        if (!fs.existsSync(sourceDir)) {
-            console.error(`El directorio fuente ${sourceDir} no existe`);
-            return false;
-        }
+        const isWindows = process.platform === 'win32';
+        const { extractTarGz, detectArchitecture } = require('./extractors');
         
         // Crear carpetas necesarias
         await fsPromises.mkdir(path.join(getPorcoslandPath(), 'runtime'), { recursive: true });
+        
+        if (isWindows) {
+            // En Windows, copiar desde el directorio de assets/runtime/windows
+            const sourceDir = path.join(app.getAppPath(), 'assets', 'runtime', 'windows', 'jdk-24');
+            const targetDir = path.join(getPorcoslandPath(), 'runtime', 'jdk-24');
+            
+            // Verificar si el directorio fuente existe
+            if (!fs.existsSync(sourceDir)) {
+                console.error(`El directorio fuente ${sourceDir} no existe`);
+                return false;
+            }
+        } else {
+            // En Linux, extraer el archivo tar.gz según la arquitectura
+            const arch = detectArchitecture();
+            const tarFileName = arch === 'arm64' ? 'jdk-24_linux-aarch64_bin.tar.gz' : 'jdk-24_linux-x64_bin.tar.gz';
+            const tarFilePath = path.join(app.getAppPath(), 'assets', 'runtime', 'linux', tarFileName);
+            const targetDir = path.join(getPorcoslandPath(), 'runtime', 'jdk-24');
+            
+            // Verificar si el archivo tar.gz existe
+            if (!fs.existsSync(tarFilePath)) {
+                console.error(`El archivo ${tarFilePath} no existe`);
+                return false;
+            }
+            
+            // Si el JDK ya existe en el destino, verificar permisos
+            if (fs.existsSync(targetDir)) {
+                console.log('JDK ya está copiado en .porcosLauncher');
+                
+                // Verificar permisos de ejecución en el directorio bin
+                const binDir = path.join(targetDir, 'bin');
+                if (fs.existsSync(binDir)) {
+                    try {
+                        // Listar todos los archivos en el directorio bin
+                        const files = await fsPromises.readdir(binDir);
+                        
+                        // Establecer permisos para cada archivo ejecutable
+                        for (const file of files) {
+                            const filePath = path.join(binDir, file);
+                            const stats = await fsPromises.stat(filePath);
+                            
+                            // Si es un archivo (no directorio)
+                            if (stats.isFile()) {
+                                // Establecer permisos de ejecución (chmod +x)
+                                await fsPromises.chmod(filePath, 0o755);
+                                console.log(`Permisos de ejecución establecidos para ${file}`);
+                            }
+                        }
+                    } catch (chmodError) {
+                        console.error('Error al establecer permisos de ejecución:', chmodError);
+                    }
+                } else {
+                    console.error(`El directorio bin no existe en ${targetDir}`);
+                    // Si no existe el directorio bin, extraer de nuevo el archivo tar.gz
+                    await extractTarGz(tarFilePath, path.join(getPorcoslandPath(), 'runtime'), false);
+                }
+                
+                return true;
+            }
+            
+            // Extraer el archivo tar.gz
+            console.log(`Extrayendo JDK para Linux (${arch}) desde ${tarFilePath}...`);
+            const extractResult = await extractTarGz(tarFilePath, path.join(getPorcoslandPath(), 'runtime'), false);
+            
+            if (!extractResult) {
+                console.error('Error al extraer el archivo tar.gz');
+                return false;
+            }
+            
+            console.log(`JDK extraído exitosamente a ${targetDir}`);
+            
+            // Establecer permisos de ejecución para todos los ejecutables en bin
+            const binDir = path.join(targetDir, 'bin');
+            if (fs.existsSync(binDir)) {
+                try {
+                    // Listar todos los archivos en el directorio bin
+                    const files = await fsPromises.readdir(binDir);
+                    
+                    // Establecer permisos para cada archivo ejecutable
+                    for (const file of files) {
+                        const filePath = path.join(binDir, file);
+                        const stats = await fsPromises.stat(filePath);
+                        
+                        // Si es un archivo (no directorio)
+                        if (stats.isFile()) {
+                            // Establecer permisos de ejecución (chmod +x)
+                            await fsPromises.chmod(filePath, 0o755);
+                            console.log(`Permisos de ejecución establecidos para ${file}`);
+                        }
+                    }
+                } catch (chmodError) {
+                    console.error('Error al establecer permisos de ejecución:', chmodError);
+                }
+            }
+            
+            return true;
+        }
         
         // Si el JDK ya existe en el destino, verificar permisos en Linux
         if (fs.existsSync(targetDir)) {

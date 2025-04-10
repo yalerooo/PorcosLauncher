@@ -18,7 +18,10 @@
       "icon": "resources/ico.ico"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "icon": "resources/icon.png",
       "category": "Game",
       "executableName": "PorcosLauncher",
@@ -49,6 +52,7 @@
     "node-unrar-js": "^2.0.2",
     "quilt": "^0.1.3",
     "sharp": "^0.33.5",
+    "tar": "^7.4.3",
     "tomate-loaders": "^2.0.2",
     "unzipper": "^0.12.3",
     "uuid": "^9.0.1"
