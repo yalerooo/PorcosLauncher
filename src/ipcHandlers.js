@@ -286,8 +286,62 @@ function setupIpcHandlers(mainWindow) {
     ipcMain.handle("open-minecraft-folder", async (event, instanceId) => {
         try {
             const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
-            shell.openPath(minecraftPath);
-            return { success: true };
+            
+            // Verificar si la carpeta existe
+            if (!fs.existsSync(minecraftPath)) {
+                console.error(`La carpeta no existe: ${minecraftPath}`);
+                return { success: false, error: `La carpeta no existe: ${minecraftPath}` };
+            }
+            
+            // En Linux, intentar diferentes métodos para abrir la carpeta
+            if (process.platform === 'linux') {
+                const { exec } = require('child_process');
+                
+                // Lista de comandos a intentar en orden
+                const commands = [
+                    `xdg-open "${minecraftPath}"`,
+                    `gio open "${minecraftPath}"`,
+                    `gnome-open "${minecraftPath}"`,
+                    `kde-open "${minecraftPath}"`,
+                    `nautilus "${minecraftPath}"`,
+                    `dolphin "${minecraftPath}"`,
+                    `thunar "${minecraftPath}"`,
+                    `pcmanfm "${minecraftPath}"`
+                ];
+                
+                // Intentar cada comando hasta que uno funcione
+                for (const cmd of commands) {
+                    try {
+                        exec(cmd, (error) => {
+                            if (!error) {
+                                console.log(`Carpeta abierta con éxito usando: ${cmd}`);
+                            }
+                        });
+                        
+                        // Si llegamos aquí sin error, asumimos que funcionó
+                        return { success: true };
+                    } catch (cmdError) {
+                        console.log(`Comando fallido: ${cmd}`, cmdError);
+                        // Continuar con el siguiente comando
+                    }
+                }
+                
+                // Si todos los comandos fallan, intentar con shell.openPath como último recurso
+                return shell.openPath(minecraftPath)
+                    .then(() => ({ success: true }))
+                    .catch(error => {
+                        console.error("Error al abrir carpeta con shell.openPath:", error);
+                        return { success: false, error: error.message };
+                    });
+            } else {
+                // En Windows y macOS, usar el método estándar
+                return shell.openPath(minecraftPath)
+                    .then(() => ({ success: true }))
+                    .catch(error => {
+                        console.error("Error al abrir carpeta con shell.openPath:", error);
+                        return { success: false, error: error.message };
+                    });
+            }
         } catch (error) {
             console.error("Error opening folder:", error);
             return { success: false, error: error.message };
