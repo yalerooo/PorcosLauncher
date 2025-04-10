@@ -15,7 +15,23 @@ function getPorcoslandPath() {
 function getJavaPath() {
     const isWindows = process.platform === 'win32';
     const javaExecutable = isWindows ? 'javaw.exe' : 'java';
-    return path.join(getPorcoslandPath(), 'runtime', 'jdk-24', 'bin', javaExecutable);
+    
+    // Get the path to the bundled JDK
+    const bundledPath = path.join(getPorcoslandPath(), 'runtime', 'jdk-24', 'bin', javaExecutable);
+    
+    // Check if the bundled Java exists
+    if (fs.existsSync(bundledPath)) {
+        return bundledPath;
+    }
+    
+    // If bundled Java doesn't exist, try to use the Java from assets
+    const fallbackPath = path.join(app.getAppPath(), 'assets', 'runtime', 'jdk-24', 'bin', javaExecutable);
+    if (fs.existsSync(fallbackPath)) {
+        return fallbackPath;
+    }
+    
+    // If neither exists, return the bundled path anyway (will be handled by error handling)
+    return bundledPath;
 }
 
 function getCustomMinecraftPath() {
@@ -75,12 +91,42 @@ async function copyJavaRuntime() {
         // Si el JDK ya existe en el destino, no hacer nada
         if (fs.existsSync(targetDir)) {
             console.log('JDK ya está copiado en .porcosLauncher');
+            
+            // En Linux, asegurarse de que el ejecutable de Java tenga permisos de ejecución
+            if (process.platform !== 'win32') {
+                const javaPath = path.join(targetDir, 'bin', 'java');
+                if (fs.existsSync(javaPath)) {
+                    try {
+                        // Establecer permisos de ejecución (chmod +x)
+                        await fsPromises.chmod(javaPath, 0o755);
+                        console.log('Permisos de ejecución establecidos para Java en Linux');
+                    } catch (chmodError) {
+                        console.error('Error al establecer permisos de ejecución:', chmodError);
+                    }
+                }
+            }
+            
             return true;
         }
         
         // Copiar directorio recursivamente
         await copyDirectory(sourceDir, targetDir);
         console.log(`JDK copiado exitosamente a ${targetDir}`);
+        
+        // En Linux, establecer permisos de ejecución para el ejecutable de Java
+        if (process.platform !== 'win32') {
+            const javaPath = path.join(targetDir, 'bin', 'java');
+            if (fs.existsSync(javaPath)) {
+                try {
+                    // Establecer permisos de ejecución (chmod +x)
+                    await fsPromises.chmod(javaPath, 0o755);
+                    console.log('Permisos de ejecución establecidos para Java en Linux');
+                } catch (chmodError) {
+                    console.error('Error al establecer permisos de ejecución:', chmodError);
+                }
+            }
+        }
+        
         return true;
     } catch (error) {
         console.error('Error al copiar el runtime de Java:', error);
@@ -107,6 +153,19 @@ async function copyDirectory(source, target) {
         } else {
             // Es un archivo, copiarlo directamente
             await fsPromises.copyFile(srcPath, destPath);
+            
+            // En Linux, si el archivo está en el directorio bin y es un ejecutable, establecer permisos
+            if (process.platform !== 'win32' && 
+                entry.name === 'java' && 
+                srcPath.includes(path.join('runtime', 'jdk-24', 'bin'))) {
+                try {
+                    // Establecer permisos de ejecución (chmod +x)
+                    await fsPromises.chmod(destPath, 0o755);
+                    console.log(`Permisos de ejecución establecidos para ${destPath}`);
+                } catch (chmodError) {
+                    console.error(`Error al establecer permisos para ${destPath}:`, chmodError);
+                }
+            }
         }
     }
 }
