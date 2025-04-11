@@ -3,7 +3,7 @@ const { app, BrowserWindow, screen } = require("electron"); // Import 'screen'
 const path = require("path");
 const { setupIpcHandlers } = require("./ipcHandlers");
 const { ensureAssets } = require("./assetManager");
-const { getCustomMinecraftPath, getInstanceMinecraftPath, getActiveInstance, copyJavaRuntime, getPorcoslandPath } = require('./config');
+const { getCustomMinecraftPath, getInstanceMinecraftPath, getActiveInstance, copyJavaRuntime, copyRuntimeFolders, getPorcoslandPath } = require('./config');
 const fs = require('fs');
 const { getWindowState, setWindowState } = require('./storage'); // Import window state functions
 const { initializeMinecraftFolder } = require('./minecraftInitializer'); // Import minecraft initializer
@@ -126,6 +126,15 @@ app.whenReady().then(async () => {
             console.log('JDK copiado correctamente a .porcosLauncher');
         } else {
             console.log('No se pudo copiar el JDK a .porcosLauncher, se usará el JDK incluido en el paquete');
+        }
+        
+        // Copiar las carpetas de runtime (windows y linux) a .porcosLauncher/runtime
+        console.log('Copiando carpetas de runtime (windows y linux)...');
+        const runtimeFoldersCopied = await copyRuntimeFolders();
+        if (runtimeFoldersCopied) {
+            console.log('Carpetas de runtime copiadas correctamente a .porcosLauncher');
+        } else {
+            console.log('No se pudieron copiar todas las carpetas de runtime a .porcosLauncher');
         }
         
         // Verificar el Java incluido en .porcosLauncher/runtime/jdk-24
