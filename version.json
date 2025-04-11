@@ -1,6 +1,6 @@
 {
   "version": "1.3.0",
-  "downloadUrl": "https://github.com/yalerooo/PorcosLauncher/releases/download/v1.2.0/PorcosLauncher.Setup.1.2.0.exe",
-  "downloadUrlLinux": "https://github.com/yalerooo/PorcosLauncher/releases/download/v1.2.0/PorcosLauncher-1.2.0.AppImage",
-  "releaseNotes": "- Visual improvements: Changes have been made to the user interface to enhance the visual appearance of the application, making it more attractive and easier to use.\n- New mods update: Support for the latest version of mods has been added, allowing users to enjoy new features and improvements in their gaming experience.\n- Wallpapers: New wallpapers have been included that users can select to customize the appearance of the application.\n- Bug fixes: Several user-reported bugs have been fixed, improving the overall stability and performance of the application."
+  "downloadUrl": "https://github.com/yalerooo/PorcosLauncher/releases/download/v1.3.0/PorcosLauncher.Setup.1.3.0.exe",
+  "downloadUrlLinux": "https://github.com/yalerooo/PorcosLauncher/releases/download/v1.3.0/PorcosLauncher-1.3.0.AppImage",
+  "releaseNotes": "-Linux support -Extraction fixed -Settings ui updated"
 }
