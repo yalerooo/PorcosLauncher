@@ -81,6 +81,30 @@ function setupIpcHandlers(mainWindow) {
         await removeModpackFromRegistry(instanceId);
         return await deleteInstance(instanceId);
     });
+    
+    // Nuevo manejador para desinstalar modpacks completamente (eliminando la instancia)
+    ipcMain.handle('uninstall-modpack', async (event, instanceId) => {
+        try {
+            // Eliminar el modpack del registro
+            const removeResult = await removeModpackFromRegistry(instanceId);
+            
+            if (!removeResult.success) {
+                return { success: false, error: removeResult.error || 'Error al eliminar el modpack del registro' };
+            }
+            
+            // Eliminar la instancia asociada
+            const deleteResult = await deleteInstance(instanceId);
+            
+            if (!deleteResult.success) {
+                return { success: false, error: deleteResult.error || 'Error al eliminar la instancia asociada' };
+            }
+            
+            return { success: true, message: 'Modpack e instancia eliminados correctamente' };
+        } catch (error) {
+            console.error('Error al desinstalar modpack:', error);
+            return { success: false, error: error.message };
+        }
+    });
 
     ipcMain.handle('get-active-instance', () => {
         return getActiveInstance();

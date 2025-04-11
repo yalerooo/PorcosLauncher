@@ -298,12 +298,23 @@ async function getInstalledModpackByID(modpackId) {
 // Función para eliminar un modpack del registro (al eliminar una instancia)
 async function removeModpackFromRegistry(instanceId) {
     try {
+        // Primero obtenemos el registro actual
         const registry = await getInstalledModpacks();
+        
+        // Filtramos los modpacks para eliminar el que corresponde a la instancia
+        const modpackToRemove = registry.installedModpacks.find(m => m.instanceId === instanceId);
         registry.installedModpacks = registry.installedModpacks.filter(
             m => m.instanceId !== instanceId
         );
+        
+        // Guardamos el registro actualizado
         await saveModpacksRegistry(registry);
-        return { success: true };
+        
+        // Devolvemos información sobre el modpack eliminado para posibles usos posteriores
+        return { 
+            success: true, 
+            removedModpack: modpackToRemove || null 
+        };
     } catch (error) {
         console.error('Error removing modpack from registry:', error);
         return { success: false, error: error.message };

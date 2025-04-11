@@ -542,13 +542,19 @@ async function handleUninstallClick(event) {
                 showStatus(`Desinstalando modpack ${modpack.name}...`);
                 isModpackOperationInProgress = true;
                 
-                // Eliminar la instancia asociada al modpack
-                const result = await window.api.deleteInstance(instanceId);
+                // Eliminar el modpack y la instancia asociada completamente
+                const result = await window.api.uninstallModpack(instanceId);
                 
                 if (result.success) {
                     showStatus(`Modpack ${modpack.name} desinstalado correctamente`, 5000);
+                    
                     // Recargar la lista de modpacks para reflejar el cambio
                     await loadModpacks();
+                    
+                    // Recargar la lista de instancias para reflejar el cambio
+                    if (window.loadInstances) {
+                        await window.loadInstances();
+                    }
                 } else {
                     showStatus(`Error al desinstalar el modpack: ${result.error}`, 5000);
                 }
