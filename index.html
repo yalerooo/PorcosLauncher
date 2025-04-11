@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="styles/modpacks.css"> <!--NEW-->
     <link rel="stylesheet" href="styles/glassmorphic-override.css"> <!--NEW-->
     <link rel="stylesheet" href="styles/animations.css"> <!--NEW-->
+    <link rel="stylesheet" href="styles/custom-update-buttons.css"> <!--NEW CUSTOM BUTTONS-->
 </head>
 <body>
     <div class="title-bar">
@@ -185,89 +186,274 @@
         
         <!-- Settings Section -->
         <div id="settings" class="content-section">
-            <h2>Settings</h2>
-
-            <div class="memory-setting">
-                <div class="memory-label-container">
-                    <label for="minMemory">Minimum Memory:</label>
-                    <span class="memory-value" id="minMemoryValue">2G</span>
-                </div>
-                <input type="range" id="minMemory" min="1" max="8" value="2" step="1" class="memory-slider">
-            </div>
-
-            <div class="memory-setting">
-                <div class="memory-label-container">
-                    <label for="maxMemory">Maximum Memory:</label>
-                    <span class="memory-value" id="maxMemoryValue">4G</span>
-                </div>
-                <input type="range" id="maxMemory" min="2" max="32" value="4" step="1" class="memory-slider">
-            </div>
-
-            <div class="update-section">
-                <div class="update-row">
-                    <label for="minecraftURLInput">Update Minecraft:</label>
-                    <div class="input-container">
-                        <input type="text" id="minecraftURLInput" placeholder="Enter download URL" class="input-url">
-                        <button id="updateMinecraftButton" onclick="updateMinecraft()" class="update-button">Update</button>
+            <div class="settings-container">
+                <!-- Settings Sidebar -->
+                <div class="settings-sidebar">
+                    <div class="settings-nav-item active" data-section="system-section">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                            <rect x="9" y="9" width="6" height="6"></rect>
+                            <line x1="9" y1="1" x2="9" y2="4"></line>
+                            <line x1="15" y1="1" x2="15" y2="4"></line>
+                            <line x1="9" y1="20" x2="9" y2="23"></line>
+                            <line x1="15" y1="20" x2="15" y2="23"></line>
+                            <line x1="20" y1="9" x2="23" y2="9"></line>
+                            <line x1="20" y1="14" x2="23" y2="14"></line>
+                            <line x1="1" y1="9" x2="4" y2="9"></line>
+                            <line x1="1" y1="14" x2="4" y2="14"></line>
+                        </svg>
+                        <span>System</span>
+                    </div>
+                    <div class="settings-nav-item" data-section="updates-section">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <span>Updates</span>
+                    </div>
+                    <div class="settings-nav-item" data-section="appearance-section">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        <span>Appearance</span>
+                    </div>
+                    <div class="settings-nav-item" data-section="about-section">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span>About</span>
                     </div>
                 </div>
-                <div class="update-row">
-                    <label for="modsURLInput">Update Mods:</label>
-                    <div class="input-container">
-                        <input type="text" id="modsURLInput" placeholder="Enter mods download URL" class="input-url">
-                        <button id="updateModsButton" onclick="updateMods()" class="update-button">Update</button>
+                
+                <!-- Settings Content -->
+                <div class="settings-content">
+                    <!-- System Settings -->
+                    <div class="settings-section active" id="system-section">
+                        <div class="settings-header">
+                            <h2>System Settings</h2>
+                            <p>Configure system resources and performance settings</p>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
+                                </svg>
+                                <h3>Memory Allocation</h3>
+                            </div>
+                            <div class="settings-card-content">
+                                <div class="memory-setting">
+                                    <div class="memory-label-container">
+                                        <label for="minMemory">Minimum Memory</label>
+                                        <span class="memory-value" id="minMemoryValue">2G</span>
+                                    </div>
+                                    <input type="range" id="minMemory" min="1" max="8" value="2" step="1" class="memory-slider">
+                                </div>
+
+                                <div class="memory-setting">
+                                    <div class="memory-label-container">
+                                        <label for="maxMemory">Maximum Memory</label>
+                                        <span class="memory-value" id="maxMemoryValue">4G</span>
+                                    </div>
+                                    <input type="range" id="maxMemory" min="2" max="32" value="4" step="1" class="memory-slider">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Updates Settings -->
+                    <div class="settings-section" id="updates-section">
+                        <div class="settings-header">
+                            <h2>Updates</h2>
+                            <p>Manage game and mods updates</p>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                    <polyline points="1 20 1 14 7 14"></polyline>
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                </svg>
+                                <h3>Game & Mods</h3>
+                            </div>
+                            <div class="settings-card-content">
+                                <div class="update-row">
+                                    <label for="minecraftURLInput">Minecraft URL</label>
+                                    <div class="input-container">
+                                        <input type="text" id="minecraftURLInput" placeholder="Enter download URL" class="input-url">
+                                        <button id="updateMinecraftButton" onclick="updateMinecraft()" class="update-button">Update</button>
+                                    </div>
+                                </div>
+                                <div class="update-row">
+                                    <label for="modsURLInput">Mods URL</label>
+                                    <div class="input-container">
+                                        <input type="text" id="modsURLInput" placeholder="Enter mods download URL" class="input-url">
+                                        <button id="updateModsButton" onclick="updateMods()" class="update-button">Update</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                <h3>Launcher Updates</h3>
+                            </div>
+                            <div class="settings-card-content">
+                                <div class="version-info">
+                                    <div class="version-row">
+                                        <span class="version-label">Launcher Version:</span>
+                                        <span id="launcherVersion" class="version-value">1.2.0</span>
+                                    </div>
+                                    <div class="version-actions">
+                                        <button id="checkUpdatesButton" class="action-button">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="23 4 23 10 17 10"></polyline>
+                                                <polyline points="1 20 1 14 7 14"></polyline>
+                                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                            </svg>
+                                            Check for Updates
+                                        </button>
+                                        <button id="checkJavaButton" class="action-button">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                                            </svg>
+                                            Verify Java
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Appearance Settings -->
+                    <div class="settings-section" id="appearance-section">
+                        <div class="settings-header">
+                            <h2>Appearance</h2>
+                            <p>Customize the look and feel of the launcher</p>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="5"></circle>
+                                    <path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"></path>
+                                </svg>
+                                <h3>Theme</h3>
+                            </div>
+                            <div class="settings-card-content">
+                                <div class="theme-select-container">
+                                    <label for="themeSelector">Select Theme</label>
+                                    <select id="themeSelector" class="theme-selector">
+                                        <option value="default">Default (Pink)</option>
+                                        <option value="blue">Blue</option>
+                                        <option value="green">Green</option>
+                                        <option value="purple">Purple</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                                </svg>
+                                <h3>Custom Colors</h3>
+                            </div>
+                            <div class="settings-card-content">
+                                <div class="colors-grid">
+                                    <div class="color-setting">
+                                        <label for="primaryColor">Primary Color</label>
+                                        <input type="color" id="primaryColor" class="color-picker">
+                                    </div>
+
+                                    <div class="color-setting">
+                                        <label for="primaryHoverColor">Primary Hover</label>
+                                        <input type="color" id="primaryHoverColor" class="color-picker">
+                                    </div>
+                                    
+                                    <div class="color-setting">
+                                        <label for="secondaryColor">Secondary Color</label>
+                                        <input type="color" id="secondaryColor" class="color-picker">
+                                    </div>
+
+                                    <div class="color-setting">
+                                        <label for="secondaryHoverColor">Secondary Hover</label>
+                                        <input type="color" id="secondaryHoverColor" class="color-picker">
+                                    </div>
+                                </div>
+                                
+                                <button id="resetColorsButton" class="secondary-button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                        <path d="M3 3v5h5"></path>
+                                    </svg>
+                                    Reset to Default
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- About Section -->
+                    <div class="settings-section" id="about-section">
+                        <div class="settings-header">
+                            <h2>About</h2>
+                            <p>Information about the PorcosLauncher</p>
+                        </div>
+                        
+                        <div class="settings-card about-card">
+                            <div class="about-content">
+                                <div class="launcher-logo">
+                                    <img src="assets/pigimage.png" alt="PorcosLauncher Logo" width="80">
+                                </div>
+                                <div class="about-info">
+                                    <h3>PorcosLauncher</h3>
+                                    <p>Version: <span id="about-version">1.2.0</span></p>
+                                    <p>A custom Minecraft launcher for multiple platforms.</p>
+                                    <div class="platform-support">
+                                        <div class="platform">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                                            </svg>
+                                            <span>Windows</span>
+                                        </div>
+                                        <div class="platform">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="4" y1="9" x2="20" y2="9"></line>
+                                                <line x1="4" y1="15" x2="20" y2="15"></line>
+                                                <line x1="10" y1="3" x2="8" y2="21"></line>
+                                                <line x1="16" y1="3" x2="14" y2="21"></line>
+                                            </svg>
+                                            <span>Linux</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <div class="color-settings-section">
-                <h3>Color Settings</h3>
                 
-                <div class="color-setting">
-                    <label for="themeSelector">Theme:</label>
-                    <select id="themeSelector" class="theme-selector">
-                        <option value="default">Default (Pink)</option>
-                        <option value="blue">Blue</option>
-                        <option value="green">Green</option>
-                        <option value="purple">Purple</option>
-                    </select>
-                </div>
-                
-                <div class="color-setting">
-                    <label for="primaryColor">Primary Color:</label>
-                    <input type="color" id="primaryColor" class="color-picker">
-                </div>
-
-                <div class="color-setting">
-                    <label for="primaryHoverColor">Primary Hover Color:</label>
-                    <input type="color" id="primaryHoverColor" class="color-picker">
-                </div>
-                
-                <div class="color-setting">
-                    <label for="secondaryColor">Secondary Color:</label>
-                    <input type="color" id="secondaryColor" class="color-picker">
-                </div>
-
-                <div class="color-setting">
-                    <label for="secondaryHoverColor">Secondary Hover Color:</label>
-                    <input type="color" id="secondaryHoverColor" class="color-picker">
-                </div>
-
-                <button id="resetColorsButton" class="reset-button">Reset to Default</button>
-            </div>
-            
-            <h3>Actualizaciones</h3>
-            <div class="color-setting">
-                <label>Versión del Launcher:</label>
-                <span id="launcherVersion">1.2.0</span>
-            </div>
-            <div class="color-setting">
-                <button id="checkUpdatesButton" class="reset-button">Verificar Actualizaciones</button>
-                <button id="checkJavaButton" class="reset-button">Verificar Java</button>
-            </div>
-
             <div class="settings-buttons">
-                <button id="saveSettingsButton" onclick="saveSettings()">Save Settings</button>
+                <button id="saveSettingsButton" onclick="saveSettings()" class="primary-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    Save Settings
+                </button>
             </div>
         </div>
 

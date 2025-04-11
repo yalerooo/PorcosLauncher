@@ -1,0 +1,42 @@
+/* Estilos específicos para los botones de actualización */
+
+#updateMinecraftButton.update-button,
+#updateModsButton.update-button,
+button[id="updateMinecraftButton"],
+button[id="updateModsButton"] {
+    /* Usar el color primario del tema actual */
+    background-color: var(--primary) !important;
+    color: white !important;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#updateMinecraftButton.update-button:hover,
+#updateModsButton.update-button:hover,
+button[id="updateMinecraftButton"]:hover,
+button[id="updateModsButton"]:hover {
+    background-color: var(--primary-hover) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#updateMinecraftButton.update-button:active,
+#updateModsButton.update-button:active,
+button[id="updateMinecraftButton"]:active,
+button[id="updateModsButton"]:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

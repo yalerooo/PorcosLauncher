@@ -208,31 +208,64 @@ window.showSection = function showSection(sectionId) {
         }
     }
     
+    // --- Settings Sidebar Navigation ---
+    function setupSettingsSidebar() {
+        const sidebarItems = document.querySelectorAll('.settings-nav-item');
+        const settingsSections = document.querySelectorAll('.settings-section');
+        
+        // Add click event to each sidebar item
+        sidebarItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // Remove active class from all sidebar items
+                sidebarItems.forEach(i => i.classList.remove('active'));
+                
+                // Add active class to clicked item
+                item.classList.add('active');
+                
+                // Hide all settings sections
+                settingsSections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                // Show the corresponding section
+                const targetSection = item.getAttribute('data-section');
+                document.getElementById(targetSection).style.display = 'block';
+            });
+        });
+        
+        // Activate the first sidebar item by default
+        if (sidebarItems.length > 0) {
+            sidebarItems[0].click();
+        }
+    }
+    
     // --- Load and Apply Settings ---
     async function loadSettings() {
         try {
             const settings = await window.api.getSettings();
+            
+            // Update URLs in System settings
             document.getElementById('minecraftURLInput').value = settings.minecraftURL;
             document.getElementById('modsURLInput').value = settings.modsURL || '';
             
-            // Extraer el valor numérico de la memoria (quitar la 'G')
+            // Extract numeric memory values (remove the 'G')
             const minMemoryValue = parseInt(settings.minMemory);
             const maxMemoryValue = parseInt(settings.maxMemory);
             
-            // Actualizar los sliders
+            // Update memory sliders
             document.getElementById('minMemory').value = minMemoryValue;
             document.getElementById('maxMemory').value = maxMemoryValue;
             
-            // Actualizar los valores mostrados
+            // Update displayed memory values
             document.getElementById('minMemoryValue').textContent = settings.minMemory;
             document.getElementById('maxMemoryValue').textContent = settings.maxMemory;
             
-            // Cargar tema seleccionado
+            // Load selected theme in Appearance settings
             if (settings.theme) {
                 document.getElementById('themeSelector').value = settings.theme;
             }
             
-            // Cargar colores primarios
+            // Load primary colors
             if (settings.primaryColor) {
                 document.getElementById('primaryColor').value = settings.primaryColor;
                 document.documentElement.style.setProperty('--primary', settings.primaryColor);
@@ -243,7 +276,7 @@ window.showSection = function showSection(sectionId) {
                 document.documentElement.style.setProperty('--primary-hover', settings.primaryHoverColor);
             }
             
-            // Cargar colores secundarios
+            // Load secondary colors
             if (settings.secondaryColor) {
                 document.getElementById('secondaryColor').value = settings.secondaryColor;
                 document.documentElement.style.setProperty('--secondary', settings.secondaryColor);
@@ -254,12 +287,12 @@ window.showSection = function showSection(sectionId) {
                 document.documentElement.style.setProperty('--secondary-hover', settings.secondaryHoverColor);
             }
             
-            // Configurar event listeners para los sliders de memoria
+            // Setup memory slider event listeners
             document.getElementById('minMemory').addEventListener('input', function() {
                 const value = this.value + 'G';
                 document.getElementById('minMemoryValue').textContent = value;
                 
-                // Asegurarse de que minMemory no sea mayor que maxMemory
+                // Ensure minMemory is not greater than maxMemory
                 const maxMemory = parseInt(document.getElementById('maxMemory').value);
                 if (parseInt(this.value) > maxMemory) {
                     document.getElementById('maxMemory').value = this.value;
@@ -271,12 +304,22 @@ window.showSection = function showSection(sectionId) {
                 const value = this.value + 'G';
                 document.getElementById('maxMemoryValue').textContent = value;
                 
-                // Asegurarse de que maxMemory no sea menor que minMemory
+                // Ensure maxMemory is not less than minMemory
                 const minMemory = parseInt(document.getElementById('minMemory').value);
                 if (parseInt(this.value) < minMemory) {
                     document.getElementById('minMemory').value = this.value;
                     document.getElementById('minMemoryValue').textContent = value;
                 }
+            });
+            
+            // Setup color picker event listeners
+            document.querySelectorAll('.settings-color-picker input[type="color"]').forEach(colorPicker => {
+                colorPicker.addEventListener('input', function() {
+                    const colorVar = this.dataset.colorVar;
+                    if (colorVar) {
+                        document.documentElement.style.setProperty(colorVar, this.value);
+                    }
+                });
             });
         } catch (error) {
             console.error("Error loading settings:", error);
@@ -2074,6 +2117,9 @@ window.showSection = function showSection(sectionId) {
         if (typeof window.initModpacksModule === 'function') {
             window.initModpacksModule();
         }
+        
+        // Configurar la navegación de la barra lateral de configuraciones
+        setupSettingsSidebar();
         
         // Asegurar que siempre se inicie en la pantalla de inicio
         showSection("home");
