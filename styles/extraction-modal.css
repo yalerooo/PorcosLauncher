@@ -1,0 +1,126 @@
+/* Estilos para el modal de extracciu00f3n de archivos */
+.extraction-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.extraction-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.extraction-content {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(var(--primary-rgb), 0.2);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    animation: fadeInScale 0.3s forwards;
+}
+
+.extraction-title {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.extraction-title svg {
+    color: var(--primary);
+    width: 20px;
+    height: 20px;
+}
+
+.extraction-details {
+    margin-bottom: 20px;
+}
+
+.extraction-status {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+.extraction-file-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.extraction-progress-bar {
+    height: 6px;
+    background-color: rgba(var(--primary-rgb), 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.extraction-progress-fill {
+    height: 100%;
+    background-color: var(--primary);
+    width: 0%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.extraction-cancel {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid rgba(var(--primary-rgb), 0.2);
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.extraction-cancel:hover {
+    background-color: rgba(var(--primary-rgb), 0.05);
+    color: var(--text);
+}
+
+/* Animaciu00f3n del modal */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Spinner de carga */
+.extraction-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(var(--primary-rgb), 0.2);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: extraction-spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes extraction-spin {
+    to { transform: rotate(360deg); }
+}

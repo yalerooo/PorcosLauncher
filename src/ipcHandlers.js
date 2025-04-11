@@ -20,6 +20,11 @@ function setupIpcHandlers(mainWindow) {
         return true;
     });
     
+    // Manejar mensaje desde el renderer para minimizar la ventana
+    ipcMain.on('minimize-window', () => {
+        if (mainWindow) mainWindow.minimize();
+    });
+    
     ipcMain.handle('maximize-window', () => {
         if (mainWindow) {
             if (mainWindow.isMaximized()) {
