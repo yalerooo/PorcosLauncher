@@ -2,3 +2,4 @@
 modules filter=lfs diff=lfs merge=lfs -text
 assets/runtime/linux/jdk-24_linux-x64_bin.tar.gz filter=lfs diff=lfs merge=lfs -text
 assets/runtime/linux/jdk-24_linux-aarch64_bin.tar.gz filter=lfs diff=lfs merge=lfs -text
+assets/runtime/** filter=lfs diff=lfs merge=lfs -text
