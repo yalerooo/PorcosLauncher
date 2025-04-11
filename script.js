@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById('themeSelector').addEventListener('change', function() {
         const selectedTheme = this.value;
         applyTheme(selectedTheme);
+        saveCurrentSettings(); // Guardar automáticamente
     });
     
     // Función para aplicar un tema
@@ -71,24 +72,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Configurar event listeners para los controles de color
     document.getElementById('primaryColor').addEventListener('input', function() {
         document.documentElement.style.setProperty('--primary', this.value);
+        saveCurrentSettings(); // Guardar automáticamente
     });
     
     document.getElementById('primaryHoverColor').addEventListener('input', function() {
         document.documentElement.style.setProperty('--primary-hover', this.value);
+        saveCurrentSettings(); // Guardar automáticamente
     });
     
     document.getElementById('secondaryColor').addEventListener('input', function() {
         document.documentElement.style.setProperty('--secondary', this.value);
+        saveCurrentSettings(); // Guardar automáticamente
     });
     
     document.getElementById('secondaryHoverColor').addEventListener('input', function() {
         document.documentElement.style.setProperty('--secondary-hover', this.value);
+        saveCurrentSettings(); // Guardar automáticamente
     });
     
     // Configurar el botón de reset de colores
     document.getElementById('resetColorsButton').addEventListener('click', function() {
         document.getElementById('themeSelector').value = 'default';
         applyTheme('default');
+        saveCurrentSettings(); // Guardar automáticamente
     });
     
     // Configurar el botón de verificar actualizaciones
@@ -298,6 +304,9 @@ window.showSection = function showSection(sectionId) {
                     document.getElementById('maxMemory').value = this.value;
                     document.getElementById('maxMemoryValue').textContent = value;
                 }
+                
+                // Guardar automáticamente
+                saveCurrentSettings();
             });
 
             document.getElementById('maxMemory').addEventListener('input', function() {
@@ -310,6 +319,9 @@ window.showSection = function showSection(sectionId) {
                     document.getElementById('minMemory').value = this.value;
                     document.getElementById('minMemoryValue').textContent = value;
                 }
+                
+                // Guardar automáticamente
+                saveCurrentSettings();
             });
             
             // Setup color picker event listeners
@@ -318,8 +330,18 @@ window.showSection = function showSection(sectionId) {
                     const colorVar = this.dataset.colorVar;
                     if (colorVar) {
                         document.documentElement.style.setProperty(colorVar, this.value);
+                        saveCurrentSettings(); // Guardar automáticamente
                     }
                 });
+            });
+            
+            // Setup URL input event listeners for auto-save
+            document.getElementById('minecraftURLInput').addEventListener('input', function() {
+                saveCurrentSettings(); // Guardar automáticamente
+            });
+            
+            document.getElementById('modsURLInput').addEventListener('input', function() {
+                saveCurrentSettings(); // Guardar automáticamente
             });
         } catch (error) {
             console.error("Error loading settings:", error);
@@ -364,8 +386,7 @@ window.showSection = function showSection(sectionId) {
         document.documentElement.style.setProperty('--primary-hover', settings.primaryHoverColor);
         document.documentElement.style.setProperty('--secondary', settings.secondaryColor);
         document.documentElement.style.setProperty('--secondary-hover', settings.secondaryHoverColor);
-        
-        showStatus("Settings saved successfully.");
+        // No mostramos notificación para el guardado automático
     }
 
     async function loadVersionName(versionId) {
