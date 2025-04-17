@@ -17,7 +17,8 @@ async function extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, 
             console.log('Iniciando extracción de archivo RAR en segundo plano...');
             
             // Crear un trabajador para manejar la extracción en segundo plano
-            const workerPath = path.join(__dirname, 'extraction-worker.js');
+            const { app } = require('electron');
+            const workerPath = path.join(app.getAppPath(), 'src', 'extraction-worker.js');
             const worker = new Worker(workerPath, {
                 workerData: {
                     rarBuffer,
