@@ -398,8 +398,37 @@ window.showSection = function showSection(sectionId) {
             appTitle.textContent = storedName || "Installation Name";
             appTitle.dataset.versionId = versionId;
             
-            // Mostrar el ID de la versión en el encabezado
-            versionInfoHeader.textContent = `Version: ${versionId}`;
+            // Mostrar el nombre amigable en el encabezado
+            let friendlyName = versionId;
+            if (versionId.startsWith("fabric-loader-")) {
+                const parts = versionId.split("-");
+                if (parts.length >= 4 && parts[0] === "fabric" && parts[1] === "loader") {
+                    const mcVersion = parts.slice(3).join("-");
+                    friendlyName = `Fabric ${mcVersion}`;
+                }
+            } else if (versionId.startsWith("forge-")) {
+                const parts = versionId.split("-");
+                if (parts.length >= 3 && parts[0] === "forge") {
+                    friendlyName = `Forge ${parts[1]}`;
+                }
+            } else if (versionId.startsWith("neoforge-")) {
+                const parts = versionId.split("-");
+                if (parts.length >= 3 && parts[0] === "neoforge") {
+                    friendlyName = `NeoForge ${parts[1]}`;
+                }
+            } else if (versionId.startsWith("quilt-loader-")) {
+                const parts = versionId.split("-");
+                if (parts.length >= 4 && parts[0] === "quilt" && parts[1] === "loader") {
+                    const mcVersion = parts.slice(3).join("-");
+                    friendlyName = `Quilt ${mcVersion}`;
+                }
+            } else if (versionId.startsWith("vanilla-")) {
+                const parts = versionId.split("-");
+                if (parts.length >= 2 && parts[0] === "vanilla") {
+                    friendlyName = `Vanilla ${parts[1]}`;
+                }
+            }
+            versionInfoHeader.textContent = `Version: ${friendlyName}`;
 
             if (selectedVersionButton) {
                 selectedVersionButton.title = storedName || "Installation Name";
@@ -641,29 +670,50 @@ window.showSection = function showSection(sectionId) {
         
         // Manejar eventos de progreso de descarga y extracción
         window.api.onDownloadProgress((event, data) => {
-            if (data.progress === 'extracting') {
-                // Estamos extrayendo, mostrar spinner y mensaje de instalación
-                updateProgressBar.style.display = 'none';
-                
-                // Crear spinner si no existe
-                let spinner = document.querySelector('.update-progress-spinner');
-                if (!spinner) {
-                    spinner = document.createElement('div');
-                    spinner.className = 'loading-spinner update-progress-spinner';
-                    updateProgressBar.parentNode.insertBefore(spinner, updateProgressBar);
-                }
-                
-                // Mostrar spinner
-                spinner.style.display = 'block';
-                updateProgressStatus.textContent = 'Installing...'
-                
-                // Configurar un intervalo para mantener la aplicación respondiendo
-                if (!window.extractionInterval) {
-                    window.extractionInterval = setInterval(() => {
-                        console.log('Manteniendo la aplicación activa durante la extracción...');
-                        // Forzar una pequeña actualización en la UI para mantener la aplicación respondiendo
-                        updateProgressStatus.textContent = 'Installing...' + (new Date().getSeconds() % 2 ? '.' : '');
-                    }, 1000);
+            if (data.progress === 'extracting' || (typeof data.progress === 'object' && data.progress.extracting)) {
+                // Verificar si tenemos información de progreso de extracción
+                if (typeof data.progress === 'object' && data.progress.extracting && typeof data.progress.progress === 'number') {
+                    // Mostrar el progreso de extracción como porcentaje
+                    updateProgressBar.style.display = 'block';
+                    const percentage = Math.min(Math.round(data.progress.progress * 100), 100);
+                    updateProgressBar.style.width = `${percentage}%`;
+                    updateProgressStatus.textContent = `Extrayendo archivos... ${percentage}%`;
+                    
+                    // No necesitamos el spinner ni el intervalo si tenemos progreso real
+                    const spinner = document.querySelector('.update-progress-spinner');
+                    if (spinner) {
+                        spinner.style.display = 'none';
+                    }
+                    
+                    // Limpiar el intervalo si existe
+                    if (window.extractionInterval) {
+                        clearInterval(window.extractionInterval);
+                        window.extractionInterval = null;
+                    }
+                } else {
+                    // Comportamiento anterior para cuando no hay progreso detallado
+                    updateProgressBar.style.display = 'none';
+                    
+                    // Crear spinner si no existe
+                    let spinner = document.querySelector('.update-progress-spinner');
+                    if (!spinner) {
+                        spinner = document.createElement('div');
+                        spinner.className = 'loading-spinner update-progress-spinner';
+                        updateProgressBar.parentNode.insertBefore(spinner, updateProgressBar);
+                    }
+                    
+                    // Mostrar spinner
+                    spinner.style.display = 'block';
+                    updateProgressStatus.textContent = 'Instalando...'
+                    
+                    // Configurar un intervalo para mantener la aplicación respondiendo
+                    if (!window.extractionInterval) {
+                        window.extractionInterval = setInterval(() => {
+                            console.log('Manteniendo la aplicación activa durante la extracción...');
+                            // Forzar una pequeña actualización en la UI para mantener la aplicación respondiendo
+                            updateProgressStatus.textContent = 'Instalando...' + (new Date().getSeconds() % 2 ? '.' : '');
+                        }, 1000);
+                    }
                 }
             } else if (data.progress === 'completed') {
                 // Extracción completada
@@ -733,6 +783,7 @@ window.showSection = function showSection(sectionId) {
                 
                 const instanceLogo = document.createElement("div");
                 instanceLogo.classList.add("instance-logo");
+                instanceLogo.setAttribute("data-name", instance.name);
                 
                 // Check if instance has an icon
                 if (instance.icon) {
@@ -1182,16 +1233,74 @@ window.showSection = function showSection(sectionId) {
             
             console.log("Loading versions for instance:", instanceId, "Found versions:", versions.length);
             
-            // Añadir botones de versiones
-            for (const version of versions) {
+            // Filtrar versiones: excluir solo la versión básica de fabric (ej: fabric-1.21.4), mostrar el resto
+            const filteredVersions = versions.filter(v => {
+                // Excluir solo si es exactamente 'fabric-' seguido de la versión de MC, sin loader
+                if (/^fabric-\d/.test(v.id)) return false;
+                return true;
+            });
+            filteredVersions.forEach(version => {
+                // Usar el nombre almacenado como base
+                let displayName = version.name;
+                // Si no hay nombre almacenado, construir uno amigable según el tipo
+                if (!displayName || displayName.trim() === "") {
+                    if (version.id.startsWith("fabric-loader-")) {
+                        // Formato: fabric-loader-<loaderVersion>-<mcVersion>
+                        const parts = version.id.split("-");
+                        if (parts.length >= 4 && parts[0] === "fabric" && parts[1] === "loader") {
+                            const loaderVersion = parts[2];
+                            const mcVersion = parts.slice(3).join("-");
+                            displayName = `Fabric ${mcVersion} (Loader ${loaderVersion})`;
+                        }
+                    } else if (version.id.startsWith("forge-")) {
+                        // Formato: forge-<mcVersion>-<forgeVersion>
+                        const parts = version.id.split("-");
+                        if (parts.length >= 3 && parts[0] === "forge") {
+                            const mcVersion = parts[1];
+                            const forgeVersion = parts[2];
+                            displayName = `Forge ${mcVersion} (${forgeVersion})`;
+                        }
+                    } else if (version.id.startsWith("neoforge-")) {
+                        // Formato: neoforge-<mcVersion>-<neoforgeVersion>
+                        const parts = version.id.split("-");
+                        if (parts.length >= 3 && parts[0] === "neoforge") {
+                            const mcVersion = parts[1];
+                            const neoForgeVersion = parts[2];
+                            displayName = `NeoForge ${mcVersion} (${neoForgeVersion})`;
+                        }
+                    } else if (version.id.startsWith("quilt-loader-")) {
+                        // Formato: quilt-loader-<loaderVersion>-<mcVersion>
+                        const parts = version.id.split("-");
+                        if (parts.length >= 4 && parts[0] === "quilt" && parts[1] === "loader") {
+                            const loaderVersion = parts[2];
+                            const mcVersion = parts.slice(3).join("-");
+                            displayName = `Quilt ${mcVersion} (Loader ${loaderVersion})`;
+                        }
+                    } else if (version.id.startsWith("vanilla-")) {
+                        // Formato: vanilla-<mcVersion>
+                        const parts = version.id.split("-");
+                        if (parts.length >= 2 && parts[0] === "vanilla") {
+                            displayName = `Vanilla ${parts[1]}`;
+                        }
+                    } else {
+                        displayName = version.id;
+                    }
+                }
+                // Crear el botón de versión como antes, pero usando displayName
                 const versionButton = document.createElement("div");
                 versionButton.classList.add("version-button");
                 versionButton.dataset.version = version.id;
-                versionButton.title = version.name;
+                versionButton.title = displayName;
                 
                 const versionLogo = document.createElement("div");
                 versionLogo.classList.add("version-logo");
                 versionButton.appendChild(versionLogo);
+                
+                // Añadir el nombre de la versión
+                const versionName = document.createElement("span");
+                versionName.classList.add("version-name");
+                versionName.textContent = displayName;
+                versionButton.appendChild(versionName);
                 
                 // Botón de edición
                 const editButton = document.createElement("div");
@@ -1225,11 +1334,11 @@ window.showSection = function showSection(sectionId) {
                 });
                 
                 // Actualizar logo
-                await updateVersionLogo(versionButton, version.id);
+                updateVersionLogo(versionButton, version.id);
                 
                 // Añadir a la barra lateral
                 versionsSidebar.appendChild(versionButton);
-            }
+            });
             
             // Añadir botón para crear nueva versión
             addCreateVersionButton();
@@ -1251,6 +1360,7 @@ window.showSection = function showSection(sectionId) {
             <div class="version-add-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
             </div>
+            <span class="version-name">Nueva versión</span>
         `;
         
         // Evento de clic para crear nueva versión

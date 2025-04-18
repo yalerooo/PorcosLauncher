@@ -4,102 +4,87 @@ const fs = require('fs');
 const { URL } = require('url');
 const AdmZip = require('adm-zip');
 const unrar = require('node-unrar-js');
-const { Worker } = require('worker_threads');
 
 async function extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, progressCallback) {
-    return new Promise((resolve, reject) => {
-        try {
-            // Notificar que estamos extrayendo
-            if (progressCallback) {
-                progressCallback('extracting');
-            }
-            
-            console.log('Iniciando extracción de archivo RAR en segundo plano...');
-            
-            // Crear un trabajador para manejar la extracción en segundo plano
-            const { app } = require('electron');
-            const workerPath = path.join(app.getAppPath(), 'src', 'extraction-worker.js');
-            const worker = new Worker(workerPath, {
-                workerData: {
-                    rarBuffer,
-                    destinationDir
-                }
-            });
-            
-            // Escuchar mensajes del trabajador
-            worker.on('message', (message) => {
-                switch(message.type) {
-                    case 'status':
-                        console.log(message.message);
-                        break;
-                    
-                    case 'progress':
-                        console.log(`Procesados ${message.filesProcessed} de ${message.totalFiles} archivos (${message.percentComplete}%)...`);
-                        if (progressCallback) {
-                            progressCallback({ 
-                                extracting: true, 
-                                progress: message.filesProcessed / message.totalFiles,
-                                filesProcessed: message.filesProcessed,
-                                totalFiles: message.totalFiles
-                            });
-                        }
-                        break;
-                    
-                    case 'complete':
-                        console.log(message.message);
-                        
-                        // Eliminar el archivo RAR si no queremos conservarlo
-                        if (!keepArchive && fs.existsSync(savePath)) {
-                            fs.unlinkSync(savePath);
-                        }
-                        
-                        // Notificar que la extracción ha completado
-                        if (progressCallback) {
-                            progressCallback('completed');
-                        }
-                        
-                        resolve({ success: true, path: message.path });
-                        break;
-                    
-                    case 'error':
-                        console.error(message.message);
-                        if (progressCallback) {
-                            progressCallback('error');
-                        }
-                        reject(new Error(message.message));
-                        break;
-                }
-            });
-            
-            // Manejar errores del trabajador
-            worker.on('error', (err) => {
-                console.error('Error en el trabajador de extracción:', err.message);
-                if (progressCallback) {
-                    progressCallback('error');
-                }
-                reject(err);
-            });
-            
-            // Manejar terminación del trabajador
-            worker.on('exit', (code) => {
-                if (code !== 0) {
-                    console.error(`El trabajador de extracción terminó con código de salida ${code}`);
-                    if (progressCallback) {
-                        progressCallback('error');
-                    }
-                    reject(new Error(`Proceso de extracción terminado con código: ${code}`));
-                }
-            });
-            
-        } catch (error) {
-            console.error('Error al iniciar la extracción de RAR:', error);
-            // Notificar el error
-            if (progressCallback) {
-                progressCallback('error');
-            }
-            reject(error);
+    try {
+        // Notificar que estamos extrayendo
+        if (progressCallback) {
+            progressCallback('extracting');
+            // No configuramos el intervalo aquí, lo haremos después de obtener la lista de archivos
         }
-    });
+        
+        console.log('Iniciando extracción de archivo RAR...');
+        const extractor = await unrar.createExtractorFromData({ data: rarBuffer });
+        console.log('Obteniendo lista de archivos...');
+        const list = extractor.getFileList();
+        const fileNames = [];
+        for (const header of list.fileHeaders) {
+            fileNames.push(header.name);
+        }
+        
+        console.log(`Extrayendo ${fileNames.length} archivos...`);
+        
+        // Configurar un intervalo para mostrar el progreso de extracción
+        let filesProcessed = 0;
+        const totalFiles = fileNames.length;
+        
+        // Crear un intervalo para actualizar el progreso
+        let extractionInterval;
+        if (progressCallback) {
+            extractionInterval = setInterval(() => {
+                const percentage = totalFiles > 0 ? filesProcessed / totalFiles : 0;
+                progressCallback({ extracting: true, progress: percentage });
+            }, 500); // Actualizar cada medio segundo
+        }
+        
+        const extracted = extractor.extract({ files: fileNames });
+        
+        for (const file of extracted.files) {
+            if (file.fileHeader.flags.directory) {
+                continue;
+            }
+            const filePath = path.join(destinationDir, file.fileHeader.name);
+            const dirPath = path.dirname(filePath);
+            if (!fs.existsSync(dirPath)) {
+                fs.mkdirSync(dirPath, { recursive: true });
+            }
+            if (file.extraction) {
+                fs.writeFileSync(filePath, Buffer.from(file.extraction));
+            }
+            
+            filesProcessed++;
+            if (filesProcessed % 10 === 0) {
+                console.log(`Procesados ${filesProcessed} de ${totalFiles} archivos (${Math.round(filesProcessed / totalFiles * 100)}%)...`);
+            }
+        }
+        
+        if (!keepArchive) {
+            fs.unlinkSync(savePath);
+        }
+        
+        // Detener el intervalo de actualizaciones
+        if (progressCallback) {
+            if (typeof extractionInterval !== 'undefined') {
+                clearInterval(extractionInterval);
+            }
+            // Notificar que la extracción ha completado
+            progressCallback('completed');
+        }
+        
+        console.log('Extracción de RAR completada exitosamente');
+        return { success: true, path: destinationDir };
+    } catch (error) {
+        console.error('Error durante la extracción de RAR:', error);
+        // Asegurarse de detener el intervalo en caso de error
+        if (typeof extractionInterval !== 'undefined') {
+            clearInterval(extractionInterval);
+        }
+        // Notificar el error
+        if (progressCallback) {
+            progressCallback('error');
+        }
+        throw error;
+    }
 }
 
 async function downloadAndExtract(url, destinationDir, keepArchive = false, saveAs = null, progressCallback = null) {

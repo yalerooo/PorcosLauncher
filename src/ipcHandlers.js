@@ -163,9 +163,39 @@ function setupIpcHandlers(mainWindow) {
             
             const instanceId = instanceResult.instance.id;
             
-            // Crear una función para enviar el progreso
-            const progressHandler = (progress) => {
-                event.sender.send('modpack-install-progress', { progress });
+            // Crear una función para enviar el progreso estructurado
+            const progressHandler = (progressData) => {
+                let status = 'downloading'; // Default status
+                let value = 0;
+
+                if (typeof progressData === 'object' && progressData !== null) {
+                    if (progressData.download) {
+                        status = 'downloading';
+                        value = progressData.progress;
+                    } else if (progressData.extracting) {
+                        status = 'extracting';
+                        value = progressData.progress;
+                    } else if (progressData.multipart) {
+                         // Handle multipart download progress (optional, basic example)
+                         status = `downloading_part_${progressData.current}_of_${progressData.total}`;
+                         value = 0; // Or use overall progress if available
+                    }
+                } else if (typeof progressData === 'number') {
+                    // Assume number is download progress if not explicitly extraction
+                    // Or could be extraction progress if the worker sends only numbers
+                    // We need to refine this based on how downloader.js sends progress
+                    status = 'progressing'; // Generic term
+                    value = progressData;
+                } else if (typeof progressData === 'string') {
+                    // Handle status strings like 'extracting', 'completed', 'error'
+                    status = progressData; // e.g., 'extracting', 'completed', 'error'
+                    if (status === 'completed') value = 1.0;
+                    else if (status === 'extracting') value = 0; // Reset progress for extraction phase
+                    else value = 0; // Default for other statuses
+                }
+
+                console.log(`Sending progress: Status=${status}, Value=${value}`);
+                event.sender.send('modpack-install-progress', { status, progress: value });
             };
             
             // Instalar el modpack en la instancia

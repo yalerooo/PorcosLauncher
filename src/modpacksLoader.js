@@ -306,6 +306,29 @@ async function startModpackInstallation(modpackId, instanceName) {
     try {
         // Registrar callback para el progreso
         installProgressCallback = (event, data) => {
+            // data = { status: 'downloading'/'extracting'/'completed'/'error'/'progressing', progress: 0.0-1.0 }
+            let statusText = 'Procesando...';
+            if (data.status === 'downloading') {
+                statusText = 'Descargando...';
+            } else if (data.status === 'extracting') {
+                statusText = 'Extrayendo...';
+            } else if (data.status === 'completed') {
+                statusText = 'Completado.';
+            } else if (data.status === 'error') {
+                statusText = 'Error.';
+            } else if (data.status.startsWith('downloading_part')) {
+                // Extract part numbers if needed, e.g., "Descargando parte 2 de 3..."
+                statusText = 'Descargando partes...'; 
+            } else if (data.status === 'progressing') {
+                 // Generic progress if specific phase isn't clear
+                 statusText = 'Progresando...';
+            }
+            
+            // Update the status text and progress bar
+            const statusElement = document.querySelector('.update-progress-container .status-text');
+            if (statusElement) {
+                statusElement.textContent = statusText;
+            }
             updateProgressBar(data.progress);
         };
         window.api.onModpackInstallProgress(installProgressCallback);
@@ -607,7 +630,7 @@ function showConfirmModal(title, message, onConfirm) {
         modal.style.display = 'none';
     });
     
-    // Cerrar al hacer clic fuera del modal
+    // Cerrar al hace clic fuera del modal
     modal.addEventListener('click', (event) => {
         if (event.target === modal) {
             modal.style.display = 'none';

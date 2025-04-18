@@ -183,7 +183,7 @@ button:hover::after {
 }
 
 .versions-sidebar {
-  width: 70px;
+  width: 180px;
   background-color: var(--surface-light);
   padding: 20px 10px;
   display: flex;
@@ -244,8 +244,7 @@ button:hover::after {
   opacity: 1;
 }
 
-.instance-button,
-.version-button {
+.instance-button {
   width: 45px;
   height: 45px;
   display: flex;
@@ -257,8 +256,20 @@ button:hover::after {
   transition: var(--transition);
 }
 
-.instance-logo,
-.version-logo {
+.version-button {
+  width: 160px;
+  height: 45px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  cursor: pointer;
+  margin-bottom: 15px;
+  position: relative;
+  transition: var(--transition);
+  padding-left: 5px;
+}
+
+.instance-logo {
   width: 100%;
   height: 100%;
   background-color: var(--surface-light);
@@ -273,10 +284,49 @@ button:hover::after {
   color: var(--text-secondary);
 }
 
-.instance-logo::after,
-.version-logo::after {
+.version-logo {
+  width: 45px;
+  height: 45px;
+  background-color: var(--surface-light);
+  border-radius: 10px;
+  transition: var(--transition);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.instance-logo::after {
   position: absolute;
   font-size: 14px;
+  content: attr(data-name);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  margin-left: 10px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+}
+
+.version-name {
+  font-size: 14px;
+  color: var(--text);
+  margin-left: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
 }
 
 #version-name-input {
@@ -290,11 +340,27 @@ button:hover::after {
   padding: 4px 0;
 }
 
-.instance-button:hover .instance-logo,
+.instance-button:hover .instance-logo {
+  background-color: rgba(255, 107, 139, 0.1);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(255, 107, 139, 0.2);
+}
+
 .version-button:hover .version-logo {
   background-color: rgba(255, 107, 139, 0.1);
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(255, 107, 139, 0.2);
+}
+
+.version-button:hover .version-name {
+  color: var(--primary);
+}
+
+.instance-button:hover .instance-logo::after {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.8);
+  transform: translateY(-50%);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
 }
 
 .instance-logo.selected,
@@ -306,15 +372,21 @@ button:hover::after {
 
 .instance-add-icon,
 .version-add-icon {
-  width: 100%;
-  height: 100%;
+  width: 45px;
+  height: 45px;
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 600;
   transition: var(--transition);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
 }
 
 .instance-add-icon:hover,
@@ -371,13 +443,17 @@ button:hover::after {
 }
 
 /* When versions sidebar is active, push main content to the right */
+.versions-sidebar.active ~ .main-content {
+  margin-left: 250px; /* 70px (instances-sidebar) + 180px (versions-sidebar) */
+  width: calc(100% - 250px); /* Ajustar ancho para compensar el nuevo margen */
+}
 
 
 /* When versions sidebar is active, push top bar further to the right */
 .versions-sidebar.active ~ .main-content .top-bar {
-  left: 140px; /* 70px (instances-sidebar) + 70px (versions-sidebar) */
+  left: 250px; /* 70px (instances-sidebar) + 180px (versions-sidebar) */
   right: 30px; /* Mantener el espacio a la derecha */
-  width: calc(100% - 140px); /* Ajustar ancho para compensar ambos márgenes */
+  width: calc(100% - 250px); /* Ajustar ancho para compensar ambos márgenes */
 }
 
 /* When versions sidebar is not active, maintain consistent right margin */
@@ -649,6 +725,11 @@ button:hover::after {
     background-position: center;
     color: transparent;
     text-indent: -9999px;
+}
+
+.instance-logo.has-image::after {
+    text-indent: 0; /* Restaurar el text-indent para el tooltip */
+    color: white; /* Asegurar que el texto sea visible */
 }
 
 .instance-image-preview {
