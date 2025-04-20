@@ -1466,7 +1466,7 @@ window.showSection = function showSection(sectionId) {
             </div>
         </div>
         `;
-
+        
         document.body.insertAdjacentHTML('beforeend', modalHTML);
     }
 
@@ -1605,15 +1605,7 @@ window.showSection = function showSection(sectionId) {
                     <h3>Background Image</h3>
                     <div class="version-background-preview" id="versionBackgroundPreview"></div>
                     
-                    <div class="image-upload-container">
-                        <label for="versionBackgroundUpload">Background Image:</label>
-                        <input type="file" id="versionBackgroundUpload" accept="image/*">
-                    </div>
-                    
-                    <label>Or select from default backgrounds:</label>
-                    <div class="default-images-container" id="defaultBackgroundsContainer">
-                        <!-- Default backgrounds will be loaded here -->
-                    </div>
+                    <button id="selectBackgroundBtn" class="btn">Select Background</button>
                 </div>
                 
                 <div class="modal-buttons">
@@ -1633,18 +1625,17 @@ window.showSection = function showSection(sectionId) {
         document.getElementById('cancelVersionEdit').addEventListener('click', closeVersionEditModal);
         document.getElementById('deleteVersion').addEventListener('click', deleteSelectedVersion);
         document.getElementById('versionImageUpload').addEventListener('change', handleVersionImageUpload);
-        document.getElementById('versionBackgroundUpload').addEventListener('change', handleVersionBackgroundUpload);
+        document.getElementById('selectBackgroundBtn').addEventListener('click', openBackgroundsPopup);
         
         // Load default images
         loadDefaultVersionImages();
-        loadDefaultBackgroundImages();
         
         const modal = document.getElementById("versionEditModal");
         window.onclick = (event) => {
             if (event.target == modal) {
                 closeVersionEditModal();
             }
-        }
+        };
     }
     
     async function loadVersionDataForEdit(versionId) {
@@ -1733,26 +1724,6 @@ window.showSection = function showSection(sectionId) {
         });
     }
     
-    function loadDefaultBackgroundImages() {
-        const container = document.getElementById('defaultBackgroundsContainer');
-        container.innerHTML = '';
-        
-        // Load images from assets/backgrounds folder
-        window.api.getDefaultBackgroundImages().then(images => {
-            images.forEach(image => {
-                const imgElement = document.createElement('img');
-                imgElement.src = image.dataURL; // Usar la miniatura para la vista previa
-                imgElement.classList.add('default-version-image');
-                imgElement.title = image.name;
-                imgElement.dataset.originalImage = image.originalDataURL; // Guardar la URL de la imagen original
-                imgElement.addEventListener('click', () => selectDefaultBackground(image.dataURL, image.originalDataURL));
-                container.appendChild(imgElement);
-            });
-        }).catch(error => {
-            console.error("Error loading default background images:", error);
-        });
-    }
-    
     function selectDefaultImage(imagePath) {
         // Remove selection from all images
         document.querySelectorAll('.default-version-image').forEach(img => {
@@ -1767,8 +1738,13 @@ window.showSection = function showSection(sectionId) {
         
         // Update preview
         const imagePreview = document.getElementById('versionImagePreview');
-        imagePreview.style.backgroundImage = `url('${imagePath}')`;  
+        imagePreview.style.backgroundImage = `url('${imagePath}')`;
         imagePreview.textContent = '';
+        
+        // Remove selection from default images
+        document.querySelectorAll('.default-version-image').forEach(img => {
+            img.classList.remove('selected-image');
+        });
     }
     
     function handleVersionImageUpload(event) {
@@ -1777,97 +1753,20 @@ window.showSection = function showSection(sectionId) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 // Update preview
-                const imagePreview = document.getElementById('versionImagePreview');
-                imagePreview.style.backgroundImage = `url('${e.target.result}')`;
-                imagePreview.textContent = '';
-                
-                // Remove selection from default images
-                document.querySelectorAll('#defaultImagesContainer .default-version-image').forEach(img => {
-                    img.classList.remove('selected-image');
-                });
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-    
-    function handleVersionBackgroundUpload(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                // Update preview
-                const backgroundPreview = document.getElementById('versionBackgroundPreview');
-                backgroundPreview.style.backgroundImage = `url('${e.target.result}')`;
-                backgroundPreview.textContent = '';
-                
-                // Remove selection from default backgrounds
-                document.querySelectorAll('#defaultBackgroundsContainer .default-version-image').forEach(img => {
-                    img.classList.remove('selected-image');
+                const selectedPreviews = document.querySelectorAll('#defaultImagesContainer .default-version-image.selected-image');
+                selectedPreviews.forEach(preview => {
+                    preview.classList.remove('selected-image');
                 });
                 
                 // Guardar temporalmente el fondo seleccionado para previsualización
                 window.tempSelectedBackgroundFile = e.target.result;
                 
-                // Si la versión que se está editando es la misma que está seleccionada actualmente,
-                // actualizar el fondo en la vista principal para previsualización
-                if (currentEditingVersion && selectedVersionButton && 
-                    selectedVersionButton.dataset.version === currentEditingVersion) {
-                    const versionDetailsElement = document.getElementById("version-details");
-                    versionDetailsElement.classList.add('changing-background');
-                    
-                    setTimeout(() => {
-                        versionDetailsElement.style.backgroundImage = `url('${e.target.result}')`;
-                        versionDetailsElement.classList.remove('no-background');
-                        
-                        setTimeout(() => {
-                            versionDetailsElement.classList.remove('changing-background');
-                        }, 500);
-                    }, 50);
+                // Si estamos en el modal de confirmación, actualizar también la vista previa ahí
+                if (document.getElementById('backgroundsPopup').style.display === 'flex') {
+                    // En este punto no actualizamos la vista previa principal hasta que se confirme
                 }
             };
             reader.readAsDataURL(file);
-        }
-    }
-    
-    function selectDefaultBackground(imagePath, originalImagePath) {
-        // Remove selection from all images
-        document.querySelectorAll('#defaultBackgroundsContainer .default-version-image').forEach(img => {
-            img.classList.remove('selected-image');
-        });
-        
-        // Add selection to clicked image
-        const clickedImage = Array.from(document.querySelectorAll('#defaultBackgroundsContainer .default-version-image')).find(img => img.src === imagePath);
-        if (clickedImage) {
-            clickedImage.classList.add('selected-image');
-            // Guardar la imagen original en el atributo de datos
-            clickedImage.dataset.originalImage = originalImagePath;
-        }
-        
-        // Update preview - mostrar la miniatura en la vista previa
-        const backgroundPreview = document.getElementById('versionBackgroundPreview');
-        backgroundPreview.style.backgroundImage = `url('${imagePath}')`;
-        backgroundPreview.textContent = '';
-        
-        // Aplicar inmediatamente el fondo si estamos en el modal de edición
-        if (currentEditingVersion && document.getElementById('versionEditModal').style.display === 'flex') {
-            // Guardar temporalmente el fondo seleccionado para previsualización
-            window.tempSelectedBackground = originalImagePath || imagePath;
-            
-            // Si la versión que se está editando es la misma que está seleccionada actualmente,
-            // actualizar el fondo en la vista principal para previsualización
-            if (selectedVersionButton && selectedVersionButton.dataset.version === currentEditingVersion) {
-                const versionDetailsElement = document.getElementById("version-details");
-                versionDetailsElement.classList.add('changing-background');
-                
-                setTimeout(() => {
-                    versionDetailsElement.style.backgroundImage = `url('${imagePath}')`;
-                    versionDetailsElement.classList.remove('no-background');
-                    
-                    setTimeout(() => {
-                        versionDetailsElement.classList.remove('changing-background');
-                    }, 500);
-                }, 50);
-            }
         }
     }
     
@@ -1879,16 +1778,30 @@ window.showSection = function showSection(sectionId) {
         }
         
         try {
+            // Mostrar información de depuración
+            console.log("=== DEBUG: GUARDANDO CAMBIOS DE VERSIÓN ===");
+            console.log("- currentVersionBackgroundPath:", window.currentVersionBackgroundPath);
+            console.log("- tempSelectedBackground:", window.tempSelectedBackground);
+            console.log("- tempSelectedBackgroundFile:", window.tempSelectedBackgroundFile);
+            
+            // Verificar si hay un fondo seleccionado en el DOM
+            const backgroundPreview = document.getElementById('versionBackgroundPreview');
+            const backgroundFromDOM = backgroundPreview ? backgroundPreview.dataset.selectedBackground : null;
+            console.log("- backgroundFromDOM:", backgroundFromDOM);
+            
+            // Verificar si hay un fondo seleccionado en el botón
+            const selectBackgroundBtn = document.getElementById('selectBackgroundBtn');
+            const hasBackground = selectBackgroundBtn ? selectBackgroundBtn.getAttribute('data-has-background') === 'true' : false;
+            const backgroundFromBtn = selectBackgroundBtn ? selectBackgroundBtn.getAttribute('data-background-path') : null;
+            console.log("- hasBackground:", hasBackground);
+            console.log("- backgroundFromBtn:", backgroundFromBtn);
+            
             // Save new name
             await window.api.setVersionName(currentEditingVersion, newName, activeInstanceId);
             
             // Save image if selected
             const imageUpload = document.getElementById('versionImageUpload').files[0];
             const selectedDefaultImage = document.querySelector('#defaultImagesContainer .default-version-image.selected-image');
-            
-            // Save background if selected
-            const backgroundUpload = document.getElementById('versionBackgroundUpload').files[0];
-            const selectedDefaultBackground = document.querySelector('#defaultBackgroundsContainer .default-version-image.selected-image');
             
             // Variables para controlar el flujo asíncrono
             let pendingOperations = 0;
@@ -1916,32 +1829,50 @@ window.showSection = function showSection(sectionId) {
                 await window.api.setVersionImage(currentEditingVersion, selectedDefaultImage.src, activeInstanceId);
                 checkCompletion();
             } else if (window.currentVersionImagePath) {
-                // Si no hay una nueva imagen seleccionada pero hay una imagen actual guardada, mantenerla
                 pendingOperations++;
                 await window.api.setVersionImage(currentEditingVersion, window.currentVersionImagePath, activeInstanceId);
                 checkCompletion();
             }
             
-            // Procesar imagen de fondo
-            if (backgroundUpload) {
+            // Procesar imagen de fondo - intentar con todos los posibles lugares donde se podría haber guardado
+            let backgroundToUse = window.currentVersionBackgroundPath || 
+                                  window.tempSelectedBackground || 
+                                  window.tempSelectedBackgroundFile ||
+                                  backgroundFromDOM ||
+                                  backgroundFromBtn;
+            
+            // Verificar si el fondo a usar es válido (debe ser un string no vacío)
+            if (backgroundToUse && typeof backgroundToUse === 'string' && backgroundToUse.trim() !== '') {
                 pendingOperations++;
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    await window.api.setVersionBackground(currentEditingVersion, e.target.result, activeInstanceId);
+                console.log("Guardando fondo, ruta final:", backgroundToUse);
+                
+                try {
+                    // Asegurarnos de pasar la URL de la imagen ORIGINAL, nunca la miniatura
+                    await window.api.setVersionBackground(currentEditingVersion, backgroundToUse, activeInstanceId);
                     checkCompletion();
-                };
-                reader.readAsDataURL(backgroundUpload);
-            } else if (selectedDefaultBackground) {
-                pendingOperations++;
-                // Usar la imagen original en lugar de la miniatura
-                const originalImageURL = selectedDefaultBackground.dataset.originalImage || selectedDefaultBackground.src;
-                await window.api.setVersionBackground(currentEditingVersion, originalImageURL, activeInstanceId);
-                checkCompletion();
-            } else if (window.currentVersionBackgroundPath) {
-                // Si no hay un nuevo fondo seleccionado pero hay un fondo actual guardado, mantenerlo
-                pendingOperations++;
-                await window.api.setVersionBackground(currentEditingVersion, window.currentVersionBackgroundPath, activeInstanceId);
-                checkCompletion();
+                } catch (error) {
+                    console.error("Error al guardar el fondo:", error);
+                    checkCompletion();
+                }
+            } else if (hasBackground) {
+                // Si el botón indica que hay un fondo pero no tenemos la ruta, intentar ver si hay un fondo seleccionado
+                const selectedBackground = document.querySelector('#defaultBackgroundsContainer .default-version-image.selected-image');
+                if (selectedBackground && selectedBackground.dataset.originalImage) {
+                    pendingOperations++;
+                    console.log("Usando fondo del elemento seleccionado:", selectedBackground.dataset.originalImage);
+                    
+                    try {
+                        await window.api.setVersionBackground(currentEditingVersion, selectedBackground.dataset.originalImage, activeInstanceId);
+                        checkCompletion();
+                    } catch (error) {
+                        console.error("Error al guardar el fondo desde elemento seleccionado:", error);
+                        checkCompletion();
+                    }
+                } else {
+                    console.log("El botón indica que hay un fondo pero no se pudo encontrar la ruta");
+                }
+            } else {
+                console.log("No hay imagen de fondo seleccionada para guardar");
             }
             
             // Si no hay operaciones pendientes, terminar inmediatamente
@@ -1994,7 +1925,6 @@ window.showSection = function showSection(sectionId) {
     
     function closeVersionEditModal() {
         document.getElementById('versionEditModal').style.display = 'none';
-        currentEditingVersion = null;
     }
     
     async function deleteSelectedVersion() {
@@ -2262,6 +2192,7 @@ window.showSection = function showSection(sectionId) {
         const instances = await window.api.listInstances();
         const listContainer = document.getElementById('instanceSelectionList');
         listContainer.innerHTML = '';
+        
         let selectedInstanceId = null;
 
         for (const instance of instances) {
@@ -2287,6 +2218,7 @@ window.showSection = function showSection(sectionId) {
             
             option.addEventListener('click', () => {
                 document.querySelectorAll('.instance-option').forEach(opt => opt.classList.remove('selected'));
+                
                 option.classList.add('selected');
                 selectedInstanceId = instance.id;
                 document.getElementById('confirmInstanceSelection').disabled = false;
@@ -2411,5 +2343,236 @@ window.showSection = function showSection(sectionId) {
         });
     }
 
+    // Crear el modal para seleccionar fondos
+    function createBackgroundsPopup() {
+        // Verificar si ya existe el popup
+        if (document.getElementById('backgroundsPopup')) {
+            return;
+        }
+        
+        const popupHTML = `
+        <div id="backgroundsPopup" class="modal">
+            <div class="modal-content backgrounds-popup-content">
+                <h2>Select Background</h2>
+                
+                <div class="image-upload-container">
+                    <label for="versionBackgroundUpload">Upload Background Image:</label>
+                    <input type="file" id="versionBackgroundUpload" accept="image/*">
+                </div>
+                
+                <label>Or select from default backgrounds:</label>
+                <div class="default-images-container" id="defaultBackgroundsContainer">
+                    <!-- Default backgrounds will be loaded here -->
+                </div>
+                
+                <div class="modal-buttons">
+                    <button id="confirmBackgroundSelection">Confirm</button>
+                    <button id="cancelBackgroundSelection">Cancel</button>
+                </div>
+            </div>
+        </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', popupHTML);
+        setupBackgroundsPopup();
+    }
+
+    // Configurar el popup de selección de fondos
+    function setupBackgroundsPopup() {
+        // Cargar imágenes predeterminadas
+        loadDefaultBackgroundImages();
+        
+        // Configurar manejadores de eventos
+        document.getElementById('versionBackgroundUpload').addEventListener('change', handleVersionBackgroundUpload);
+        document.getElementById('confirmBackgroundSelection').addEventListener('click', confirmBackgroundSelection);
+        document.getElementById('cancelBackgroundSelection').addEventListener('click', closeBackgroundsPopup);
+        
+        // Configurar cierre con clic fuera del popup
+        const popup = document.getElementById("backgroundsPopup");
+        popup.addEventListener('click', (event) => {
+            if (event.target === popup) {
+                closeBackgroundsPopup();
+            }
+        });
+    }
+
+    // Mostrar el popup de selección de fondos
+    function openBackgroundsPopup() {
+        // Crear el popup si no existe
+        if (!document.getElementById('backgroundsPopup')) {
+            createBackgroundsPopup();
+        }
+
+        // Mostrar el popup
+        document.getElementById('backgroundsPopup').style.display = 'flex';
+    }
+    
+    // Cerrar el popup de selección de fondos
+    function closeBackgroundsPopup() {
+        const popup = document.getElementById('backgroundsPopup');
+        if (popup) {
+            popup.style.display = 'none';
+        }
+    }
+    
+    // Confirmar selección de fondo
+    function confirmBackgroundSelection() {
+        const selectedBackground = document.querySelector('#defaultBackgroundsContainer .default-version-image.selected-image');
+        const fileInput = document.getElementById('versionBackgroundUpload');
+        const backgroundPreview = document.getElementById('versionBackgroundPreview');
+        
+        let backgroundSelected = false;
+        
+        if (selectedBackground) {
+            // Lo más importante: obtener la URL de la imagen original de alta calidad
+            const originalImageURL = selectedBackground.dataset.originalImage;
+            
+            if (!originalImageURL) {
+                console.error("ERROR: No se encontró la URL de la imagen original");
+                return;
+            }
+            
+            console.log("Confirmando selección de fondo");
+            console.log("- Miniatura:", selectedBackground.src);
+            console.log("- Original:", originalImageURL);
+            
+            // Guardar en TODAS las posibles ubicaciones para mayor seguridad
+            window.currentVersionBackgroundPath = originalImageURL;
+            window.tempSelectedBackground = originalImageURL;
+            backgroundSelected = true;
+            
+            // Para la vista previa en el modal usamos la miniatura (mejor rendimiento)
+            backgroundPreview.style.backgroundImage = `url('${selectedBackground.src}')`;
+            backgroundPreview.textContent = '';
+            
+            // Vista previa en la UI principal con la imagen original
+            previewBackgroundInMainUI(originalImageURL);
+            
+            // Guardar en el elemento del DOM para persistencia adicional
+            backgroundPreview.dataset.selectedBackground = originalImageURL;
+            
+            // Forzar guardado inmediato de la selección (esto es crítico)
+            document.getElementById('selectBackgroundBtn').setAttribute('data-has-background', 'true');
+            document.getElementById('selectBackgroundBtn').setAttribute('data-background-path', originalImageURL);
+        } else if (fileInput.files.length > 0) {
+            // Para imágenes subidas por el usuario
+            if (window.tempSelectedBackgroundFile) {
+                backgroundPreview.style.backgroundImage = `url('${window.tempSelectedBackgroundFile}')`;
+                backgroundPreview.textContent = '';
+                
+                window.currentVersionBackgroundPath = window.tempSelectedBackgroundFile;
+                window.tempSelectedBackground = window.tempSelectedBackgroundFile; // Guardar también aquí
+                backgroundSelected = true;
+                
+                previewBackgroundInMainUI(window.tempSelectedBackgroundFile);
+                
+                // Guardar en el elemento del DOM para persistencia adicional
+                backgroundPreview.dataset.selectedBackground = window.tempSelectedBackgroundFile;
+                
+                // Forzar guardado inmediato de la selección (esto es crítico)
+                document.getElementById('selectBackgroundBtn').setAttribute('data-has-background', 'true');
+                document.getElementById('selectBackgroundBtn').setAttribute('data-background-path', window.tempSelectedBackgroundFile);
+            }
+        }
+        
+        // Mantener un registro de que se seleccionó un fondo
+        if (backgroundSelected) {
+            console.log("Fondo seleccionado correctamente - será guardado cuando se guarde la versión");
+            document.getElementById('selectBackgroundBtn').classList.add('background-selected');
+            document.getElementById('selectBackgroundBtn').textContent = 'Change Background';
+        }
+        
+        // Cerrar el popup
+        closeBackgroundsPopup();
+    }
+    
+    // Aplicar vista previa del fondo en la UI principal
+    function previewBackgroundInMainUI(imagePath) {
+        // Solo si la versión que se está editando es la misma que está seleccionada actualmente
+        if (currentEditingVersion && selectedVersionButton && 
+            selectedVersionButton.dataset.version === currentEditingVersion) {
+            const versionDetailsElement = document.getElementById("version-details");
+            versionDetailsElement.classList.add('changing-background');
+            
+            // Guardar el camino original para usarlo más tarde si es necesario
+            versionDetailsElement.dataset.originalBackgroundPath = imagePath;
+            
+            setTimeout(() => {
+                // Siempre usar la imagen original de alta calidad para el fondo principal
+                versionDetailsElement.style.backgroundImage = `url('${imagePath}')`;
+                versionDetailsElement.classList.remove('no-background');
+                
+                setTimeout(() => {
+                    versionDetailsElement.classList.remove('changing-background');
+                }, 500);
+            }, 50);
+        }
+    }
+    
+    function selectDefaultBackground(imagePath, originalImagePath) {
+        console.log("Seleccionando fondo:");
+        console.log("- Miniatura:", imagePath);
+        console.log("- Original:", originalImagePath);
+        
+        // Remove selection from all images
+        document.querySelectorAll('#defaultBackgroundsContainer .default-version-image').forEach(img => {
+            img.classList.remove('selected-image');
+        });
+        
+        // Add selection to clicked image
+        const clickedImage = Array.from(document.querySelectorAll('#defaultBackgroundsContainer .default-version-image')).find(img => img.src === imagePath);
+        if (clickedImage) {
+            clickedImage.classList.add('selected-image');
+            // Guardar la imagen original en el atributo de datos
+            clickedImage.dataset.originalImage = originalImagePath;
+        }
+        
+        // Guardar referencias temporales - siempre usar la imagen original, no la miniatura
+        window.tempSelectedBackground = originalImagePath;
+    }
+
+    function loadDefaultBackgroundImages() {
+        const container = document.getElementById('defaultBackgroundsContainer');
+        container.innerHTML = '';
+        
+        // Load images from assets/backgrounds folder
+        window.api.getDefaultBackgroundImages().then(images => {
+            images.forEach(image => {
+                const imgElement = document.createElement('img');
+                imgElement.src = image.dataURL; // Usar la miniatura para la vista previa
+                imgElement.classList.add('default-version-image');
+                imgElement.title = image.name;
+                imgElement.dataset.originalImage = image.originalDataURL; // Guardar la URL de la imagen original
+                imgElement.addEventListener('click', () => selectDefaultBackground(image.dataURL, image.originalDataURL));
+                container.appendChild(imgElement);
+            });
+        }).catch(error => {
+            console.error("Error loading default background images:", error);
+        });
+    }
+    
+    function handleVersionBackgroundUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Update preview
+                const selectedPreviews = document.querySelectorAll('#defaultBackgroundsContainer .default-version-image.selected-image');
+                selectedPreviews.forEach(preview => {
+                    preview.classList.remove('selected-image');
+                });
+                
+                // Guardar temporalmente el fondo seleccionado para previsualización
+                window.tempSelectedBackgroundFile = e.target.result;
+                
+                // Si estamos en el modal de confirmación, actualizar también la vista previa ahí
+                if (document.getElementById('backgroundsPopup').style.display === 'flex') {
+                    // En este punto no actualizamos la vista previa principal hasta que se confirme
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
     init();
 });
