@@ -349,7 +349,6 @@ window.showSection = function showSection(sectionId) {
         }
     }
 
-    // --- Load Username ---
     async function loadUsername() {
         try {
             const settings = await window.api.getSettings();
@@ -936,7 +935,7 @@ window.showSection = function showSection(sectionId) {
         }
     
         // Show the modal
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
         setupInstanceCreateModal();
     }
     
@@ -990,7 +989,7 @@ window.showSection = function showSection(sectionId) {
         loadInstanceDataForEdit(instanceId, instanceName);
         
         // Show the modal
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
         setupInstanceEditModal();
     }
     
@@ -1438,7 +1437,7 @@ window.showSection = function showSection(sectionId) {
             return;
         }
 
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
         setupCreateModal();
     }
 
@@ -1570,7 +1569,7 @@ window.showSection = function showSection(sectionId) {
         loadVersionDataForEdit(versionId);
         
         // Show the modal
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
         setupVersionEditModal();
     }
     
@@ -1813,7 +1812,7 @@ window.showSection = function showSection(sectionId) {
         backgroundPreview.textContent = '';
         
         // Aplicar inmediatamente el fondo si estamos en el modal de edición
-        if (currentEditingVersion && document.getElementById('versionEditModal').style.display === 'block') {
+        if (currentEditingVersion && document.getElementById('versionEditModal').style.display === 'flex') {
             // Guardar temporalmente el fondo seleccionado para previsualización
             window.tempSelectedBackground = originalImagePath || imagePath;
             
@@ -2248,7 +2247,7 @@ window.showSection = function showSection(sectionId) {
         }
 
         return new Promise((resolve) => {
-            modal.style.display = 'block';
+            modal.style.display = 'flex';
             
             document.getElementById('confirmInstanceSelection').onclick = async () => {
                 if (selectedInstanceId) {
@@ -2310,7 +2309,7 @@ window.showSection = function showSection(sectionId) {
         // Cuando comienza la descarga del JDK
         window.api.onJdkDownloadStarted(() => {
             // Mostrar el modal de descarga
-            jdkDownloadModal.style.display = 'flex';
+            jdkDownloadModal.classList.add('visible');
             jdkProgressFill.style.width = '0%';
             jdkProgressText.textContent = '0%';
             jdkDownloadStatus.textContent = 'Iniciando descarga...';
@@ -2348,7 +2347,7 @@ window.showSection = function showSection(sectionId) {
             addConsoleMessage('success', 'Instalación del JDK completada con éxito.');
             
             setTimeout(() => {
-                jdkDownloadModal.style.display = 'none';
+                jdkDownloadModal.classList.remove('visible');
             }, 2000);
         });
         
@@ -2359,7 +2358,7 @@ window.showSection = function showSection(sectionId) {
             
             // Ocultar el modal después de un retraso mayor
             setTimeout(() => {
-                jdkDownloadModal.style.display = 'none';
+                jdkDownloadModal.classList.remove('visible');
             }, 5000);
         });
     }

@@ -1,7 +1,8 @@
 /* modal.css */
 /* Modal Styles */
+/* Centrado de modales */
 .modal {
-    display: none; /* Hidden by default */
+    /* Configuración general, visible o no */
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -9,10 +10,42 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(10, 10, 15, 0.6); /* Dark with higher opacity for contrast */
+    background-color: rgba(10, 10, 15, 0.6);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     animation: modalFadeIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    
+    /* Usar flexbox para centrado */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Los modales se esconden por defecto */
+.modal {
+    display: none;
+}
+
+/* Cuando un modal tiene clase visible o se muestra con display: flex */
+.modal.visible,
+.modal[style*="display: flex"] {
+    display: flex;
+}
+
+/* Eliminar el margen que descentraba el contenido */
+.modal-content {
+    margin: 0;
+    background-color: rgba(22, 22, 29, 0.75);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    animation: contentSlideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes modalFadeIn {
@@ -26,21 +59,6 @@
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
     }
-}
-
-.modal-content {
-    background-color: rgba(22, 22, 29, 0.75);
-    margin: 8% auto;
-    padding: 25px;
-    border-radius: var(--border-radius);
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-    position: relative;
-    border: 1px solid var(--border-color);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    animation: contentSlideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes contentSlideUp {
@@ -72,11 +90,7 @@
     margin-bottom: 15px;
 }
 
-/* Estilos para el modal de descarga del JDK */
-#jdkDownloadModal .modal-content {
-    max-width: 480px;
-}
-
+/* Estilos generales para barras de progreso */
 .progress-container {
     margin: 20px 0;
 }
@@ -103,11 +117,52 @@
     color: rgba(255, 255, 255, 0.7);
 }
 
-#jdkDownloadStatus {
+/* Estilos para el modal de descarga del JDK */
+#jdkDownloadModal {
+    display: none;
+}
+
+#jdkDownloadModal.visible {
+    display: flex; /* Usar flex para centrar */
+}
+
+#jdkDownloadModal .modal-content {
+    max-width: 400px;
+    max-height: 300px;
+    padding: 20px;
+}
+
+#jdkDownloadModal .modal-header {
+    margin-bottom: 10px;
+}
+
+#jdkDownloadModal .modal-header h3 {
+    font-size: 1.2rem;
+}
+
+#jdkDownloadModal .modal-body p {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+#jdkDownloadModal .progress-container {
+    margin: 15px 0;
+}
+
+#jdkDownloadModal .progress-bar {
+    height: 6px;
+}
+
+#jdkDownloadModal .progress-text {
+    font-size: 12px;
+}
+
+#jdkDownloadModal #jdkDownloadStatus {
+    margin-top: 8px;
+    font-size: 0.9rem;
     text-align: center;
     font-weight: 500;
     color: #fff;
-    margin-top: 10px;
 }
 
 /* News modal specific styles */
@@ -457,4 +512,17 @@
     background-color: var(--surface);
     background-size: cover;
     background-position: center;
+}
+
+/* Estilos específicos para cada tipo de modal */
+/* Modal de creación de instancias */
+#instanceCreateModal .modal-content,
+#instanceEditModal .modal-content {
+    max-width: 500px;
+}
+
+/* Modal de creación/edición de versiones */
+#versionCreateModal .modal-content,
+#versionEditModal .modal-content {
+    max-width: 500px;
 }
