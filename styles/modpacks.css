@@ -441,7 +441,7 @@
     width: 100%;
 }
 
-/* Estilos para el modal de confirmación */
+/* Modal de confirmación */
 #modpackConfirmModal {
     display: none;
     position: fixed;
@@ -449,93 +449,114 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
 }
 
 #modpackConfirmModal .modal-content {
-    background-color: var(--primary-bg);
-    border-radius: 10px;
-    border: 1px solid var(--tertiary);
-    width: 400px;
-    max-width: 90%;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-    color: white;
-    position: relative;
+    width: 450px;
+    max-width: 90vw;
+    border-radius: 20px;
+    padding: 25px;
+    background: rgba(22, 22, 28, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 107, 139, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: modalFadeIn 0.3s ease-out;
 }
 
 #modpackConfirmModal .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+    position: relative;
 }
 
 #modpackConfirmModal h3 {
+    font-size: 24px;
     margin: 0;
-    font-size: 1.2rem;
-    color: var(--primary);
+    text-align: center;
+    width: 100%;
+    color: var(--text);
+    letter-spacing: -0.02em;
+}
+
+#modpackConfirmModal .modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
 }
 
 #modpackConfirmModal .close-modal {
+    position: absolute;
+    right: 0;
+    top: 0;
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.5);
     cursor: pointer;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    color: var(--text-secondary);
+    padding: 5px;
 }
 
 #modpackConfirmModal .close-modal:hover {
-    color: white;
+    color: var(--primary);
 }
 
 #modpackConfirmModal p {
-    padding: 20px;
-    margin: 0;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    color: var(--text-secondary);
+    text-align: center;
 }
 
 #modpackConfirmModal .modal-buttons {
     display: flex;
-    padding: 0 20px 20px;
-    gap: 10px;
-    justify-content: flex-end;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 25px;
 }
 
 #modpackConfirmModal .confirm-button {
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 8px 15px;
-    cursor: pointer;
-    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    background: rgba(255, 69, 58, 0.15);
+    color: #ff453a;
+    border: 1px solid rgba(255, 69, 58, 0.3);
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 #modpackConfirmModal .confirm-button:hover {
-    background-color: var(--primary-hover);
+    background: rgba(255, 69, 58, 0.25);
+    transform: translateY(-2px);
 }
 
 #modpackConfirmModal .cancel-button {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 8px 15px;
-    cursor: pointer;
-    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    background: rgba(30, 30, 41, 0.5);
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 #modpackConfirmModal .cancel-button:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+    background: rgba(40, 40, 51, 0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
 
 .no-modpacks svg {

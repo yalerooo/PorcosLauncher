@@ -48,6 +48,233 @@
     animation: contentSlideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Estilos para modales de edición (versiones e instancias) */
+.modal-content.edit-modal {
+    width: 700px;
+    max-width: 90vw;
+    max-height: 80vh;
+    border-radius: 20px;
+    padding: 25px;
+    background: rgba(22, 22, 28, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 107, 139, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-y: auto;
+}
+
+.modal-content.edit-modal .modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.modal-content.edit-modal .modal-grid-single {
+    grid-column: span 2;
+}
+
+.modal-content.edit-modal .left-column,
+.modal-content.edit-modal .right-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-content.edit-modal h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    position: relative;
+}
+
+.modal-content.edit-modal h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+
+.modal-content.edit-modal .input-group {
+    margin-bottom: 15px;
+}
+
+.modal-content.edit-modal label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.modal-content.edit-modal input[type="text"],
+.modal-content.edit-modal select {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 12px;
+    background: rgba(30, 30, 41, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text);
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.modal-content.edit-modal input[type="text"]:focus,
+.modal-content.edit-modal select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(255, 107, 139, 0.25);
+    outline: none;
+}
+
+.modal-content.edit-modal .modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.modal-content.edit-modal .modal-buttons button {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.modal-content.edit-modal button.save-button {
+    background: var(--primary);
+    color: white;
+}
+
+.modal-content.edit-modal button.save-button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 139, 0.3);
+}
+
+.modal-content.edit-modal button.cancel-button {
+    background: rgba(30, 30, 41, 0.5);
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-content.edit-modal button.cancel-button:hover {
+    background: rgba(40, 40, 51, 0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Sección de eliminación */
+.delete-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.delete-section h3 {
+    font-size: 16px;
+    color: #ff453a;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.delete-section h3 svg {
+    margin-right: 8px;
+    width: 20px;
+    height: 20px;
+}
+
+.delete-section p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.delete-trigger {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 69, 58, 0.15);
+    color: #ff453a;
+    border: 1px solid rgba(255, 69, 58, 0.3);
+    border-radius: 8px;
+    padding: 8px 15px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.delete-trigger:hover {
+    background: rgba(255, 69, 58, 0.25);
+    transform: translateY(-1px);
+}
+
+.delete-trigger svg {
+    margin-right: 8px;
+    width: 16px;
+    height: 16px;
+}
+
+.delete-confirmation {
+    background: rgba(255, 69, 58, 0.1);
+    border: 1px solid rgba(255, 69, 58, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 15px;
+    display: none;
+}
+
+.delete-confirmation.show {
+    display: block;
+    animation: fadeSlideIn 0.3s ease;
+}
+
+.delete-confirmation p {
+    font-weight: 500;
+    color: #ff453a;
+    margin-bottom: 15px;
+}
+
+.delete-confirmation .confirmation-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.delete-confirmation button {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.delete-confirmation button.confirm-delete {
+    background: #ff453a;
+    color: white;
+}
+
+.delete-confirmation button.cancel-delete {
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--text-secondary);
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @keyframes modalFadeIn {
     from {
         opacity: 0;

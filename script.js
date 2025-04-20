@@ -1111,6 +1111,11 @@ window.showSection = function showSection(sectionId) {
         const imagePreview = document.getElementById('instanceImagePreview');
         imagePreview.style.backgroundImage = `url('${imagePath}')`;
         imagePreview.textContent = '';
+        
+        // Remove selection from default images
+        document.querySelectorAll('.default-version-image').forEach(img => {
+            img.classList.remove('selected-image');
+        });
     }
     
     function handleInstanceImageUpload(event) {
@@ -1653,9 +1658,25 @@ window.showSection = function showSection(sectionId) {
             const imagePreview = document.getElementById('versionImagePreview');
             
             if (imagePath) {
+                // Guardar referencia a la imagen actual
+                window.currentVersionImagePath = imagePath;
                 imagePreview.style.backgroundImage = `url('${imagePath}')`;
                 imagePreview.textContent = '';
+                
+                // Buscar y seleccionar la imagen predeterminada que coincida con la imagen actual
+                setTimeout(() => {
+                    const defaultImages = document.querySelectorAll('#defaultImagesContainer .default-version-image');
+                    defaultImages.forEach(img => {
+                        const imgFilename = img.src.split('/').pop();
+                        const currentFilename = imagePath.split('/').pop();
+                        
+                        if (imgFilename === currentFilename || img.src === imagePath) {
+                            img.classList.add('selected-image');
+                        }
+                    });
+                }, 300);
             } else {
+                window.currentVersionImagePath = null;
                 imagePreview.style.backgroundImage = '';
                 imagePreview.textContent = versionName.substring(0, 2).toUpperCase();
             }
@@ -1665,9 +1686,25 @@ window.showSection = function showSection(sectionId) {
             const backgroundPreview = document.getElementById('versionBackgroundPreview');
             
             if (backgroundPath) {
+                // Guardar referencia al fondo actual
+                window.currentVersionBackgroundPath = backgroundPath;
                 backgroundPreview.style.backgroundImage = `url('${backgroundPath}')`;
                 backgroundPreview.textContent = '';
+                
+                setTimeout(() => {
+                    const defaultBackgrounds = document.querySelectorAll('#defaultBackgroundsContainer .default-version-image');
+                    defaultBackgrounds.forEach(img => {
+                        const originalImage = img.dataset.originalImage || img.src;
+                        const imgFilename = originalImage.split('/').pop();
+                        const currentFilename = backgroundPath.split('/').pop();
+                        
+                        if (imgFilename === currentFilename || originalImage === backgroundPath || img.src === backgroundPath) {
+                            img.classList.add('selected-image');
+                        }
+                    });
+                }, 300);
             } else {
+                window.currentVersionBackgroundPath = null;
                 backgroundPreview.style.backgroundImage = '';
                 backgroundPreview.textContent = 'No background image selected';
             }
@@ -1878,6 +1915,11 @@ window.showSection = function showSection(sectionId) {
                 pendingOperations++;
                 await window.api.setVersionImage(currentEditingVersion, selectedDefaultImage.src, activeInstanceId);
                 checkCompletion();
+            } else if (window.currentVersionImagePath) {
+                // Si no hay una nueva imagen seleccionada pero hay una imagen actual guardada, mantenerla
+                pendingOperations++;
+                await window.api.setVersionImage(currentEditingVersion, window.currentVersionImagePath, activeInstanceId);
+                checkCompletion();
             }
             
             // Procesar imagen de fondo
@@ -1894,6 +1936,11 @@ window.showSection = function showSection(sectionId) {
                 // Usar la imagen original en lugar de la miniatura
                 const originalImageURL = selectedDefaultBackground.dataset.originalImage || selectedDefaultBackground.src;
                 await window.api.setVersionBackground(currentEditingVersion, originalImageURL, activeInstanceId);
+                checkCompletion();
+            } else if (window.currentVersionBackgroundPath) {
+                // Si no hay un nuevo fondo seleccionado pero hay un fondo actual guardado, mantenerlo
+                pendingOperations++;
+                await window.api.setVersionBackground(currentEditingVersion, window.currentVersionBackgroundPath, activeInstanceId);
                 checkCompletion();
             }
             
@@ -1940,6 +1987,8 @@ window.showSection = function showSection(sectionId) {
             // Limpiar variables temporales
             window.tempSelectedBackground = null;
             window.tempSelectedBackgroundFile = null;
+            window.currentVersionImagePath = null;
+            window.currentVersionBackgroundPath = null;
         }
     }
     
@@ -2320,15 +2369,14 @@ window.showSection = function showSection(sectionId) {
         
         // Actualizar el progreso de la descarga
         window.api.onJdkDownloadProgress((event, data) => {
-            const progress = data.progress * 100;
-            const progressFormatted = Math.round(progress);
-            jdkProgressFill.style.width = `${progressFormatted}%`;
-            jdkProgressText.textContent = `${progressFormatted}%`;
-            jdkDownloadStatus.textContent = `Descargando... ${progressFormatted}%`;
+            const progress = data.progress;
+            jdkProgressFill.style.width = `${progress}%`;
+            jdkProgressText.textContent = `${progress}%`;
+            jdkDownloadStatus.textContent = `Descargando... ${progress}%`;
             
             // Actualizar la consola periódicamente (cada 10%)
-            if (progressFormatted % 10 === 0) {
-                addConsoleMessage('info', `Descarga del JDK: ${progressFormatted}%`);
+            if (progress % 10 === 0) {
+                addConsoleMessage('info', `Descarga del JDK: ${progress}%`);
             }
         });
         

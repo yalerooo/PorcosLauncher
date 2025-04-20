@@ -230,15 +230,26 @@ function showCreateModpackInstanceModal(modpack) {
     if (!modal) {
         const modalHTML = `
             <div id="modpackInstanceModal" class="modal">
-                <div class="modal-content">
+                <div class="modal-content edit-modal">
                     <h2>Instalar Modpack</h2>
-                    <p>Vas a instalar el modpack <strong id="modpackNameInModal"></strong></p>
-                    <div id="modpackModalDetails" class="modal-details"></div>
-                    <label for="modpackInstanceName">Nombre de la instancia:</label>
-                    <input type="text" id="modpackInstanceName" placeholder="Introduce un nombre para la instancia">
+                    
+                    <div class="modal-grid">
+                        <div class="left-column">
+                            <p>Vas a instalar el modpack <strong id="modpackNameInModal"></strong></p>
+                            <div id="modpackModalDetails" class="modal-details"></div>
+                        </div>
+                        
+                        <div class="right-column">
+                            <div class="input-group">
+                                <label for="modpackInstanceName">Nombre de la instancia:</label>
+                                <input type="text" id="modpackInstanceName" placeholder="Introduce un nombre para la instancia">
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="modal-buttons">
-                        <button id="installModpackButton">Instalar</button>
-                        <button id="cancelModpackInstall">Cancelar</button>
+                        <button id="installModpackButton" class="save-button">Instalar</button>
+                        <button id="cancelModpackInstall" class="cancel-button">Cancelar</button>
                     </div>
                 </div>
             </div>
@@ -268,7 +279,7 @@ function showCreateModpackInstanceModal(modpack) {
     document.getElementById('modpackInstanceName').value = modpack.name;
     
     // Mostrar el modal
-    modal.style.display = 'block';
+    modal.style.display = 'flex';
     
     // Configurar event listeners
     document.getElementById('installModpackButton').onclick = () => {
