@@ -54,6 +54,62 @@
     }
 }
 
+.modal-header {
+    margin-bottom: 15px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 1.3rem;
+}
+
+.modal-body {
+    color: #ddd;
+}
+
+.modal-body p {
+    margin-bottom: 15px;
+}
+
+/* Estilos para el modal de descarga del JDK */
+#jdkDownloadModal .modal-content {
+    max-width: 480px;
+}
+
+.progress-container {
+    margin: 20px 0;
+}
+
+.progress-bar {
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    width: 0%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    text-align: right;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+#jdkDownloadStatus {
+    text-align: center;
+    font-weight: 500;
+    color: #fff;
+    margin-top: 10px;
+}
+
 /* News modal specific styles */
 #newsModal .modal-content {
     max-width: 700px;

@@ -527,9 +527,27 @@
         </div>
     </div>
 
+    <!-- Modal para progreso de descarga de JDK -->
+    <div class="modal" id="jdkDownloadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Descargando Java Development Kit</h3>
+            </div>
+            <div class="modal-body">
+                <p>Se está descargando el runtime de Java necesario para el juego. Por favor espere...</p>
+                <div class="progress-container">
+                    <div class="progress-bar" id="jdkProgressBar">
+                        <div class="progress-fill" id="jdkProgressFill"></div>
+                    </div>
+                    <div class="progress-text" id="jdkProgressText">0%</div>
+                </div>
+                <p id="jdkDownloadStatus">Iniciando descarga...</p>
+            </div>
+        </div>
+    </div>
+
     <script src="src/newsLoader.js"></script>
     <script src="src/modpacksLoader.js"></script>
     <script src="script.js"></script>
-    </div>
 </body>
 </html>

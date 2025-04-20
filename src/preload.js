@@ -68,5 +68,17 @@ contextBridge.exposeInMainWorld('api', {
     onModpackUpdateProgress: (callback) => ipcRenderer.on('modpack-update-progress', callback),
     offModpackUpdateProgress: (callback) => ipcRenderer.removeListener('modpack-update-progress', callback),
     checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
-    checkJavaVersion: () => ipcRenderer.invoke('check-java-version')
+    checkJavaVersion: () => ipcRenderer.invoke('check-java-version'),
+    
+    // JDK download event handlers
+    onJdkDownloadStarted: (callback) => ipcRenderer.on('jdk-download-started', callback),
+    offJdkDownloadStarted: (callback) => ipcRenderer.removeListener('jdk-download-started', callback),
+    onJdkDownloadProgress: (callback) => ipcRenderer.on('jdk-download-progress', callback),
+    offJdkDownloadProgress: (callback) => ipcRenderer.removeListener('jdk-download-progress', callback),
+    onJdkExtracting: (callback) => ipcRenderer.on('jdk-extracting', callback),
+    offJdkExtracting: (callback) => ipcRenderer.removeListener('jdk-extracting', callback),
+    onJdkInstallCompleted: (callback) => ipcRenderer.on('jdk-install-completed', callback),
+    offJdkInstallCompleted: (callback) => ipcRenderer.removeListener('jdk-install-completed', callback),
+    onJdkInstallError: (callback) => ipcRenderer.on('jdk-install-error', callback),
+    offJdkInstallError: (callback) => ipcRenderer.removeListener('jdk-install-error', callback)
 });

@@ -4,7 +4,7 @@ const fs = require('fs');
 const { URL } = require('url');
 const AdmZip = require('adm-zip');
 const unrar = require('node-unrar-js');
-const { execSync } = require('child_process');
+const { execSync, exec } = require('child_process');
 
 async function extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, progressCallback) {
     try {
@@ -206,79 +206,73 @@ async function downloadSingleFile(url, destinationDir, keepArchive = false, save
             item.once('done', async (event, state) => {
                 if (state === 'completed') {
                     try {
-                        const buffer = Buffer.alloc(4);
-                        const fd = fs.openSync(savePath, 'r');
-                        fs.readSync(fd, buffer, 0, 4, 0);
-                        fs.closeSync(fd);
-
-                        const signature = buffer.toString('hex').toUpperCase();
-                        console.log(`File signature: ${signature}`);
-
-                        if (signature.startsWith('4D5A')) {
-                            console.log('Detected EXE file, keeping for installation...');
-                            try {
-                                // Notificar que la descarga ha completado
-                                if (progressCallback) {
-                                    progressCallback('completed');
-                                }
-                                // Don't execute the file, just keep it for later installation
-                                resolve({ success: true, path: destinationDir, filePath: savePath, isExecutable: true });
-                            } catch (error) {
-                                throw new Error(`EXE execution failed: ${error.message}`);
-                            }
-                        } else if (['504B0304', '504B0506'].includes(signature)) {
-                            console.log('Extracting ZIP file...');
-                            try {
-                                // Notificar que estamos extrayendo
-                                if (progressCallback) {
-                                    progressCallback('extracting');
-                                }
-                                
-                                // Configurar un intervalo para enviar actualizaciones periódicas
-                                const extractionInterval = setInterval(() => {
+                        if (fs.existsSync(savePath)) {
+                            // Leer las primeras bytes del archivo para identificar el tipo
+                            const headerBuffer = Buffer.alloc(10);
+                            const fd = fs.openSync(savePath, 'r');
+                            fs.readSync(fd, headerBuffer, 0, 10, 0);
+                            fs.closeSync(fd);
+                            
+                            // Convertir a hexadecimal para identificación
+                            const signature = headerBuffer.toString('hex', 0, 4).toUpperCase();
+                            console.log('File signature:', signature);
+                            
+                            // Verificar extensión del archivo
+                            const fileExt = path.extname(savePath).toLowerCase();
+                            
+                            // Extraer según el tipo de archivo
+                            if (signature === '504B0304') {
+                                console.log('Extracting ZIP file...');
+                                try {
+                                    const zip = new AdmZip(savePath);
+                                    
+                                    // Notificar que estamos extrayendo
                                     if (progressCallback) {
                                         progressCallback('extracting');
                                     }
-                                }, 2000); // Cada 2 segundos
-                                
-                                console.log('Iniciando extracción de archivo ZIP...');
-                                const zip = new AdmZip(savePath);
-                                
-                                // Obtener la lista de entradas para poder mostrar progreso
-                                const zipEntries = zip.getEntries();
-                                console.log(`Extrayendo ${zipEntries.length} archivos...`);
-                                
-                                // Extraer todos los archivos
-                                zip.extractAllTo(destinationDir, true);
-                                
-                                if (!keepArchive) {
-                                    fs.unlinkSync(savePath);
+                                    
+                                    zip.extractAllTo(destinationDir, true);
+                                    
+                                    // Eliminar el archivo comprimido si es necesario
+                                    if (!keepArchive && fs.existsSync(savePath)) {
+                                        fs.unlinkSync(savePath);
+                                    }
+                                    
+                                    // Notificar que la extracción ha completado
+                                    if (progressCallback) {
+                                        progressCallback('completed');
+                                    }
+                                    
+                                    resolve({ success: true, path: destinationDir });
+                                } catch (error) {
+                                    throw new Error(`ZIP extraction failed: ${error.message}`);
                                 }
-                                
-                                // Detener el intervalo de actualizaciones
-                                clearInterval(extractionInterval);
-                                
-                                // Notificar que la extracción ha completado
-                                if (progressCallback) {
-                                    progressCallback('completed');
+                            } else if (signature === '52617221') {
+                                console.log('Extracting RAR file...');
+                                try {
+                                    const rarBuffer = fs.readFileSync(savePath);
+                                    const result = await extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, progressCallback);
+                                    resolve(result);
+                                } catch (error) {
+                                    throw new Error(`RAR extraction failed: ${error.message}`);
                                 }
-                                
-                                console.log('Extracción de ZIP completada exitosamente');
-                                resolve({ success: true, path: destinationDir });
-                            } catch (error) {
-                                throw new Error(`ZIP extraction failed: ${error.message}`);
-                            }
-                        } else if (signature === '52617221') {
-                            console.log('Extracting RAR file...');
-                            try {
-                                const rarBuffer = fs.readFileSync(savePath);
-                                const result = await extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, progressCallback);
-                                resolve(result);
-                            } catch (error) {
-                                throw new Error(`RAR extraction failed: ${error.message}`);
+                            } else if (signature === '1F8B0800' || fileExt === '.gz' || fileExt === '.tar.gz') {
+                                console.log('Extracting tar.gz file...');
+                                try {
+                                    const result = await extractTarGz(savePath, destinationDir, keepArchive, progressCallback);
+                                    resolve(result);
+                                } catch (error) {
+                                    throw new Error(`tar.gz extraction failed: ${error.message}`);
+                                }
+                            } else {
+                                throw new Error(`Unsupported archive format. Signature: ${signature}, Extension: ${fileExt}`);
                             }
                         } else {
-                            throw new Error(`Unsupported archive format. Signature: ${signature}`);
+                            // Notificar que la descarga ha completado
+                            if (progressCallback) {
+                                progressCallback('completed');
+                            }
+                            resolve({ success: true, path: destinationDir });
                         }
                     } catch (error) {
                         reject(new Error(`Extraction failed: ${error.message}`));
@@ -294,6 +288,58 @@ async function downloadSingleFile(url, destinationDir, keepArchive = false, save
     });
 }
 
+// Función para extraer archivos tar.gz (para Linux)
+async function extractTarGz(filePath, destinationDir, keepArchive = false, progressCallback = null) {
+    return new Promise((resolve, reject) => {
+        try {
+            // Notificar que estamos extrayendo
+            if (progressCallback) {
+                progressCallback('extracting');
+            }
+            
+            console.log(`Extrayendo archivo tar.gz: ${filePath} a ${destinationDir}`);
+            
+            // Crear la carpeta de destino si no existe
+            if (!fs.existsSync(destinationDir)) {
+                fs.mkdirSync(destinationDir, { recursive: true });
+            }
+            
+            // Usar tar para extraer (comando nativo en sistemas Linux)
+            const command = `tar -xzf "${filePath}" -C "${destinationDir}"`;
+            
+            exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`Error al extraer tar.gz: ${error}`);
+                    reject(error);
+                    return;
+                }
+                
+                console.log('Extracción de tar.gz completada exitosamente');
+                
+                // Eliminar el archivo comprimido si es necesario
+                if (!keepArchive && fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                }
+                
+                // Notificar que la extracción ha completado
+                if (progressCallback) {
+                    progressCallback('completed');
+                }
+                
+                resolve({ success: true, path: destinationDir });
+            });
+        } catch (error) {
+            console.error('Error durante la extracción de tar.gz:', error);
+            
+            // Notificar el error
+            if (progressCallback) {
+                progressCallback('error');
+            }
+            
+            reject(error);
+        }
+    });
+}
 
 // Variable global para mantener referencia a la ventana principal
 let mainWindow;

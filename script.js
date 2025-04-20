@@ -2295,6 +2295,73 @@ window.showSection = function showSection(sectionId) {
         selectedInstanceButton = null;
         selectedVersionButton = null;
         document.getElementById("versions-sidebar").classList.remove("active");
+        
+        // Configurar manejadores para eventos de descarga del JDK
+        setupJdkDownloadHandlers();
+    }
+    
+    // Función para configurar los manejadores de eventos de descarga del JDK
+    function setupJdkDownloadHandlers() {
+        const jdkDownloadModal = document.getElementById('jdkDownloadModal');
+        const jdkProgressFill = document.getElementById('jdkProgressFill');
+        const jdkProgressText = document.getElementById('jdkProgressText');
+        const jdkDownloadStatus = document.getElementById('jdkDownloadStatus');
+        
+        // Cuando comienza la descarga del JDK
+        window.api.onJdkDownloadStarted(() => {
+            // Mostrar el modal de descarga
+            jdkDownloadModal.style.display = 'flex';
+            jdkProgressFill.style.width = '0%';
+            jdkProgressText.textContent = '0%';
+            jdkDownloadStatus.textContent = 'Iniciando descarga...';
+            
+            // Agregar mensaje a la consola
+            addConsoleMessage('info', 'Descargando Java Development Kit (JDK)...');
+        });
+        
+        // Actualizar el progreso de la descarga
+        window.api.onJdkDownloadProgress((event, data) => {
+            const progress = data.progress * 100;
+            const progressFormatted = Math.round(progress);
+            jdkProgressFill.style.width = `${progressFormatted}%`;
+            jdkProgressText.textContent = `${progressFormatted}%`;
+            jdkDownloadStatus.textContent = `Descargando... ${progressFormatted}%`;
+            
+            // Actualizar la consola periódicamente (cada 10%)
+            if (progressFormatted % 10 === 0) {
+                addConsoleMessage('info', `Descarga del JDK: ${progressFormatted}%`);
+            }
+        });
+        
+        // Cuando comienza la extracción
+        window.api.onJdkExtracting(() => {
+            jdkProgressFill.style.width = '100%';
+            jdkProgressText.textContent = '100%';
+            jdkDownloadStatus.textContent = 'Extrayendo archivos...';
+            addConsoleMessage('info', 'Extrayendo archivos del JDK...');
+        });
+        
+        // Cuando se completa la instalación
+        window.api.onJdkInstallCompleted(() => {
+            // Ocultar el modal después de un breve retraso
+            jdkDownloadStatus.textContent = 'Instalación completada';
+            addConsoleMessage('success', 'Instalación del JDK completada con éxito.');
+            
+            setTimeout(() => {
+                jdkDownloadModal.style.display = 'none';
+            }, 2000);
+        });
+        
+        // Cuando hay un error en la instalación
+        window.api.onJdkInstallError((event, data) => {
+            jdkDownloadStatus.textContent = `Error: ${data?.error || 'Error desconocido'}`;
+            addConsoleMessage('error', `Error en la instalación del JDK: ${data?.error || 'Error desconocido'}`);
+            
+            // Ocultar el modal después de un retraso mayor
+            setTimeout(() => {
+                jdkDownloadModal.style.display = 'none';
+            }, 5000);
+        });
     }
 
     init();

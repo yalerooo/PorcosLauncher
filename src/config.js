@@ -74,45 +74,138 @@ async function copyJavaRuntime() {
     try {
         const { app } = require('electron');
         const isWindows = process.platform === 'win32';
-        let sourceDir, targetDir;
+        const isARM64 = process.arch === 'arm64';
+        let targetDir;
         
+        // Determinar directorio destino según el sistema operativo
         if (isWindows) {
             // Para Windows
-            sourceDir = path.join(app.getAppPath(), 'assets', 'runtime', 'windows', 'jdk-24');
             targetDir = path.join(getPorcoslandPath(), 'runtime', 'windows', 'jdk-24');
         } else {
             // Para Linux
-            const isARM64 = process.arch === 'arm64';
             const jdkFolderName = isARM64 ? 'jdk-24-ARM64' : 'jdk-24-x64';
-            
-            sourceDir = path.join(app.getAppPath(), 'assets', 'runtime', 'linux', jdkFolderName);
             targetDir = path.join(getPorcoslandPath(), 'runtime', 'linux', jdkFolderName);
         }
         
-        // Verificar si el directorio fuente existe
-        if (!fs.existsSync(sourceDir)) {
-            console.error(`El directorio fuente ${sourceDir} no existe`);
-            return false;
-        }
-        
-        // Crear carpetas necesarias
-        // Para Windows, crear runtime/windows
-        // Para Linux, crear runtime/linux
-        const parentDir = path.dirname(targetDir);
-        await fsPromises.mkdir(parentDir, { recursive: true });
-        
-        // Si el JDK ya existe en el destino, no hacer nada
+        // Verificar si el JDK ya existe en el destino
         if (fs.existsSync(targetDir)) {
-            console.log(`JDK ya está copiado en ${targetDir}`);
+            console.log(`JDK ya está instalado en ${targetDir}`);
             return true;
         }
         
-        // Copiar directorio recursivamente
-        await copyDirectory(sourceDir, targetDir);
-        console.log(`JDK copiado exitosamente a ${targetDir}`);
-        return true;
+        // Si no existe, debemos descargarlo
+        console.log('JDK no encontrado, se procederá a descargar...');
+        
+        // Crear carpeta de destino
+        const parentDir = path.dirname(targetDir);
+        await fsPromises.mkdir(parentDir, { recursive: true });
+        
+        // Obtener URL de descarga según el sistema operativo
+        let downloadUrl, fileExt;
+        if (isWindows) {
+            downloadUrl = 'https://download.oracle.com/java/24/latest/jdk-24_windows-x64_bin.zip';
+            fileExt = 'zip';
+        } else {
+            if (isARM64) {
+                downloadUrl = 'https://download.oracle.com/java/24/latest/jdk-24_linux-aarch64_bin.tar.gz';
+                fileExt = 'tar.gz';
+            } else {
+                downloadUrl = 'https://download.oracle.com/java/24/latest/jdk-24_linux-x64_bin.tar.gz';
+                fileExt = 'tar.gz';
+            }
+        }
+        
+        // Notificar a la ventana principal que se está descargando el JDK
+        const { BrowserWindow } = require('electron');
+        const mainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
+        if (mainWindow) {
+            // Enviar mensaje a la ventana principal para mostrar el popup
+            mainWindow.webContents.send('jdk-download-started');
+            
+            // Esperar un momento para asegurar que el popup se muestre
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        // Descargar y extraer el JDK
+        try {
+            const { downloadAndExtract } = require('./downloader');
+            const tempDir = path.join(app.getPath('temp'), 'jdk-download');
+            
+            // Asegurarse de que el directorio temporal existe
+            await fsPromises.mkdir(tempDir, { recursive: true });
+            
+            // Notificar progreso
+            const progressCallback = (progress) => {
+                if (mainWindow) {
+                    if (typeof progress === 'number') {
+                        mainWindow.webContents.send('jdk-download-progress', { progress });
+                    } else if (progress === 'extracting') {
+                        mainWindow.webContents.send('jdk-extracting');
+                    } else if (progress === 'completed') {
+                        mainWindow.webContents.send('jdk-install-completed');
+                    } else if (progress === 'error') {
+                        mainWindow.webContents.send('jdk-install-error');
+                    }
+                }
+            };
+            
+            // Nombre de archivo temporal específico según el sistema
+            const tempFile = path.join(tempDir, `jdk-download.${fileExt}`);
+            
+            console.log(`Descargando JDK desde ${downloadUrl} a ${tempFile}`);
+            
+            // Descargar y extraer el JDK
+            const result = await downloadAndExtract(
+                downloadUrl,
+                tempDir,
+                false, // No mantener el archivo comprimido
+                tempFile, // Especificar el nombre del archivo temporal
+                progressCallback
+            );
+            
+            if (!result.success) {
+                throw new Error(`Error al descargar o extraer el JDK: ${result.error || 'Unknown error'}`);
+            }
+            
+            // Mover los archivos extraídos a la ubicación final
+            const extractedFiles = await fsPromises.readdir(tempDir);
+            let sourceJdkDir = tempDir;
+            
+            // Encontrar la carpeta del JDK si existe (normalmente el archivo se extrae en una subcarpeta)
+            for (const file of extractedFiles) {
+                const filePath = path.join(tempDir, file);
+                const stat = await fsPromises.stat(filePath);
+                if (stat.isDirectory() && file.includes('jdk')) {
+                    sourceJdkDir = filePath;
+                    break;
+                }
+            }
+            
+            console.log(`Copiando desde ${sourceJdkDir} a ${targetDir}`);
+            
+            // Copiar el JDK a la ubicación final
+            await copyDirectory(sourceJdkDir, targetDir);
+            
+            // Eliminar el directorio temporal
+            await fsPromises.rm(tempDir, { recursive: true, force: true }).catch(err => {
+                console.error('Error al eliminar directorio temporal:', err);
+                // No interrumpir el proceso por un error al limpiar
+            });
+            
+            console.log(`JDK descargado y copiado exitosamente a ${targetDir}`);
+            return true;
+        } catch (error) {
+            console.error('Error al descargar el JDK:', error);
+            
+            // Notificar el error
+            if (mainWindow) {
+                mainWindow.webContents.send('jdk-install-error', { error: error.message });
+            }
+            
+            return false;
+        }
     } catch (error) {
-        console.error('Error al copiar el runtime de Java:', error);
+        console.error('Error al gestionar el runtime de Java:', error);
         return false;
     }
 }

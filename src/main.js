@@ -65,6 +65,11 @@ async function createWindow() { //  Make createWindow async
     // Show window when ready-to-show, prevents visual flash
     mainWindow.on('ready-to-show', () => {
         mainWindow.show();
+        
+        // Verificar Java DESPUÉS de que la ventana sea visible
+        setTimeout(async () => {
+            await initializeJavaRuntime(mainWindow);
+        }, 1000); // Esperar 1 segundo para asegurar que la interfaz se haya cargado
     });
 
     // Save window state and clear active instance when closing
@@ -84,6 +89,27 @@ async function createWindow() { //  Make createWindow async
     
     // Inicializar instancias
     await initializeInstances();
+    
+    return mainWindow;
+}
+
+// Nueva función para inicializar el runtime de Java
+async function initializeJavaRuntime(mainWindow) {
+    try {
+        // Primero, asegurarse de que existe la carpeta .porcosLauncher
+        const porcoslandPath = getPorcoslandPath();
+        if (!fs.existsSync(porcoslandPath)) {
+            fs.mkdirSync(porcoslandPath, { recursive: true });
+            console.log(`Carpeta ${porcoslandPath} creada correctamente`);
+        }
+        
+        // Verificar Java incluido en .porcosLauncher/runtime/jdk-24
+        console.log('Verificando Java incluido en .porcosLauncher...');
+        const javaInfo = await checkJavaVersion();
+        console.log(`Usando Java incluido. Versión: ${javaInfo.version}`);
+    } catch (error) {
+        console.error('Error al verificar Java incluido:', error);
+    }
 }
 
 async function initializeInstances() {
@@ -108,41 +134,6 @@ app.whenReady().then(async () => {
         console.log('Carpeta de miniaturas verificada correctamente');
     } catch (error) {
         console.error('Error al verificar carpeta de miniaturas:', error);
-    }
-    
-    // Copiar el JDK a .porcosland y verificar la versión
-    try {
-        // Primero, asegurarse de que existe la carpeta .porcosLauncher
-        const porcoslandPath = getPorcoslandPath();
-        if (!fs.existsSync(porcoslandPath)) {
-            fs.mkdirSync(porcoslandPath, { recursive: true });
-            console.log(`Carpeta ${porcoslandPath} creada correctamente`);
-        }
-        
-        // Copiar el JDK de assets/runtime/jdk-24 a .porcosLauncher/runtime/jdk-24
-        console.log('Copiando JDK a', porcoslandPath);
-        const jdkCopied = await copyJavaRuntime();
-        if (jdkCopied) {
-            console.log('JDK copiado correctamente a .porcosLauncher');
-        } else {
-            console.log('No se pudo copiar el JDK a .porcosLauncher, se usará el JDK incluido en el paquete');
-        }
-        
-        // Copiar las carpetas de runtime (windows y linux) a .porcosLauncher/runtime
-        console.log('Copiando carpetas de runtime (windows y linux)...');
-        const runtimeFoldersCopied = await copyRuntimeFolders();
-        if (runtimeFoldersCopied) {
-            console.log('Carpetas de runtime copiadas correctamente a .porcosLauncher');
-        } else {
-            console.log('No se pudieron copiar todas las carpetas de runtime a .porcosLauncher');
-        }
-        
-        // Verificar el Java incluido en .porcosLauncher/runtime/jdk-24
-        console.log('Verificando Java incluido en .porcosLauncher...');
-        const javaInfo = await checkJavaVersion();
-        console.log(`Usando Java incluido. Versión: ${javaInfo.version}`);
-    } catch (error) {
-        console.error('Error al verificar Java incluido:', error);
     }
     
     await createWindow();
