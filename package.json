@@ -42,10 +42,11 @@
   "dependencies": {
     "@electron/remote": "^2.1.2",
     "adm-zip": "^0.5.16",
+    "canvas": "^3.1.0",
     "cheerio": "^1.0.0",
     "drive-mediafire-downloader": "^1.0.0",
     "electron-store": "^10.0.1",
-    "fabric": "^6.6.1",
+    "fabric": "^6.6.4",
     "forge": "^2.3.0",
     "jsdom": "^26.0.0",
     "minecraft-launcher-core": "^3.18.2",
@@ -58,7 +59,9 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@electron/rebuild": "^3.7.2",
     "electron": "^28.0.0",
-    "electron-builder": "^24.9.1"
+    "electron-builder": "^24.9.1",
+    "electron-rebuild": "^3.2.9"
   }
 }

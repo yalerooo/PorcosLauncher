@@ -4,19 +4,23 @@ const fs = require('fs');
 const { URL } = require('url');
 const AdmZip = require('adm-zip');
 const unrar = require('node-unrar-js');
+const { execSync } = require('child_process');
 
 async function extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, progressCallback) {
     try {
         // Notificar que estamos extrayendo
         if (progressCallback) {
             progressCallback('extracting');
-            // No configuramos el intervalo aquí, lo haremos después de obtener la lista de archivos
         }
         
         console.log('Iniciando extracción de archivo RAR...');
+        
+        // Enfoque por lotes para evitar bloquear la UI
+        // Primero, obtener la lista de archivos
         const extractor = await unrar.createExtractorFromData({ data: rarBuffer });
         console.log('Obteniendo lista de archivos...');
         const list = extractor.getFileList();
+        
         const fileNames = [];
         for (const header of list.fileHeaders) {
             fileNames.push(header.name);
@@ -30,44 +34,74 @@ async function extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, 
         
         // Crear un intervalo para actualizar el progreso
         let extractionInterval;
+        
+        // Extraer de forma no bloqueante usando setTimeout
+        const extracted = extractor.extract();
+        
+        // Extraer archivos por lotes para no bloquear la UI
         if (progressCallback) {
             extractionInterval = setInterval(() => {
                 const percentage = totalFiles > 0 ? filesProcessed / totalFiles : 0;
                 progressCallback({ extracting: true, progress: percentage });
-            }, 500); // Actualizar cada medio segundo
+            }, 100); // Actualizar más frecuentemente
         }
         
-        const extracted = extractor.extract({ files: fileNames });
-        
-        for (const file of extracted.files) {
-            if (file.fileHeader.flags.directory) {
-                continue;
-            }
-            const filePath = path.join(destinationDir, file.fileHeader.name);
-            const dirPath = path.dirname(filePath);
-            if (!fs.existsSync(dirPath)) {
-                fs.mkdirSync(dirPath, { recursive: true });
-            }
-            if (file.extraction) {
-                fs.writeFileSync(filePath, Buffer.from(file.extraction));
+        // Función para procesar archivos en pequeños lotes
+        const processFilesInBatches = async () => {
+            // Tamaño de batch pequeño para permitir actualizaciones más frecuentes de la UI
+            const batchSize = 5;
+            let currentIndex = 0;
+            
+            for (const file of extracted.files) {
+                // Permitir que el bucle de eventos se ejecute cada cierto número de archivos
+                if (currentIndex % batchSize === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1));
+                }
+                
+                if (file.fileHeader.flags.directory) {
+                    filesProcessed++;
+                    currentIndex++;
+                    continue;
+                }
+                
+                const filePath = path.join(destinationDir, file.fileHeader.name);
+                const dirPath = path.dirname(filePath);
+                
+                if (!fs.existsSync(dirPath)) {
+                    fs.mkdirSync(dirPath, { recursive: true });
+                }
+                
+                if (file.extraction) {
+                    fs.writeFileSync(filePath, Buffer.from(file.extraction));
+                }
+                
+                filesProcessed++;
+                currentIndex++;
+                
+                // Registrar progreso periódicamente
+                if (filesProcessed % 25 === 0) {
+                    console.log(`Procesados ${filesProcessed} de ${totalFiles} archivos (${Math.round(filesProcessed / totalFiles * 100)}%)...`);
+                }
             }
             
-            filesProcessed++;
-            if (filesProcessed % 10 === 0) {
-                console.log(`Procesados ${filesProcessed} de ${totalFiles} archivos (${Math.round(filesProcessed / totalFiles * 100)}%)...`);
-            }
-        }
+            console.log('Procesamiento de archivos completado.');
+        };
         
-        if (!keepArchive) {
+        // Iniciar el procesamiento por lotes
+        await processFilesInBatches();
+        
+        // Eliminar el archivo comprimido si es necesario
+        if (!keepArchive && fs.existsSync(savePath)) {
             fs.unlinkSync(savePath);
         }
         
         // Detener el intervalo de actualizaciones
+        if (extractionInterval) {
+            clearInterval(extractionInterval);
+        }
+        
+        // Notificar que la extracción ha completado
         if (progressCallback) {
-            if (typeof extractionInterval !== 'undefined') {
-                clearInterval(extractionInterval);
-            }
-            // Notificar que la extracción ha completado
             progressCallback('completed');
         }
         
@@ -75,14 +109,17 @@ async function extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, 
         return { success: true, path: destinationDir };
     } catch (error) {
         console.error('Error durante la extracción de RAR:', error);
-        // Asegurarse de detener el intervalo en caso de error
+        
+        // Detener el intervalo en caso de error
         if (typeof extractionInterval !== 'undefined') {
             clearInterval(extractionInterval);
         }
+        
         // Notificar el error
         if (progressCallback) {
             progressCallback('error');
         }
+        
         throw error;
     }
 }
