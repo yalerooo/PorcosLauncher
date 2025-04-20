@@ -1,192 +1,229 @@
 /* play-button.css */
 /* Estilos para el nuevo botón de play */
 .play-container {
-    position: relative;
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
-    background-color: rgba(28, 28, 30, 0.7);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-  }
-  
-  /* Versión delgada del contenedor de play */
-  .play-container.slim {
-    max-width: 800px;
-    padding: 15px 20px;
-    margin-top: 20px;
-    position: sticky;
-    bottom: 20px;
-    background-color: rgba(28, 28, 30, 0.4);
-    z-index: 100;
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  }
-  
-  .play-container::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    opacity: 0.5;
-    background: radial-gradient(circle at 50% 50%, rgba(255, 107, 139, 0.1), transparent 70%);
-    z-index: 0;
-    border-radius: 20px;
-  }
-  
-  .play-content {
-    position: relative;
-    z-index: 1;
-  }
-  
-  .play-header {
-    margin-bottom: 24px;
-    text-align: center;
-  }
-  
-  .play-header h2 {
-    margin-bottom: 8px;
-    font-size: 24px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: white;
-  }
-  
-  .play-header p {
-    font-size: 14px;
-    color: var(--text-secondary);
-  }
-  
-  .play-controls {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 15px;
+    backdrop-filter: blur(12px);
+    padding: 20px;
+    width: 460px;
+    margin-left: 300px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease-in-out;
+}
+
+.play-container:hover {
+    transform: translateX(-60px) translateY(-2px);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.play-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Contenedor de información del jugador */
+.player-info {
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  
-  .input-wrapper {
+    justify-content: center;
+    gap: 20px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     position: relative;
-    flex: 1;
-  }
-  
-  #username {
+}
+
+/* Estilos para la cabeza del jugador */
+.minecraft-head {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.minecraft-head img {
     width: 100%;
-    padding: 12px 16px;
-    border-radius: 12px;
-    background-color: rgba(44, 44, 46, 0.5);
-    color: var(--text);
+    height: 100%;
+    object-fit: cover;
+    image-rendering: pixelated; /* Dar estilo pixelado característico de Minecraft */
+}
+
+.minecraft-head.has-player {
+    box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.4);
+}
+
+.minecraft-head.mhf-head {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.4); }
+    50% { box-shadow: 0 0 25px rgba(var(--primary-rgb), 0.6); }
+    100% { box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.4); }
+}
+
+.head-placeholder {
+    width: 48px;
+    height: 48px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a7 7 0 0 1 7-7h2a7 7 0 0 1 7 7v2"/></svg>');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 80%;
+    opacity: 0.5;
+}
+
+.player-username {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: left;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.play-controls {
+    display: flex;
+    gap: 15px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.input-wrapper {
+    flex: 1;
+    position: relative;
+}
+
+.play-controls input {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: white;
     font-size: 14px;
-    border: none;
     outline: none;
     transition: all 0.3s;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
-  }
-  
-  #username:focus {
-    background-color: rgba(44, 44, 46, 0.8);
-    box-shadow: 0 0 0 2px rgba(255, 107, 139, 0.3);
-  }
-  
-  #username::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-  }
-  
-  /* Estilos mejorados para el botón de lanzamiento */
-  #launch {
-    min-width: 120px;
-    height: 45px;
-    background: linear-gradient(135deg, #ff5b84, #ff3366);
-    color: white;
+}
+
+.play-controls input:focus {
+    border-color: rgba(var(--primary-rgb), 0.5);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+}
+
+.play-controls button {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
     border: none;
-    border-radius: 12px;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
     cursor: pointer;
-    font-weight: bold;
-    font-size: 15px;
-    padding: 0 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(255, 51, 102, 0.2);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  #launch:hover {
+    min-width: 120px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
+}
+
+.play-controls button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255, 51, 102, 0.4);
-    background: linear-gradient(135deg, #ff6b94, #ff4376);
-  }
-  
-  #launch:active {
-    transform: translateY(0);
-    box-shadow: 0 3px 10px rgba(255, 51, 102, 0.2);
-  }
-  
-  /* Efecto de brillo */
-  #launch::before {
-    content: '';
+    box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.4);
+}
+
+.play-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Versión delgada del contenedor de play */
+.play-container.slim {
+    max-width: 850px;
+    margin: 20px auto 0;
+    margin-left: 500px;
+    position: sticky;
+    bottom: 20px;
+    background-color: rgba(22, 22, 28, 0.45);
+    z-index: 100;
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25), 0 0 15px rgba(255, 107, 139, 0.1);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Efecto de brillo en los bordes */
+.play-container.slim::before {
+    content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.7) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s;
+    inset: 0;
+    padding: 1.5px; /* Grosor del borde iluminado */
+    border-radius: 20px;
+    background: linear-gradient(120deg, 
+      rgba(255, 107, 139, 0.4), 
+      rgba(79, 172, 254, 0.4), 
+      rgba(0, 242, 254, 0.4), 
+      rgba(255, 107, 139, 0.4));
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.8;
     z-index: 1;
     pointer-events: none;
-  }
-  
-  #launch:hover::before {
-    opacity: 0.2;
-  }
-  
-  .play-icon {
-    width: 20px;
-    height: 20px;
-    fill: white;
-    transition: transform 0.3s;
-    position: relative;
-    z-index: 2;
-    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
-  }
-  
-  #launch:hover .play-icon {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.4));
-  }
-  
-  .play-footer {
-    text-align: center;
-    margin-top: 16px;
-  }
-  
-  .play-footer span {
-    font-size: 12px;
-    color: var(--text-secondary);
-    opacity: 0.7;
-  }
-  
-  @media (max-width: 768px) {
-    .play-container {
-      padding: 30px;
-      margin: 0 20px;
+}
+
+/* Efectos de partículas/luz en las esquinas */
+.play-container.slim::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 0% 0%, rgba(255, 107, 139, 0.15), transparent 40%),
+                radial-gradient(circle at 100% 0%, rgba(79, 172, 254, 0.15), transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(0, 242, 254, 0.15), transparent 40%),
+                radial-gradient(circle at 0% 100%, rgba(255, 107, 139, 0.15), transparent 40%);
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .play-container.slim {
+        padding: 15px;
     }
-  
-    .play-controls {
-      flex-direction: column;
+    
+    .play-content {
+        flex-direction: column;
+        gap: 15px;
     }
-  
+    
+    .input-wrapper {
+        width: 100%;
+    }
+    
     #launch {
-      width: 100%;
-      margin-top: 12px;
-      height: 46px;
+        width: 100%;
     }
-  }
+}

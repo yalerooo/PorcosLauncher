@@ -353,18 +353,54 @@ window.showSection = function showSection(sectionId) {
     async function loadUsername() {
         try {
             const settings = await window.api.getSettings();
-            document.getElementById("username").value = settings.username || "";
+            const username = settings.username || "";
+            document.getElementById("username").value = username;
+            
+            // Actualizar la visualización del nombre de usuario y la cabeza
+            updatePlayerDisplay(username);
             
             // Añadir event listener para guardar automáticamente el username al escribir
             document.getElementById("username").addEventListener("input", function() {
                 const username = this.value.trim();
                 window.api.setSettings({ username: username });
+                updatePlayerDisplay(username);
             });
         } catch (error) {
             console.error("Error loading username:", error);
         }
     }
-
+    
+    // Función para actualizar la visualización del nombre y la cabeza del jugador
+    function updatePlayerDisplay(username) {
+        // Actualizar el texto del nombre de usuario
+        const usernameDisplay = document.getElementById("player-username-display");
+        if (usernameDisplay) {
+            usernameDisplay.textContent = username || "Selecciona tu usuario";
+        }
+        
+        // Actualizar la cabeza del jugador
+        const playerHead = document.getElementById("player-head");
+        if (playerHead) {
+            if (username) {
+                // Usar la API de mcheads.org para obtener la cabeza del jugador - endpoint /head/
+                playerHead.innerHTML = `<img src="https://api.mcheads.org/head/${username}/250" alt="${username}" />`;
+                playerHead.classList.add('has-player');
+            } else {
+                // Si no hay nombre de usuario, mostrar un MHF (Minecraft Head Format) aleatorio
+                // Estos son cabezas especiales de Minecraft como Creeper, Zombie, etc.
+                const mhfHeads = [
+                    'MHF_Steve', 'MHF_Alex', 'MHF_Creeper', 'MHF_Zombie', 
+                    'MHF_Skeleton', 'MHF_Blaze', 'MHF_Enderman', 'MHF_Herobrine'
+                ];
+                const randomMHF = mhfHeads[Math.floor(Math.random() * mhfHeads.length)];
+                
+                playerHead.innerHTML = `<img src="https://api.mcheads.org/head/${randomMHF}/250" alt="${randomMHF}" />`;
+                playerHead.classList.add('has-player');
+                playerHead.classList.add('mhf-head');
+            }
+        }
+    }
+    
     // --- Save Settings ---
     function saveCurrentSettings() {
         const settings = {

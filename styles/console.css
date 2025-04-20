@@ -1,44 +1,35 @@
 /* console.css */
 .console-container {
   width: 100%;
-  max-width: 800px;
-  height: 300px;
-  margin: 30px auto 20px; /* Aumentado el margen superior para separarlo */
-  background-color: rgba(20, 20, 22, 0.5); /* Reducida la opacidad para el efecto glassmorphic */
-  border-radius: 16px; /* Incrementado el border-radius para un aspecto más moderno */
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 850px;
+  height: 320px;
+  margin: 30px auto 20px;
+  margin-left: 300px;
+  background-color: rgba(22, 22, 28, 0.45); /* Más transparente para efecto glassmorphic */
+  border-radius: 20px; /* Bordes más redondeados */
+  border: 1px solid rgba(255, 255, 255, 0.12);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25), 0 0 15px rgba(255, 107, 139, 0.1);
   position: relative;
-  
-  /* Efecto glassmorphic */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Decorative elements for console */
+/* Efecto de brillo en los bordes */
 .console-container::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(255, 107, 139, 0.3), rgba(79, 172, 254, 0.3), rgba(255, 107, 139, 0.3));
-  z-index: 5;
-  opacity: 0.8; /* Incrementada la opacidad del borde superior */
-}
-
-/* Nuevo efecto de brillo en las esquinas */
-.console-container::after {
-  content: "";
-  position: absolute;
   inset: 0;
-  border-radius: 16px;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 50%, rgba(255, 255, 255, 0.05));
+  padding: 1.5px; /* Grosor del borde iluminado */
+  border-radius: 20px;
+  background: linear-gradient(120deg, 
+    rgba(255, 107, 139, 0.4), 
+    rgba(79, 172, 254, 0.4), 
+    rgba(0, 242, 254, 0.4), 
+    rgba(255, 107, 139, 0.4));
   -webkit-mask: 
     linear-gradient(#fff 0 0) content-box, 
     linear-gradient(#fff 0 0);
@@ -47,6 +38,25 @@
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
+  opacity: 0.8;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Efectos de partículas/luz en las esquinas */
+.console-container::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 0% 0%, rgba(255, 107, 139, 0.15), transparent 40%),
+              radial-gradient(circle at 100% 0%, rgba(79, 172, 254, 0.15), transparent 40%),
+              radial-gradient(circle at 100% 100%, rgba(0, 242, 254, 0.15), transparent 40%),
+              radial-gradient(circle at 0% 100%, rgba(255, 107, 139, 0.15), transparent 40%);
+  opacity: 0.6;
+  z-index: 1;
   pointer-events: none;
 }
 
@@ -54,30 +64,35 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 15px; /* Incrementado padding vertical */
-  background-color: rgba(30, 30, 32, 0.6); /* Reducida la opacidad */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 14px 18px;
+  background-color: rgba(20, 20, 24, 0.65);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
+  position: relative;
+  z-index: 3;
 }
 
 .console-header h3 {
   margin: 0;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--text);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  letter-spacing: 0.3px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Add iconic element to console header */
+/* Icono mejorado para consola */
 .console-header h3::before {
-  content: ">";
-  font-family: monospace;
-  font-size: 16px;
-  color: rgba(255, 107, 139, 0.8);
-  font-weight: bold;
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #ff6b8b, #4facfe);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(255, 107, 139, 0.5);
 }
 
 .console-header .console-actions {
@@ -86,12 +101,12 @@
 }
 
 .console-header button {
-  background: none;
+  background: rgba(255, 255, 255, 0.1);
   border: none;
   color: var(--text-secondary);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
+  padding: 6px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -99,87 +114,100 @@
 }
 
 .console-header button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.2);
   color: var(--text);
+  transform: translateY(-1px);
 }
 
 .console-content {
   flex: 1;
   overflow-y: auto;
-  padding: 10px 15px;
-  font-family: 'Consolas', 'Monaco', monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #e0e0e0;
+  padding: 15px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
   position: relative;
-  z-index: 2;
-  background-color: rgba(20, 20, 22, 0.4); /* Reducida la opacidad */
-}
-
-.console-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.console-content::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-}
-
-.console-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
-}
-
-.console-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  z-index: 3;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 107, 139, 0.5) rgba(30, 30, 41, 0.3);
 }
 
 .console-line {
-  margin: 2px 0;
-  white-space: pre-wrap;
-  word-break: break-all;
+  margin-bottom: 8px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  opacity: 0.9;
+  transition: opacity 0.2s;
 }
 
-.console-line.debug {
-  color: #7986cb; /* Azul claro */
-  text-shadow: 0 0 5px rgba(121, 134, 203, 0.2); /* Incrementado el brillo del texto */
+.console-line:hover {
+  opacity: 1;
 }
 
-.console-line.info {
-  color: #81c784; /* Verde claro */
-  text-shadow: 0 0 5px rgba(129, 199, 132, 0.2); /* Incrementado el brillo del texto */
+.info {
+  color: #4facfe;
 }
 
-.console-line.error {
-  color: #e57373; /* Rojo claro */
-  text-shadow: 0 0 5px rgba(229, 115, 115, 0.3); /* Incrementado el brillo del texto */
+.success {
+  color: #30d158;
 }
 
-.console-line.minecraft {
-  color: #ffb74d; /* Naranja claro */
-  text-shadow: 0 0 5px rgba(255, 183, 77, 0.2); /* Incrementado el brillo del texto */
+.warning {
+  color: #ffd60a;
 }
 
-/* Background pattern for console */
+.error {
+  color: #ff453a;
+}
+
+/* Patrón decorativo mejorado */
 .console-pattern {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  pointer-events: none;
-  opacity: 0.05; /* Incrementada ligeramente la opacidad */
+  height: 30%;
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
-  z-index: 1;
+    radial-gradient(circle at 20% 80%, rgba(255, 107, 139, 0.05) 0%, transparent 25%),
+    radial-gradient(circle at 80% 20%, rgba(79, 172, 254, 0.05) 0%, transparent 25%);
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.8;
 }
 
-/* Responsive adjustments */
+/* Efectos de hover mejorados */
+.console-container:hover {
+  transform: translateX(-60px) translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 107, 139, 0.15);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.console-container:hover::before {
+  opacity: 1;
+  background: linear-gradient(120deg, 
+    rgba(255, 107, 139, 0.6), 
+    rgba(79, 172, 254, 0.6), 
+    rgba(0, 242, 254, 0.6), 
+    rgba(255, 107, 139, 0.6));
+}
+
+/* Mejoras para dispositivos móviles */
 @media (max-width: 768px) {
   .console-container {
-    height: 200px;
-    margin: 25px auto 20px; /* Ajustado el margen en pantallas pequeñas */
+    height: 250px;
+    margin: 25px auto 20px;
+    border-radius: 16px;
+  }
+  
+  .console-header {
+    padding: 12px 15px;
+  }
+  
+  .console-header h3 {
+    font-size: 14px;
+  }
+  
+  .console-content {
+    padding: 12px 15px;
+    font-size: 12px;
   }
 }

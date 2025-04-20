@@ -139,9 +139,17 @@
             <!-- Play Container (Slim version) -->
             <div class="play-container slim">
                 <div class="play-content">
+                    <div class="player-info">
+                        <div class="minecraft-head" id="player-head">
+                            <!-- La imagen de la cabeza del jugador se cargará dinámicamente con JavaScript -->
+                        </div>
+                        <div class="player-username" id="player-username-display">
+                            Selecciona tu usuario
+                        </div>
+                    </div>
                     <div class="play-controls">
                         <div class="input-wrapper">
-                            <input type="text" id="username" placeholder="Enter username">
+                            <input type="text" id="username" placeholder="Nombre de usuario">
                         </div>
 
                         <button id="launch" onclick="launch()">
