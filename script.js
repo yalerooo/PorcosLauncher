@@ -382,7 +382,7 @@ window.showSection = function showSection(sectionId) {
         if (playerHead) {
             if (username) {
                 // Usar la API de mcheads.org para obtener la cabeza del jugador - endpoint /head/
-                playerHead.innerHTML = `<img src="https://api.mcheads.org/head/${username}/250" alt="${username}" />`;
+                playerHead.innerHTML = `<img src="https://api.mcheads.org/head/${username}/250" alt="${username}" onerror="this.onerror=null; this.src='https://minecraftfaces.com/wp-content/bigfaces/big-steve-face.png';" />`;
                 playerHead.classList.add('has-player');
             } else {
                 // Si no hay nombre de usuario, mostrar un MHF (Minecraft Head Format) aleatorio
@@ -393,7 +393,7 @@ window.showSection = function showSection(sectionId) {
                 ];
                 const randomMHF = mhfHeads[Math.floor(Math.random() * mhfHeads.length)];
                 
-                playerHead.innerHTML = `<img src="https://api.mcheads.org/head/${randomMHF}/250" alt="${randomMHF}" />`;
+                playerHead.innerHTML = `<img src="https://api.mcheads.org/head/${randomMHF}/250" alt="${randomMHF}" onerror="this.onerror=null; this.src='https://minecraftfaces.com/wp-content/bigfaces/big-steve-face.png';" />`;
                 playerHead.classList.add('has-player');
                 playerHead.classList.add('mhf-head');
             }
@@ -1802,7 +1802,7 @@ window.showSection = function showSection(sectionId) {
         const clickedImage = Array.from(document.querySelectorAll('#defaultBackgroundsContainer .default-version-image')).find(img => img.src === imagePath);
         if (clickedImage) {
             clickedImage.classList.add('selected-image');
-            // Guardar la ruta de la imagen original como atributo de datos
+            // Guardar la imagen original en el atributo de datos
             clickedImage.dataset.originalImage = originalImagePath;
         }
         

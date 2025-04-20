@@ -1,177 +1,185 @@
 /* version-details.css */
 /* Version details styles */
+
+/* Estructura para centrar los elementos en version-details */
 #version-details {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: calc(100vh - 70px);
-  width: 100vw;
-  animation: fadeIn 0.3s ease;
-  background-color: var(--background);
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  padding: 20px;
-  overflow: hidden;
-  position: relative;
-  margin: 0;
-  box-sizing: border-box;
-  left: 0;
-  right: 0;
-  transition: background-image 0.5s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 20px 0;
+    height: calc(100vh - 70px);
+    animation: fadeIn 0.3s ease;
+    background-color: var(--background);
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+    position: relative;
+    margin: 0;
+    box-sizing: border-box;
+    left: 0;
+    right: 0;
+    transition: background-image 0.5s ease-in-out;
 }
 
 /* Clase para cuando no hay fondo personalizado */
 #version-details.no-background {
-  background-image: radial-gradient(circle at 50% 10%, rgba(255, 107, 139, 0.1) 0%, transparent 70%);
+    background-image: radial-gradient(circle at 50% 10%, rgba(255, 107, 139, 0.1) 0%, transparent 70%);
 }
 
 /* Clase para la transición de fondo */
 #version-details.changing-background {
-  opacity: 0.7;
-  transition: opacity 0.3s ease-in-out, background-image 0.5s ease-in-out;
+    opacity: 0.7;
+    transition: opacity 0.3s ease-in-out, background-image 0.5s ease-in-out;
 }
 
 /* Overlay para mejorar la legibilidad del contenido */
 #version-details::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  pointer-events: none;
-  z-index: 0;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 0;
 }
 
 /* Aseguramos que el contenido esté por encima del overlay */
 #version-details > * {
-  position: relative;
-  z-index: 1;
+    position: relative;
+    z-index: 1;
 }
 
 /* Decorative elements */
 #version-details::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 107, 139, 0.3), transparent);
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 107, 139, 0.3), transparent);
 }
 
 #version-details::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 107, 139, 0.3), transparent);
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 107, 139, 0.3), transparent);
 }
 
 /* Console container enhancements */
 #version-details .console-container {
-  transition: var(--transition);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+    transition: var(--transition);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 #version-details .console-container:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 /* Play container enhancements */
 #version-details .play-container.slim {
-  transition: var(--transition);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  margin-top: 20px;
-  position: relative;
-  overflow: hidden;
+    transition: var(--transition);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
 }
 
 #version-details .play-container.slim:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 /* Glow effect for play container */
 #version-details .play-container.slim::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at center, rgba(255, 107, 139, 0.15), transparent 70%);
-  opacity: 0;
-  transition: opacity 0.5s ease;
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(255, 107, 139, 0.15), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
 }
 
 #version-details .play-container.slim:hover::before {
-  opacity: 1;
+    opacity: 1;
 }
 
 /* Username input enhancements */
 #version-details #username {
-  transition: var(--transition);
-  border-radius: 10px;
-  background-color: rgba(44, 44, 46, 0.7);
+    transition: var(--transition);
+    border-radius: 10px;
+    background-color: rgba(44, 44, 46, 0.7);
 }
 
 #version-details #username:focus {
-  background-color: rgba(44, 44, 46, 0.9);
-  box-shadow: 0 0 0 2px rgba(255, 107, 139, 0.5);
+    background-color: rgba(44, 44, 46, 0.9);
+    box-shadow: 0 0 0 2px rgba(255, 107, 139, 0.5);
 }
 
 /* Launch button enhancements */
 #version-details #launch {
-  transition: var(--transition);
-  box-shadow: 0 4px 12px rgba(255, 107, 139, 0.3);
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(255, 107, 139, 0.3);
 }
 
 #version-details #launch:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 107, 139, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 107, 139, 0.4);
 }
 
 #version-details #launch:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 8px rgba(255, 107, 139, 0.3);
+    transform: translateY(1px);
+    box-shadow: 0 2px 8px rgba(255, 107, 139, 0.3);
 }
 
 /* Animation */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* Responsive adjustments */
+/* Ajustes responsivos para #version-details */
+@media (max-width: 1200px) {
+    #version-details {
+        padding: 15px 0;
+    }
+}
+
 @media (max-width: 768px) {
-  #version-details {
-    padding: 15px;
-    height: auto;
-    min-height: calc(100vh - 70px);
-  }
-  
-  #version-details .console-container {
-    height: 250px;
-  }
+    #version-details {
+        padding: 10px 0;
+        height: auto;
+        min-height: calc(100vh - 70px);
+    }
+    
+    #version-details .console-container {
+        height: 250px;
+    }
 }
