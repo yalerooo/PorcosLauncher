@@ -393,7 +393,9 @@ function setupIpcHandlers(mainWindow) {
     ipcMain.handle("set-version-image", async (event, versionId, imageDataURL, instanceId) => {
         const minecraftPath = instanceId ? getInstanceMinecraftPath(instanceId) : getCustomMinecraftPath();
         const versionPath = path.join(minecraftPath, "versions", versionId);
-        const versionAssetsPath = path.join(minecraftPath, "assets", "versions");
+
+        console.log(`Setting version image for ${versionId} in ${versionPath}`);
+        console.log(`Image data type: ${imageDataURL.substring(0, 30)}...`);
 
         try {
             if (!fs.existsSync(versionPath)) {
@@ -416,42 +418,48 @@ function setupIpcHandlers(mainWindow) {
 
             // 2. Determine if it's a data URL or a file path
             if (imageDataURL.startsWith('data:')) {
-                // Data URL: Process as before
-                let mimeType;
-                let fileExtension;
-
+                // Data URL: Extract and save as PNG
+                let fileExtension = '.png'; // Default to PNG
+                
                 if (imageDataURL.startsWith('data:image/jpeg')) {
-                    mimeType = 'image/jpeg';
-                    fileExtension = '.jpg';
+                    fileExtension = '.png'; // Convertimos a PNG para estandarizar
                 } else if (imageDataURL.startsWith('data:image/png')) {
-                    mimeType = 'image/png';
                     fileExtension = '.png';
                 } else if (imageDataURL.startsWith('data:image/gif')) {
-                    mimeType = 'image/gif';
-                    fileExtension = '.gif';
+                    fileExtension = '.png'; // Convertimos a PNG para estandarizar
                 } else {
-                    return { success: false, error: 'Unsupported image format.' };
+                    console.log('Unsupported image format, defaulting to PNG');
                 }
+                
                 const imagePath = path.join(versionPath, `version-image${fileExtension}`);
+                console.log(`Saving image to: ${imagePath}`);
+                
                 const base64Data = imageDataURL.replace(/^data:image\/(png|jpeg|gif);base64,/, "");
                 const imageBuffer = Buffer.from(base64Data, 'base64');
                 await fs.promises.writeFile(imagePath, imageBuffer);
+                console.log(`Image saved successfully to ${imagePath}`);
 
-            } else if (imageDataURL.startsWith('file:///')) {
-                // File Path: Copy the file
-                const originalFilePath = decodeURI(imageDataURL.substring(8));
-                const fileExtension = path.extname(originalFilePath).toLowerCase();
-                const imagePath = path.join(versionPath, `version-image${fileExtension}`);
-
+            } else if (imageDataURL.startsWith('file://') || imageDataURL.startsWith('/')) {
+                // File Path: Copy the file to version-image.png
+                const originalFilePath = imageDataURL.startsWith('file://') 
+                    ? decodeURI(imageDataURL.replace('file://', ''))
+                    : imageDataURL;
+                
+                // Siempre guardamos como PNG para estandarizar
+                const imagePath = path.join(versionPath, 'version-image.png');
+                
+                console.log(`Copying image from ${originalFilePath} to ${imagePath}`);
+                
                 // Copy the file
                 try {
                     await fs.promises.copyFile(originalFilePath, imagePath);
-                    console.log(`Copied image from ${originalFilePath} to ${imagePath}`);
+                    console.log(`Copied image successfully from ${originalFilePath} to ${imagePath}`);
                 } catch (copyError) {
                     console.error(`Error copying image from ${originalFilePath} to ${imagePath}:`, copyError);
                     return { success: false, error: `Error copying image: ${copyError.message}` };
                 }
             } else {
+                console.error('Invalid image data provided:', imageDataURL.substring(0, 30));
                 return { success: false, error: 'Invalid image data provided.' };
             }
 
@@ -626,7 +634,7 @@ function setupIpcHandlers(mainWindow) {
         }
     });
 
-    ipcMain.handle("get-default-version-images", async () => {
+     ipcMain.handle("get-default-version-images", async () => {
         try {
             const imagesPath = path.join(__dirname, "..", "assets", "versions");
             const images = [];

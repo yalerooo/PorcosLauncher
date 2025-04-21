@@ -1116,6 +1116,10 @@ window.showSection = function showSection(sectionId) {
         document.querySelectorAll('.default-version-image').forEach(img => {
             img.classList.remove('selected-image');
         });
+        
+        // Guardar la imagen seleccionada en una variable global
+        window.tempSelectedInstanceImage = imagePath;
+        console.log("Imagen de instancia seleccionada:", imagePath);
     }
     
     function handleInstanceImageUpload(event) {
@@ -1132,6 +1136,11 @@ window.showSection = function showSection(sectionId) {
                 document.querySelectorAll('.default-version-image').forEach(img => {
                     img.classList.remove('selected-image');
                 });
+                
+                console.log("Imagen cargada y guardada en variable temporal");
+                
+                // Guardar la imagen cargada en una variable global
+                window.tempSelectedInstanceImage = e.target.result;
             };
             reader.readAsDataURL(file);
         }
@@ -1153,19 +1162,35 @@ window.showSection = function showSection(sectionId) {
             
             // Handle image selection
             const imageUpload = document.getElementById('instanceImageUpload').files[0];
-            const selectedDefaultImage = document.querySelector('.default-version-image.selected-image');
+            const selectedDefaultImage = document.querySelector('#defaultImagesContainer .default-version-image.selected-image');
+            
+            console.log("=== DEBUG: GUARDANDO CAMBIOS DE INSTANCIA ===");
+            console.log("- Imagen seleccionada (default):", selectedDefaultImage ? "encontrada" : "ninguna");
+            console.log("- Imagen subida:", imageUpload ? "encontrada" : "ninguna");
+            console.log("- Imagen temporal:", window.tempSelectedInstanceImage ? "disponible" : "no disponible");
             
             if (imageUpload) {
+                console.log("Procesando imagen subida");
                 // For file uploads, create a FileReader to get the data URL
                 const reader = new FileReader();
                 reader.onload = async function(e) {
-                    config.icon = e.target.result;
-                    await updateInstanceWithConfig(config);
+                    try {
+                        config.icon = e.target.result;
+                        console.log("Imagen convertida a Data URL exitosamente");
+                        await updateInstanceWithConfig(config);
+                    } catch (error) {
+                        console.error("Error al procesar la imagen subida:", error);
+                        showStatus("Error processing uploaded image.");
+                    }
                 };
                 reader.readAsDataURL(imageUpload);
                 return; // Exit early as we'll finish in the onload callback
             } else if (selectedDefaultImage) {
+                console.log("Usando imagen predefinida seleccionada");
                 config.icon = selectedDefaultImage.src;
+            } else if (window.tempSelectedInstanceImage) {
+                console.log("Usando imagen temporal guardada");
+                config.icon = window.tempSelectedInstanceImage;
             }
             
             await updateInstanceWithConfig(config);
@@ -1179,23 +1204,52 @@ window.showSection = function showSection(sectionId) {
         const result = await window.api.updateInstance(currentEditingInstance, config);
         if (result.success) {
             showStatus("Instance updated successfully!");
+            
+            // Guardar temporalmente el ID actual
+            const editedInstanceId = currentEditingInstance;
+            
             closeInstanceEditModal();
             
             // If the instance ID changed (due to name change), update the active instance
-            if (result.newInstanceId && result.newInstanceId !== currentEditingInstance) {
-                if (activeInstanceId === currentEditingInstance) {
+            if (result.newInstanceId && result.newInstanceId !== editedInstanceId) {
+                if (activeInstanceId === editedInstanceId) {
                     activeInstanceId = result.newInstanceId;
                     await window.api.setActiveInstance(result.newInstanceId);
                 }
             }
             
+            // Limpiar variables globales
+            window.tempSelectedInstanceImage = null;
+            
             // Reload instances to reflect changes
             await loadInstances();
+            
+            // Reseleccionar la instancia editada
+            if (editedInstanceId) {
+                const instanceId = result.newInstanceId || editedInstanceId;
+                console.log("Buscando instancia para seleccionar:", instanceId);
+                
+                setTimeout(() => {
+                    const instanceButtons = document.querySelectorAll('.instance-button');
+                    let newSelectedButton = null;
+                    
+                    instanceButtons.forEach(button => {
+                        if (button.dataset.instance === instanceId) {
+                            newSelectedButton = button;
+                        }
+                    });
+                    
+                    if (newSelectedButton) {
+                        console.log("Reseleccionando instancia");
+                        newSelectedButton.click();
+                    }
+                }, 100);
+            }
         } else {
             showStatus(`Error updating instance: ${result.error}`);
         }
     }
-    
+
     function closeInstanceEditModal() {
         document.getElementById('instanceEditModal').style.display = 'none';
     }
@@ -1652,7 +1706,7 @@ window.showSection = function showSection(sectionId) {
                 // Guardar referencia a la imagen actual
                 window.currentVersionImagePath = imagePath;
                 imagePreview.style.backgroundImage = `url('${imagePath}')`;
-                imagePreview.textContent = '';
+                imagePreview.textContent = "";
                 
                 // Buscar y seleccionar la imagen predeterminada que coincida con la imagen actual
                 setTimeout(() => {
@@ -1745,6 +1799,10 @@ window.showSection = function showSection(sectionId) {
         document.querySelectorAll('.default-version-image').forEach(img => {
             img.classList.remove('selected-image');
         });
+        
+        // Almacenar la imagen seleccionada en la variable global
+        window.tempSelectedVersionImage = imagePath;
+        console.log("Imagen predeterminada seleccionada:", imagePath);
     }
     
     function handleVersionImageUpload(event) {
@@ -1758,13 +1816,17 @@ window.showSection = function showSection(sectionId) {
                     preview.classList.remove('selected-image');
                 });
                 
-                // Guardar temporalmente el fondo seleccionado para previsualización
-                window.tempSelectedBackgroundFile = e.target.result;
+                // Guardar temporalmente la imagen seleccionada para la vista previa
+                window.tempSelectedVersionImage = e.target.result;
                 
-                // Si estamos en el modal de confirmación, actualizar también la vista previa ahí
-                if (document.getElementById('backgroundsPopup').style.display === 'flex') {
-                    // En este punto no actualizamos la vista previa principal hasta que se confirme
+                // Actualizar la vista previa de la imagen
+                const imagePreview = document.getElementById('versionImagePreview');
+                if (imagePreview) {
+                    imagePreview.style.backgroundImage = `url('${e.target.result}')`;
+                    imagePreview.textContent = '';
                 }
+                
+                console.log("Imagen cargada y guardada en variable temporal");
             };
             reader.readAsDataURL(file);
         }
@@ -1782,19 +1844,7 @@ window.showSection = function showSection(sectionId) {
             console.log("=== DEBUG: GUARDANDO CAMBIOS DE VERSIÓN ===");
             console.log("- currentVersionBackgroundPath:", window.currentVersionBackgroundPath);
             console.log("- tempSelectedBackground:", window.tempSelectedBackground);
-            console.log("- tempSelectedBackgroundFile:", window.tempSelectedBackgroundFile);
-            
-            // Verificar si hay un fondo seleccionado en el DOM
-            const backgroundPreview = document.getElementById('versionBackgroundPreview');
-            const backgroundFromDOM = backgroundPreview ? backgroundPreview.dataset.selectedBackground : null;
-            console.log("- backgroundFromDOM:", backgroundFromDOM);
-            
-            // Verificar si hay un fondo seleccionado en el botón
-            const selectBackgroundBtn = document.getElementById('selectBackgroundBtn');
-            const hasBackground = selectBackgroundBtn ? selectBackgroundBtn.getAttribute('data-has-background') === 'true' : false;
-            const backgroundFromBtn = selectBackgroundBtn ? selectBackgroundBtn.getAttribute('data-background-path') : null;
-            console.log("- hasBackground:", hasBackground);
-            console.log("- backgroundFromBtn:", backgroundFromBtn);
+            console.log("- tempSelectedVersionImage:", window.tempSelectedVersionImage);
             
             // Save new name
             await window.api.setVersionName(currentEditingVersion, newName, activeInstanceId);
@@ -1810,6 +1860,7 @@ window.showSection = function showSection(sectionId) {
             // Función para verificar si todas las operaciones han terminado
             function checkCompletion() {
                 completedOperations++;
+                console.log(`Completed operation ${completedOperations} of ${pendingOperations}`);
                 if (completedOperations === pendingOperations) {
                     finishSaving();
                 }
@@ -1818,28 +1869,60 @@ window.showSection = function showSection(sectionId) {
             // Procesar imagen de versión
             if (imageUpload) {
                 pendingOperations++;
+                console.log("Saving uploaded image file");
                 const reader = new FileReader();
                 reader.onload = async function(e) {
-                    await window.api.setVersionImage(currentEditingVersion, e.target.result, activeInstanceId);
-                    checkCompletion();
+                    try {
+                        await window.api.setVersionImage(currentEditingVersion, e.target.result, activeInstanceId);
+                        console.log("Uploaded image saved successfully");
+                        checkCompletion();
+                    } catch (error) {
+                        console.error("Error saving uploaded image:", error);
+                        checkCompletion();
+                    }
                 };
                 reader.readAsDataURL(imageUpload);
             } else if (selectedDefaultImage) {
                 pendingOperations++;
-                await window.api.setVersionImage(currentEditingVersion, selectedDefaultImage.src, activeInstanceId);
-                checkCompletion();
+                console.log("Saving selected default image:", selectedDefaultImage.src);
+                try {
+                    await window.api.setVersionImage(currentEditingVersion, selectedDefaultImage.src, activeInstanceId);
+                    console.log("Default image saved successfully");
+                    checkCompletion();
+                } catch (error) {
+                    console.error("Error saving default image:", error);
+                    checkCompletion();
+                }
+            } else if (window.tempSelectedVersionImage) {
+                pendingOperations++;
+                console.log("Saving temporarily selected version image");
+                try {
+                    await window.api.setVersionImage(currentEditingVersion, window.tempSelectedVersionImage, activeInstanceId);
+                    console.log("Temporarily selected image saved successfully");
+                    checkCompletion();
+                } catch (error) {
+                    console.error("Error saving temporarily selected image:", error);
+                    checkCompletion();
+                }
             } else if (window.currentVersionImagePath) {
                 pendingOperations++;
-                await window.api.setVersionImage(currentEditingVersion, window.currentVersionImagePath, activeInstanceId);
-                checkCompletion();
+                console.log("Saving current version image path:", window.currentVersionImagePath);
+                try {
+                    await window.api.setVersionImage(currentEditingVersion, window.currentVersionImagePath, activeInstanceId);
+                    console.log("Current version image saved successfully");
+                    checkCompletion();
+                } catch (error) {
+                    console.error("Error saving current version image:", error);
+                    checkCompletion();
+                }
             }
             
             // Procesar imagen de fondo - intentar con todos los posibles lugares donde se podría haber guardado
             let backgroundToUse = window.currentVersionBackgroundPath || 
-                                  window.tempSelectedBackground || 
-                                  window.tempSelectedBackgroundFile ||
-                                  backgroundFromDOM ||
-                                  backgroundFromBtn;
+                                 window.tempSelectedBackground || 
+                                 window.tempSelectedBackgroundFile ||
+                                 backgroundFromDOM ||
+                                 backgroundFromBtn;
             
             // Verificar si el fondo a usar es válido (debe ser un string no vacío)
             if (backgroundToUse && typeof backgroundToUse === 'string' && backgroundToUse.trim() !== '') {
@@ -1849,6 +1932,7 @@ window.showSection = function showSection(sectionId) {
                 try {
                     // Asegurarnos de pasar la URL de la imagen ORIGINAL, nunca la miniatura
                     await window.api.setVersionBackground(currentEditingVersion, backgroundToUse, activeInstanceId);
+                    console.log("Background image saved successfully");
                     checkCompletion();
                 } catch (error) {
                     console.error("Error al guardar el fondo:", error);
@@ -1863,6 +1947,7 @@ window.showSection = function showSection(sectionId) {
                     
                     try {
                         await window.api.setVersionBackground(currentEditingVersion, selectedBackground.dataset.originalImage, activeInstanceId);
+                        console.log("Background from selected element saved successfully");
                         checkCompletion();
                     } catch (error) {
                         console.error("Error al guardar el fondo desde elemento seleccionado:", error);
@@ -1877,7 +1962,10 @@ window.showSection = function showSection(sectionId) {
             
             // Si no hay operaciones pendientes, terminar inmediatamente
             if (pendingOperations === 0) {
+                console.log("No pending operations, finishing immediately");
                 finishSaving();
+            } else {
+                console.log(`Waiting for ${pendingOperations} operations to complete`);
             }
         } catch (error) {
             console.error("Error saving version changes:", error);
@@ -1889,7 +1977,13 @@ window.showSection = function showSection(sectionId) {
             
             // Guardar la versión que estaba seleccionada
             const wasSelectedVersion = currentEditingVersion;
-            const wasSelectedButton = selectedVersionButton;
+            
+            // Limpiar variables globales antes de cerrar el modal
+            const tempCurrentVersionImagePath = window.currentVersionImagePath;
+            const tempCurrentVersionBackgroundPath = window.currentVersionBackgroundPath;
+            const tempTempSelectedBackground = window.tempSelectedBackground;
+            const tempTempSelectedBackgroundFile = window.tempSelectedBackgroundFile;
+            const tempTempSelectedVersionImage = window.tempSelectedVersionImage;
             
             closeVersionEditModal();
             
@@ -1913,13 +2007,14 @@ window.showSection = function showSection(sectionId) {
                         newSelectedButton.click();
                     }
                 }
+                
+                // Restaurar variables globales después de recargar
+                window.currentVersionImagePath = tempCurrentVersionImagePath;
+                window.currentVersionBackgroundPath = tempCurrentVersionBackgroundPath;
+                window.tempSelectedBackground = tempTempSelectedBackground;
+                window.tempSelectedBackgroundFile = tempTempSelectedBackgroundFile;
+                window.tempSelectedVersionImage = tempTempSelectedVersionImage;
             });
-            
-            // Limpiar variables temporales
-            window.tempSelectedBackground = null;
-            window.tempSelectedBackgroundFile = null;
-            window.currentVersionImagePath = null;
-            window.currentVersionBackgroundPath = null;
         }
     }
     
@@ -2574,5 +2669,55 @@ window.showSection = function showSection(sectionId) {
         }
     }
     
+    async function updateInstanceWithConfig(config) {
+        const result = await window.api.updateInstance(currentEditingInstance, config);
+        if (result.success) {
+            showStatus("Instance updated successfully!");
+            
+            // Guardar temporalmente el ID actual
+            const editedInstanceId = currentEditingInstance;
+            
+            closeInstanceEditModal();
+            
+            // If the instance ID changed (due to name change), update the active instance
+            if (result.newInstanceId && result.newInstanceId !== editedInstanceId) {
+                if (activeInstanceId === editedInstanceId) {
+                    activeInstanceId = result.newInstanceId;
+                    await window.api.setActiveInstance(result.newInstanceId);
+                }
+            }
+            
+            // Limpiar variables globales
+            window.tempSelectedInstanceImage = null;
+            
+            // Reload instances to reflect changes
+            await loadInstances();
+            
+            // Reseleccionar la instancia editada
+            if (editedInstanceId) {
+                const instanceId = result.newInstanceId || editedInstanceId;
+                console.log("Buscando instancia para seleccionar:", instanceId);
+                
+                setTimeout(() => {
+                    const instanceButtons = document.querySelectorAll('.instance-button');
+                    let newSelectedButton = null;
+                    
+                    instanceButtons.forEach(button => {
+                        if (button.dataset.instance === instanceId) {
+                            newSelectedButton = button;
+                        }
+                    });
+                    
+                    if (newSelectedButton) {
+                        console.log("Reseleccionando instancia");
+                        newSelectedButton.click();
+                    }
+                }, 100);
+            }
+        } else {
+            showStatus(`Error updating instance: ${result.error}`);
+        }
+    }
+
     init();
 });

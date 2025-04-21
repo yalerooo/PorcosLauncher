@@ -753,3 +753,188 @@
 #versionEditModal .modal-content {
     max-width: 500px;
 }
+
+/* Estilos adicionales para los elementos de previsualización */
+.preview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 12px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.version-image-preview:hover .preview-overlay,
+.instance-image-preview:hover .preview-overlay {
+    opacity: 1;
+}
+
+.preview-overlay i {
+    font-size: 36px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 8px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.preview-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    padding: 15px;
+}
+
+.preview-placeholder i {
+    margin-bottom: 10px;
+    opacity: 0.8;
+}
+
+.preview-placeholder span {
+    font-size: 14px;
+    font-weight: 500;
+    max-width: 80%;
+}
+
+/* Mejoras para inputs */
+.file-input {
+    display: none;
+}
+
+.upload-label {
+    display: block;
+    background: rgba(var(--primary-rgb), 0.2);
+    color: var(--primary);
+    padding: 10px 15px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    border: 1px solid rgba(var(--primary-rgb), 0.3);
+}
+
+.upload-label:hover {
+    background: rgba(var(--primary-rgb), 0.3);
+    transform: translateY(-2px);
+}
+
+.upload-label i {
+    margin-right: 8px;
+}
+
+.section-label {
+    display: block;
+    margin: 15px 0 10px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.section-label i {
+    margin-right: 6px;
+    color: var(--primary);
+}
+
+/* Animaciones para mejorar la experiencia de usuario */
+.modal.active {
+    display: flex;
+}
+
+/* Animación para modal content */
+.modal.active .modal-content {
+    animation: modalContentShow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalContentShow {
+    0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Animación pulsante para botones primarios */
+.primary-btn:not(:hover) {
+    animation: subtle-pulse 2s infinite;
+}
+
+@keyframes subtle-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(var(--primary-rgb), 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0);
+    }
+}
+
+/* Efectos de hover para iconos */
+.modal-actions .icon-button {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    color: var(--text-secondary);
+    border: none;
+    cursor: pointer;
+}
+
+.modal-actions .icon-button:hover {
+    background: rgba(var(--primary-rgb), 0.2);
+    color: var(--primary);
+    transform: rotate(15deg);
+}
+
+/* Estilos para background selector */
+.background-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.background-section h3 i {
+    margin-right: 8px;
+    color: var(--primary);
+}
+
+.styled-input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    padding: 10px 15px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.styled-input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
+}

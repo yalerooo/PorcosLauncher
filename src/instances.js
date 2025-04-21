@@ -115,37 +115,81 @@ async function updateInstance(instanceId, config) {
         
         // Manejar icono
         if (config.icon) {
+            console.log("Processing icon update for instance", instanceId);
+            
             // Si es una URL de datos o una ruta de archivo
             if (config.icon.startsWith('data:')) {
-                // Determinar el tipo de imagen y extensión
-                let fileExtension;
-                if (config.icon.startsWith('data:image/jpeg')) {
-                    fileExtension = '.jpg';
-                } else if (config.icon.startsWith('data:image/png')) {
-                    fileExtension = '.png';
-                } else if (config.icon.startsWith('data:image/gif')) {
-                    fileExtension = '.gif';
-                } else {
-                    return { success: false, error: 'Unsupported image format.' };
-                }
+                console.log("Processing data URL icon");
                 
                 // Eliminar cualquier icono existente
                 const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif'];
                 for (const ext of imageExtensions) {
                     const existingIconPath = path.join(getInstancePath(instanceId), `icon${ext}`);
-                    if (await fileExists(existingIconPath)) {
-                        await fs.unlink(existingIconPath);
+                    try {
+                        if (await fileExists(existingIconPath)) {
+                            console.log(`Removing existing icon: ${existingIconPath}`);
+                            await fs.unlink(existingIconPath);
+                        }
+                    } catch (e) {
+                        console.error(`Error removing existing icon ${existingIconPath}:`, e);
                     }
                 }
                 
-                // Guardar el nuevo icono
-                const iconPath = path.join(getInstancePath(instanceId), `icon${fileExtension}`);
+                // Guardar el nuevo icono siempre como PNG para estandarizar
+                const iconPath = path.join(getInstancePath(instanceId), 'icon.png');
+                console.log(`Saving new icon to: ${iconPath}`);
+                
                 const base64Data = config.icon.replace(/^data:image\/(png|jpeg|gif);base64,/, "");
                 const imageBuffer = Buffer.from(base64Data, 'base64');
-                await fs.writeFile(iconPath, imageBuffer);
                 
-                // Actualizar la ruta en la configuración
-                currentConfig.icon = iconPath;
+                try {
+                    await fs.writeFile(iconPath, imageBuffer);
+                    console.log("Icon saved successfully");
+                    
+                    // Actualizar la ruta en la configuración
+                    currentConfig.icon = iconPath;
+                    console.log("Icon path saved in config:", iconPath);
+                } catch (writeError) {
+                    console.error("Error writing icon file:", writeError);
+                    return { success: false, error: `Error al guardar el icono: ${writeError.message}` };
+                }
+            } else if (config.icon.startsWith('file://') || config.icon.startsWith('/')) {
+                // Si es una ruta de archivo, copiarla
+                console.log("Processing file path icon");
+                
+                // Eliminar cualquier icono existente
+                const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif'];
+                for (const ext of imageExtensions) {
+                    const existingIconPath = path.join(getInstancePath(instanceId), `icon${ext}`);
+                    try {
+                        if (await fileExists(existingIconPath)) {
+                            console.log(`Removing existing icon: ${existingIconPath}`);
+                            await fs.unlink(existingIconPath);
+                        }
+                    } catch (e) {
+                        console.error(`Error removing existing icon ${existingIconPath}:`, e);
+                    }
+                }
+                
+                // Procesar la ruta de archivo
+                const originalFilePath = config.icon.startsWith('file://') 
+                    ? decodeURI(config.icon.replace('file://', ''))
+                    : config.icon;
+                
+                const iconPath = path.join(getInstancePath(instanceId), 'icon.png');
+                console.log(`Copying icon from ${originalFilePath} to ${iconPath}`);
+                
+                try {
+                    await fs.copyFile(originalFilePath, iconPath);
+                    console.log("Icon copied successfully");
+                    
+                    // Actualizar la ruta en la configuración
+                    currentConfig.icon = iconPath;
+                    console.log("Icon path saved in config:", iconPath);
+                } catch (copyError) {
+                    console.error("Error copying icon file:", copyError);
+                    return { success: false, error: `Error al copiar el icono: ${copyError.message}` };
+                }
             }
         }
         
