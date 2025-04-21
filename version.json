@@ -1,6 +1,6 @@
 {
-  "version": "1.4.0",
-  "downloadUrl": "https://github.com/yalerooo/PorcosLauncher/releases/download/v1.3.0/PorcosLauncher.Setup.1.3.0.exe",
-  "downloadUrlLinux": "https://github.com/yalerooo/PorcosLauncher/releases/download/v1.3.0/PorcosLauncher-1.3.0.AppImage",
-  "releaseNotes": "-Linux support -Extraction fixed -Settings ui updated"
+  "version": "1.4.1",
+  "downloadUrl": "https://github.com/yalerooo/PorcosLauncher/releases/download/v1.4.0/PorcosLauncher.Setup.1.4.0.exe",
+  "downloadUrlLinux": "https://github.com/yalerooo/PorcosLauncher/releases/download/v1.4.0/porcoslauncher-linux-v1.4.0.zip",
+  "releaseNotes": "New improvements and bug fixes for porcosland3"
 }

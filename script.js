@@ -2444,13 +2444,16 @@ window.showSection = function showSection(sectionId) {
         
         // Actualizar el progreso de la descarga
         window.api.onJdkDownloadProgress((event, data) => {
-            const progress = data.progress;
+            // Convertir el progreso de decimal (0-1) a porcentaje (0-100)
+            const progressDecimal = data.progress;
+            const progress = Math.round(progressDecimal * 100);
+            
             jdkProgressFill.style.width = `${progress}%`;
             jdkProgressText.textContent = `${progress}%`;
             jdkDownloadStatus.textContent = `Descargando... ${progress}%`;
             
             // Actualizar la consola periódicamente (cada 10%)
-            if (progress % 10 === 0) {
+            if (progress % 10 === 0 && progress > 0) {
                 addConsoleMessage('info', `Descarga del JDK: ${progress}%`);
             }
         });

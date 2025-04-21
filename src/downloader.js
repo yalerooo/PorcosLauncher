@@ -182,6 +182,201 @@ async function downloadSingleFile(url, destinationDir, keepArchive = false, save
             }
         }, 30000); // 30 segundos
         
+        // Usar un enfoque más robusto para descargas de Oracle
+        const isOracleDownload = url.includes('download.oracle.com');
+        
+        // Si es una descarga de Oracle, usar un enfoque alternativo
+        if (isOracleDownload) {
+            // Limpiar el timeout ya que vamos a usar un método alternativo
+            clearTimeout(downloadTimeout);
+            console.log('Detectada descarga de Oracle, usando método alternativo...');
+            
+            // Usar fetch para descargar directamente
+            const https = require('https');
+            const http = require('http');
+            const { URL } = require('url');
+            
+            // Crear directorio de destino si no existe
+            if (!fs.existsSync(destinationDir)) {
+                fs.mkdirSync(destinationDir, { recursive: true });
+            }
+            
+            // Determinar el nombre del archivo
+            // Si saveAs es una ruta completa, extraer solo el nombre del archivo
+            let fileName;
+            if (saveAs) {
+                // Verificar si saveAs ya contiene una ruta completa
+                if (path.isAbsolute(saveAs) || saveAs.includes('/') || saveAs.includes('\\')) {
+                    // Extraer solo el nombre del archivo de la ruta
+                    fileName = path.basename(saveAs);
+                } else {
+                    fileName = saveAs;
+                }
+            } else {
+                fileName = url.split('/').pop();
+            }
+            const savePath = path.join(destinationDir, fileName);
+            
+            // Notificar inicio de descarga
+            if (progressCallback) {
+                progressCallback(0.01); // Iniciar con un pequeño progreso para mostrar actividad
+            }
+            
+            // Función para manejar redirecciones
+            const downloadWithRedirects = (currentUrl, redirectCount = 0) => {
+                if (redirectCount > 5) {
+                    return reject(new Error('Demasiadas redirecciones'));
+                }
+                
+                console.log(`Intentando descargar desde: ${currentUrl}`);
+                
+                const urlObj = new URL(currentUrl);
+                const protocol = urlObj.protocol === 'https:' ? https : http;
+                
+                const options = {
+                    method: 'GET',
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                        'Accept': 'application/octet-stream'
+                    }
+                };
+                
+                const req = protocol.get(currentUrl, options, (res) => {
+                    // Manejar redirecciones
+                    if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                        console.log(`Redirigiendo a: ${res.headers.location}`);
+                        return downloadWithRedirects(res.headers.location, redirectCount + 1);
+                    }
+                    
+                    // Verificar si la respuesta es exitosa
+                    if (res.statusCode !== 200) {
+                        return reject(new Error(`Error de descarga: ${res.statusCode}`));
+                    }
+                    
+                    // Obtener el tamaño total si está disponible
+                    const totalBytes = parseInt(res.headers['content-length'], 10) || 0;
+                    let receivedBytes = 0;
+                    
+                    // Crear el archivo de salida
+                    const fileStream = fs.createWriteStream(savePath);
+                    
+                    // Manejar eventos de datos
+                    res.on('data', (chunk) => {
+                        receivedBytes += chunk.length;
+                        
+                        // Actualizar progreso
+                        if (progressCallback && totalBytes > 0) {
+                            const progress = receivedBytes / totalBytes;
+                            progressCallback(progress);
+                        }
+                    });
+                    
+                    // Manejar finalización
+                    res.pipe(fileStream);
+                    
+                    fileStream.on('finish', async () => {
+                        fileStream.close();
+                        console.log('Descarga completada con éxito');
+                        // Asegurarse de que el timeout esté cancelado
+                        clearTimeout(downloadTimeout);
+                        
+                        try {
+                            // Verificar el tipo de archivo y extraer
+                            const headerBuffer = Buffer.alloc(10);
+                            const fd = fs.openSync(savePath, 'r');
+                            fs.readSync(fd, headerBuffer, 0, 10, 0);
+                            fs.closeSync(fd);
+                            
+                            // Convertir a hexadecimal para identificación
+                            const signature = headerBuffer.toString('hex', 0, 4).toUpperCase();
+                            console.log('File signature:', signature);
+                            
+                            // Verificar extensión del archivo
+                            const fileExt = path.extname(savePath).toLowerCase();
+                            
+                            // Extraer según el tipo de archivo
+                            if (signature === '504B0304') {
+                                console.log('Extracting ZIP file...');
+                                try {
+                                    const zip = new AdmZip(savePath);
+                                    
+                                    // Notificar que estamos extrayendo
+                                    if (progressCallback) {
+                                        progressCallback('extracting');
+                                    }
+                                    
+                                    zip.extractAllTo(destinationDir, true);
+                                    
+                                    // Eliminar el archivo comprimido si es necesario
+                                    if (!keepArchive && fs.existsSync(savePath)) {
+                                        fs.unlinkSync(savePath);
+                                    }
+                                    
+                                    // Notificar que la extracción ha completado
+                                    if (progressCallback) {
+                                        progressCallback('completed');
+                                    }
+                                    
+                                    resolve({ success: true, path: destinationDir });
+                                } catch (error) {
+                                    throw new Error(`ZIP extraction failed: ${error.message}`);
+                                }
+                            } else if (signature === '52617221') {
+                                console.log('Extracting RAR file...');
+                                try {
+                                    const rarBuffer = fs.readFileSync(savePath);
+                                    const result = await extractRarFile(rarBuffer, destinationDir, keepArchive, savePath, progressCallback);
+                                    resolve(result);
+                                } catch (error) {
+                                    throw new Error(`RAR extraction failed: ${error.message}`);
+                                }
+                            } else if (signature === '1F8B0800' || fileExt === '.gz' || fileExt === '.tar.gz') {
+                                console.log('Extracting tar.gz file...');
+                                try {
+                                    const result = await extractTarGz(savePath, destinationDir, keepArchive, progressCallback);
+                                    resolve(result);
+                                } catch (error) {
+                                    throw new Error(`tar.gz extraction failed: ${error.message}`);
+                                }
+                            } else {
+                                throw new Error(`Unsupported archive format. Signature: ${signature}, Extension: ${fileExt}`);
+                            }
+                        } catch (error) {
+                            reject(new Error(`Extraction failed: ${error.message}`));
+                        }
+                    });
+                    
+                    fileStream.on('error', (error) => {
+                        fs.unlink(savePath, () => {}); // Eliminar archivo parcial
+                        clearTimeout(downloadTimeout); // Limpiar el timeout en caso de error
+                        reject(error);
+                    });
+                });
+                
+                req.on('error', (error) => {
+                    console.error('Error en la solicitud:', error);
+                    reject(error);
+                });
+                
+                // Asegurarse de que el timeout esté cancelado en caso de error
+                req.on('abort', () => {
+                    console.log('Solicitud abortada, limpiando timeout');
+                    clearTimeout(downloadTimeout);
+                });
+                
+                // Establecer un timeout para la solicitud
+                req.setTimeout(30000, () => {
+                    req.abort();
+                    reject(new Error('Timeout de descarga'));
+                });
+            };
+            
+            // Iniciar la descarga con manejo de redirecciones
+            downloadWithRedirects(url);
+            return;
+        }
+        
+        // Para descargas normales, usar el método estándar
         win.webContents.downloadURL(url);
 
         win.webContents.session.once('will-download', (event, item) => {
@@ -199,7 +394,19 @@ async function downloadSingleFile(url, destinationDir, keepArchive = false, save
                     }
                 });
             }
-            let fileName = saveAs || item.getFilename();
+            // Si saveAs es una ruta completa, extraer solo el nombre del archivo
+            let fileName;
+            if (saveAs) {
+                // Verificar si saveAs ya contiene una ruta completa
+                if (path.isAbsolute(saveAs) || saveAs.includes('/') || saveAs.includes('\\')) {
+                    // Extraer solo el nombre del archivo de la ruta
+                    fileName = path.basename(saveAs);
+                } else {
+                    fileName = saveAs;
+                }
+            } else {
+                fileName = item.getFilename();
+            }
             const savePath = path.join(destinationDir, fileName);
             item.setSavePath(savePath);
 
