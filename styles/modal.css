@@ -938,3 +938,98 @@
     outline: none;
     box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
 }
+
+/* Scrollbar invisible para los modales de instancia y versión */
+#instanceEditModal .modal-content,
+#versionEditModal .modal-content {
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE 10+ */
+}
+#instanceEditModal .modal-content::-webkit-scrollbar,
+#versionEditModal .modal-content::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; /* Chrome/Safari/Webkit */
+}
+
+/* -------------------- RESPONSIVE MODALS -------------------- */
+@media (max-width: 900px) {
+  .modal-content.edit-modal {
+    width: 98vw;
+    min-width: unset;
+    max-width: 99vw;
+    max-height: 93vh;
+    padding: 15px;
+    border-radius: 16px;
+  }
+  .modal-content.edit-modal .modal-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .modal-content.edit-modal .modal-grid-single {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .modal-content.edit-modal {
+    width: 100vw;
+    max-width: 100vw;
+    min-width: unset;
+    max-height: 99vh;
+    padding: 8px 2vw;
+    border-radius: 10px;
+  }
+  .modal-content.edit-modal h2 {
+    font-size: 19px;
+  }
+  .modal-content.edit-modal label,
+  .modal-content.edit-modal input[type="text"],
+  .modal-content.edit-modal select {
+    font-size: 15px;
+  }
+  .modal-content.edit-modal .modal-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 420px) {
+  .modal-content.edit-modal {
+    padding: 4px 0.5vw;
+    border-radius: 6px;
+  }
+}
+
+/* Botón de eliminar flotante arriba a la derecha */
+.modal-delete-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.2s, transform 0.2s;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-delete-btn svg {
+    display: block;
+    width: 22px;
+    height: 22px;
+    pointer-events: none;
+}
+.modal-delete-btn:hover {
+    background: rgba(255, 69, 58, 0.08);
+    transform: scale(1.08);
+}
+@media (max-width: 600px) {
+    .modal-delete-btn {
+        top: 8px;
+        right: 8px;
+    }
+}

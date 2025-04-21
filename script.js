@@ -854,12 +854,6 @@ window.showSection = function showSection(sectionId) {
                 `;
                 instanceButton.appendChild(editButton);
                 
-                // Marcar la instancia activa
-                if (instance.id === activeInstanceId) {
-                    instanceLogo.classList.add("selected");
-                    selectedInstanceButton = instanceButton;
-                }
-                
                 // Evento de clic en la instancia
                 instanceButton.addEventListener("click", (event) => {
                     // Ignorar si se hizo clic en el botón de edición
@@ -996,7 +990,18 @@ window.showSection = function showSection(sectionId) {
     function createInstanceEditModal() {
         const modalHTML = `
         <div id="instanceEditModal" class="modal">
-            <div class="modal-content">
+            <div class="modal-content edit-modal">
+                <button id="deleteInstance" class="modal-delete-btn" title="Eliminar instancia">
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="6.2" y="9" width="1.6" height="6" rx="0.8" fill="#ff453a"/>
+                      <rect x="10.2" y="9" width="1.6" height="6" rx="0.8" fill="#ff453a"/>
+                      <rect x="14.2" y="9" width="1.6" height="6" rx="0.8" fill="#ff453a"/>
+                      <rect x="4" y="6" width="14" height="2" rx="1" fill="#ff453a"/>
+                      <rect x="8" y="2" width="6" height="2" rx="1" fill="#ff453a"/>
+                      <rect x="2" y="6" width="18" height="2" rx="1" fill="#ff453a"/>
+                      <rect x="5" y="8" width="12" height="10" rx="2" stroke="#ff453a" stroke-width="1.5" fill="none"/>
+                    </svg>
+                </button>
                 <h2>Edit Instance</h2>
                 
                 <div class="instance-image-preview" id="instanceImagePreview"></div>
@@ -1010,14 +1015,11 @@ window.showSection = function showSection(sectionId) {
                 </div>
                 
                 <label>Or select from default images:</label>
-                <div class="default-images-container" id="defaultInstanceImagesContainer">
-                    <!-- Default images will be loaded here -->
-                </div>
+                <div class="default-images-container" id="defaultInstanceImagesContainer"><!-- Default images will be loaded here --></div>
                 
                 <div class="modal-buttons">
                     <button id="saveInstanceChanges">Save</button>
                     <button id="cancelInstanceEdit">Cancel</button>
-                    <button id="deleteInstance">Delete</button>
                 </div>
             </div>
         </div>
@@ -1029,7 +1031,7 @@ window.showSection = function showSection(sectionId) {
     function setupInstanceEditModal() {
         document.getElementById('saveInstanceChanges').addEventListener('click', saveInstanceChanges);
         document.getElementById('cancelInstanceEdit').addEventListener('click', closeInstanceEditModal);
-        document.getElementById('deleteInstance').addEventListener('click', deleteSelectedInstance);
+        document.getElementById('deleteInstance').addEventListener('click', () => deleteSelectedInstance(currentEditingInstance));
         document.getElementById('instanceImageUpload').addEventListener('change', handleInstanceImageUpload);
         
         // Load default images
@@ -1131,11 +1133,6 @@ window.showSection = function showSection(sectionId) {
                 const imagePreview = document.getElementById('instanceImagePreview');
                 imagePreview.style.backgroundImage = `url('${e.target.result}')`;
                 imagePreview.textContent = '';
-                
-                // Remove selection from default images
-                document.querySelectorAll('.default-version-image').forEach(img => {
-                    img.classList.remove('selected-image');
-                });
                 
                 console.log("Imagen cargada y guardada en variable temporal");
                 
@@ -1254,7 +1251,7 @@ window.showSection = function showSection(sectionId) {
         document.getElementById('instanceEditModal').style.display = 'none';
     }
     
-    async function deleteSelectedInstance() {
+    async function deleteSelectedInstance(instanceId) {
         // Primero cerrar el modal de edición para evitar que quede por encima
         closeInstanceEditModal();
         
@@ -1264,12 +1261,12 @@ window.showSection = function showSection(sectionId) {
             `¿Estás seguro de que deseas eliminar esta instancia? Esta acción no se puede deshacer.`,
             async () => {
                 try {
-                    const result = await window.api.deleteInstance(currentEditingInstance);
+                    const result = await window.api.deleteInstance(instanceId);
                     if (result.success) {
                         showStatus("Instancia eliminada correctamente");
                         
                         // Si esta era la instancia activa, limpiarla
-                        if (activeInstanceId === currentEditingInstance) {
+                        if (activeInstanceId === instanceId) {
                             activeInstanceId = null;
                             await window.api.setActiveInstance(null);
                             document.getElementById("versions-sidebar").classList.remove("active");
@@ -1533,7 +1530,7 @@ window.showSection = function showSection(sectionId) {
             if (event.target == modal) {
                 closeCreateVersionModal();
             }
-        }
+        };
     }
 
     function closeCreateVersionModal() {
@@ -1579,10 +1576,9 @@ window.showSection = function showSection(sectionId) {
 
         // Set up progress listener
         const progressListener = (event, data) => {
-            if (data && typeof data.progress === 'number') {
-                progressBar.style.width = `${data.progress}%`;
-                loadingText.textContent = `Downloading version... ${data.progress}%`;
-            }
+            const progress = data.progress;
+            progressBar.style.width = `${progress}%`;
+            loadingText.textContent = `Downloading version... ${progress}%`;
         };
 
         // Register the progress listener
@@ -1635,7 +1631,18 @@ window.showSection = function showSection(sectionId) {
     function createVersionEditModal() {
         const modalHTML = `
         <div id="versionEditModal" class="modal">
-            <div class="modal-content">
+            <div class="modal-content edit-modal">
+                <button id="deleteVersion" class="modal-delete-btn" title="Eliminar versión">
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="6.2" y="9" width="1.6" height="6" rx="0.8" fill="#ff453a"/>
+                      <rect x="10.2" y="9" width="1.6" height="6" rx="0.8" fill="#ff453a"/>
+                      <rect x="14.2" y="9" width="1.6" height="6" rx="0.8" fill="#ff453a"/>
+                      <rect x="4" y="6" width="14" height="2" rx="1" fill="#ff453a"/>
+                      <rect x="8" y="2" width="6" height="2" rx="1" fill="#ff453a"/>
+                      <rect x="2" y="6" width="18" height="2" rx="1" fill="#ff453a"/>
+                      <rect x="5" y="8" width="12" height="10" rx="2" stroke="#ff453a" stroke-width="1.5" fill="none"/>
+                    </svg>
+                </button>
                 <h2>Edit Version</h2>
                 
                 <div class="version-image-preview" id="versionImagePreview"></div>
@@ -1644,28 +1651,23 @@ window.showSection = function showSection(sectionId) {
                     <label for="modalEditVersionName">Version Name:</label>
                     <input type="text" id="modalEditVersionName" placeholder="Enter version name">
                 </div>
-                
                 <div class="image-upload-container">
                     <label for="versionImageUpload">Version Image:</label>
                     <input type="file" id="versionImageUpload" accept="image/*">
                 </div>
-                
                 <label>Or select from default images:</label>
-                <div class="default-images-container" id="defaultImagesContainer">
-                    <!-- Default images will be loaded here -->
-                </div>
-                
+                <div class="default-images-container" id="defaultImagesContainer"><!-- Default images will be loaded here --></div>
+                <label for="defaultBackgroundsContainer">Or select from default backgrounds:</label>
+                <div class="default-backgrounds-container" id="defaultBackgroundsContainer" style="display:none;"></div>
                 <div class="background-section">
                     <h3>Background Image</h3>
                     <div class="version-background-preview" id="versionBackgroundPreview"></div>
                     
                     <button id="selectBackgroundBtn" class="btn">Select Background</button>
                 </div>
-                
                 <div class="modal-buttons">
                     <button id="saveVersionChanges">Save</button>
                     <button id="cancelVersionEdit">Cancel</button>
-                    <button id="deleteVersion">Delete</button>
                 </div>
             </div>
         </div>
@@ -1677,7 +1679,7 @@ window.showSection = function showSection(sectionId) {
     function setupVersionEditModal() {
         document.getElementById('saveVersionChanges').addEventListener('click', saveVersionChanges);
         document.getElementById('cancelVersionEdit').addEventListener('click', closeVersionEditModal);
-        document.getElementById('deleteVersion').addEventListener('click', deleteSelectedVersion);
+        document.getElementById('deleteVersion').addEventListener('click', () => deleteSelectedVersion(currentEditingVersion));
         document.getElementById('versionImageUpload').addEventListener('change', handleVersionImageUpload);
         document.getElementById('selectBackgroundBtn').addEventListener('click', openBackgroundsPopup);
         
@@ -2022,35 +2024,80 @@ window.showSection = function showSection(sectionId) {
         document.getElementById('versionEditModal').style.display = 'none';
     }
     
-    async function deleteSelectedVersion() {
-        if (!currentEditingVersion) return;
+    async function deleteSelectedVersion(versionId) {
+        if (!versionId) return;
         
-        if (confirm(`Are you sure you want to delete this version? This action cannot be undone.`)) {
-            try {
-                const result = await window.api.deleteVersion(currentEditingVersion, activeInstanceId);
-                if (result.success) {
-                    showStatus("Version deleted successfully!");
-                    closeVersionEditModal();
-                    
-                    // If the deleted version was selected, go back to home
-                    if (selectedVersionButton && selectedVersionButton.dataset.version === currentEditingVersion) {
-                        selectedVersionButton = null;
-                        showSection("home");
+        window.showConfirmModal(
+            'Eliminar versión',
+            '¿Estás seguro de que deseas eliminar esta versión? Esta acción no se puede deshacer.',
+            async () => {
+                try {
+                    const result = await window.api.deleteVersion(versionId, activeInstanceId);
+                    if (result.success) {
+                        showStatus("Versión eliminada correctamente");
+                        closeVersionEditModal();
+                        
+                        // If the deleted version was selected, go back to home
+                        if (selectedVersionButton && selectedVersionButton.dataset.version === versionId) {
+                            selectedVersionButton = null;
+                            showSection("home");
+                        }
+                        
+                        // Reload versions
+                        loadVersions(activeInstanceId);
+                    } else {
+                        showStatus(`Error eliminando versión: ${result.error}`);
                     }
-                    
-                    // Reload versions
-                    loadVersions(activeInstanceId);
-                } else {
-                    showStatus(`Error deleting version: ${result.error}`);
+                } catch (error) {
+                    console.error("Error eliminando versión:", error);
+                    showStatus("Error eliminando versión.");
                 }
-            } catch (error) {
-                console.error("Error deleting version:", error);
-                showStatus("Error deleting version.");
             }
-        }
+        );
     }
 
-    // --- Función de lanzamiento ---
+    // MODAL DE CONFIRMACIÓN REUTILIZABLE
+    function showConfirmModal(title, message, onAccept, onCancel = null) {
+        let modal = document.getElementById('confirmModal');
+        if (!modal) {
+            const modalHTML = `
+            <div id="confirmModal" class="modal">
+                <div class="modal-content">
+                    <h2 id="confirmModalTitle"></h2>
+                    <p id="confirmModalMessage"></p>
+                    <div class="modal-buttons">
+                        <button id="confirmModalAccept">Aceptar</button>
+                        <button id="confirmModalCancel">Cancelar</button>
+                    </div>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            modal = document.getElementById('confirmModal');
+        }
+        document.getElementById('confirmModalTitle').textContent = title;
+        document.getElementById('confirmModalMessage').textContent = message;
+        modal.style.display = 'flex';
+        // Limpiar listeners anteriores
+        const acceptBtn = document.getElementById('confirmModalAccept');
+        const cancelBtn = document.getElementById('confirmModalCancel');
+        acceptBtn.onclick = () => {
+            modal.style.display = 'none';
+            if (onAccept) onAccept();
+        };
+        cancelBtn.onclick = () => {
+            modal.style.display = 'none';
+            if (onCancel) onCancel();
+        };
+        // Cerrar si se hace clic fuera del contenido
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                if (onCancel) onCancel();
+            }
+        };
+    }
+
+    // --- Funciones de lanzamiento ---
     window.launch = async function() {
         if (!selectedVersionButton) {
             showStatus("Please select a version first.");
@@ -2264,6 +2311,7 @@ window.showSection = function showSection(sectionId) {
         }
     }
 
+    // --- Función de lanzamiento ---
     async function showInstanceSelectionModal(title, message, onSelect) {
         let modal = document.getElementById('instanceSelectionModal');
         if (!modal) {
@@ -2438,286 +2486,29 @@ window.showSection = function showSection(sectionId) {
         });
     }
 
-    // Crear el modal para seleccionar fondos
-    function createBackgroundsPopup() {
-        // Verificar si ya existe el popup
-        if (document.getElementById('backgroundsPopup')) {
-            return;
-        }
-        
-        const popupHTML = `
-        <div id="backgroundsPopup" class="modal">
-            <div class="modal-content backgrounds-popup-content">
-                <h2>Select Background</h2>
-                
-                <div class="image-upload-container">
-                    <label for="versionBackgroundUpload">Upload Background Image:</label>
-                    <input type="file" id="versionBackgroundUpload" accept="image/*">
-                </div>
-                
-                <label>Or select from default backgrounds:</label>
-                <div class="default-images-container" id="defaultBackgroundsContainer">
-                    <!-- Default backgrounds will be loaded here -->
-                </div>
-                
-                <div class="modal-buttons">
-                    <button id="confirmBackgroundSelection">Confirm</button>
-                    <button id="cancelBackgroundSelection">Cancel</button>
-                </div>
-            </div>
-        </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', popupHTML);
-        setupBackgroundsPopup();
-    }
-
-    // Configurar el popup de selección de fondos
-    function setupBackgroundsPopup() {
-        // Cargar imágenes predeterminadas
-        loadDefaultBackgroundImages();
-        
-        // Configurar manejadores de eventos
-        document.getElementById('versionBackgroundUpload').addEventListener('change', handleVersionBackgroundUpload);
-        document.getElementById('confirmBackgroundSelection').addEventListener('click', confirmBackgroundSelection);
-        document.getElementById('cancelBackgroundSelection').addEventListener('click', closeBackgroundsPopup);
-        
-        // Configurar cierre con clic fuera del popup
-        const popup = document.getElementById("backgroundsPopup");
-        popup.addEventListener('click', (event) => {
-            if (event.target === popup) {
-                closeBackgroundsPopup();
-            }
-        });
-    }
-
-    // Mostrar el popup de selección de fondos
-    function openBackgroundsPopup() {
-        // Crear el popup si no existe
-        if (!document.getElementById('backgroundsPopup')) {
-            createBackgroundsPopup();
-        }
-
-        // Mostrar el popup
-        document.getElementById('backgroundsPopup').style.display = 'flex';
-    }
-    
-    // Cerrar el popup de selección de fondos
-    function closeBackgroundsPopup() {
-        const popup = document.getElementById('backgroundsPopup');
-        if (popup) {
-            popup.style.display = 'none';
-        }
-    }
-    
-    // Confirmar selección de fondo
-    function confirmBackgroundSelection() {
-        const selectedBackground = document.querySelector('#defaultBackgroundsContainer .default-version-image.selected-image');
-        const fileInput = document.getElementById('versionBackgroundUpload');
-        const backgroundPreview = document.getElementById('versionBackgroundPreview');
-        
-        let backgroundSelected = false;
-        
-        if (selectedBackground) {
-            // Lo más importante: obtener la URL de la imagen original de alta calidad
-            const originalImageURL = selectedBackground.dataset.originalImage;
-            
-            if (!originalImageURL) {
-                console.error("ERROR: No se encontró la URL de la imagen original");
-                return;
-            }
-            
-            console.log("Confirmando selección de fondo");
-            console.log("- Miniatura:", selectedBackground.src);
-            console.log("- Original:", originalImageURL);
-            
-            // Guardar en TODAS las posibles ubicaciones para mayor seguridad
-            window.currentVersionBackgroundPath = originalImageURL;
-            window.tempSelectedBackground = originalImageURL;
-            backgroundSelected = true;
-            
-            // Para la vista previa en el modal usamos la miniatura (mejor rendimiento)
-            backgroundPreview.style.backgroundImage = `url('${selectedBackground.src}')`;
-            backgroundPreview.textContent = '';
-            
-            // Vista previa en la UI principal con la imagen original
-            previewBackgroundInMainUI(originalImageURL);
-            
-            // Guardar en el elemento del DOM para persistencia adicional
-            backgroundPreview.dataset.selectedBackground = originalImageURL;
-            
-            // Forzar guardado inmediato de la selección (esto es crítico)
-            document.getElementById('selectBackgroundBtn').setAttribute('data-has-background', 'true');
-            document.getElementById('selectBackgroundBtn').setAttribute('data-background-path', originalImageURL);
-        } else if (fileInput.files.length > 0) {
-            // Para imágenes subidas por el usuario
-            if (window.tempSelectedBackgroundFile) {
-                backgroundPreview.style.backgroundImage = `url('${window.tempSelectedBackgroundFile}')`;
-                backgroundPreview.textContent = '';
-                
-                window.currentVersionBackgroundPath = window.tempSelectedBackgroundFile;
-                window.tempSelectedBackground = window.tempSelectedBackgroundFile; // Guardar también aquí
-                backgroundSelected = true;
-                
-                previewBackgroundInMainUI(window.tempSelectedBackgroundFile);
-                
-                // Guardar en el elemento del DOM para persistencia adicional
-                backgroundPreview.dataset.selectedBackground = window.tempSelectedBackgroundFile;
-                
-                // Forzar guardado inmediato de la selección (esto es crítico)
-                document.getElementById('selectBackgroundBtn').setAttribute('data-has-background', 'true');
-                document.getElementById('selectBackgroundBtn').setAttribute('data-background-path', window.tempSelectedBackgroundFile);
-            }
-        }
-        
-        // Mantener un registro de que se seleccionó un fondo
-        if (backgroundSelected) {
-            console.log("Fondo seleccionado correctamente - será guardado cuando se guarde la versión");
-            document.getElementById('selectBackgroundBtn').classList.add('background-selected');
-            document.getElementById('selectBackgroundBtn').textContent = 'Change Background';
-        }
-        
-        // Cerrar el popup
-        closeBackgroundsPopup();
-    }
-    
-    // Aplicar vista previa del fondo en la UI principal
-    function previewBackgroundInMainUI(imagePath) {
-        // Solo si la versión que se está editando es la misma que está seleccionada actualmente
-        if (currentEditingVersion && selectedVersionButton && 
-            selectedVersionButton.dataset.version === currentEditingVersion) {
-            const versionDetailsElement = document.getElementById("version-details");
-            versionDetailsElement.classList.add('changing-background');
-            
-            // Guardar el camino original para usarlo más tarde si es necesario
-            versionDetailsElement.dataset.originalBackgroundPath = imagePath;
-            
-            setTimeout(() => {
-                // Siempre usar la imagen original de alta calidad para el fondo principal
-                versionDetailsElement.style.backgroundImage = `url('${imagePath}')`;
-                versionDetailsElement.classList.remove('no-background');
-                
-                setTimeout(() => {
-                    versionDetailsElement.classList.remove('changing-background');
-                }, 500);
-            }, 50);
-        }
-    }
-    
-    function selectDefaultBackground(imagePath, originalImagePath) {
-        console.log("Seleccionando fondo:");
-        console.log("- Miniatura:", imagePath);
-        console.log("- Original:", originalImagePath);
-        
-        // Remove selection from all images
-        document.querySelectorAll('#defaultBackgroundsContainer .default-version-image').forEach(img => {
-            img.classList.remove('selected-image');
-        });
-        
-        // Add selection to clicked image
-        const clickedImage = Array.from(document.querySelectorAll('#defaultBackgroundsContainer .default-version-image')).find(img => img.src === imagePath);
-        if (clickedImage) {
-            clickedImage.classList.add('selected-image');
-            // Guardar la imagen original en el atributo de datos
-            clickedImage.dataset.originalImage = originalImagePath;
-        }
-        
-        // Guardar referencias temporales - siempre usar la imagen original, no la miniatura
-        window.tempSelectedBackground = originalImagePath;
-    }
-
-    function loadDefaultBackgroundImages() {
-        const container = document.getElementById('defaultBackgroundsContainer');
-        container.innerHTML = '';
-        
-        // Load images from assets/backgrounds folder
-        window.api.getDefaultBackgroundImages().then(images => {
-            images.forEach(image => {
-                const imgElement = document.createElement('img');
-                imgElement.src = image.dataURL; // Usar la miniatura para la vista previa
-                imgElement.classList.add('default-version-image');
-                imgElement.title = image.name;
-                imgElement.dataset.originalImage = image.originalDataURL; // Guardar la URL de la imagen original
-                imgElement.addEventListener('click', () => selectDefaultBackground(image.dataURL, image.originalDataURL));
-                container.appendChild(imgElement);
-            });
-        }).catch(error => {
-            console.error("Error loading default background images:", error);
-        });
-    }
-    
-    function handleVersionBackgroundUpload(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                // Update preview
-                const selectedPreviews = document.querySelectorAll('#defaultBackgroundsContainer .default-version-image.selected-image');
-                selectedPreviews.forEach(preview => {
-                    preview.classList.remove('selected-image');
-                });
-                
-                // Guardar temporalmente el fondo seleccionado para previsualización
-                window.tempSelectedBackgroundFile = e.target.result;
-                
-                // Si estamos en el modal de confirmación, actualizar también la vista previa ahí
-                if (document.getElementById('backgroundsPopup').style.display === 'flex') {
-                    // En este punto no actualizamos la vista previa principal hasta que se confirme
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-    
-    async function updateInstanceWithConfig(config) {
-        const result = await window.api.updateInstance(currentEditingInstance, config);
-        if (result.success) {
-            showStatus("Instance updated successfully!");
-            
-            // Guardar temporalmente el ID actual
-            const editedInstanceId = currentEditingInstance;
-            
-            closeInstanceEditModal();
-            
-            // If the instance ID changed (due to name change), update the active instance
-            if (result.newInstanceId && result.newInstanceId !== editedInstanceId) {
-                if (activeInstanceId === editedInstanceId) {
-                    activeInstanceId = result.newInstanceId;
-                    await window.api.setActiveInstance(result.newInstanceId);
-                }
-            }
-            
-            // Limpiar variables globales
-            window.tempSelectedInstanceImage = null;
-            
-            // Reload instances to reflect changes
-            await loadInstances();
-            
-            // Reseleccionar la instancia editada
-            if (editedInstanceId) {
-                const instanceId = result.newInstanceId || editedInstanceId;
-                console.log("Buscando instancia para seleccionar:", instanceId);
-                
-                setTimeout(() => {
-                    const instanceButtons = document.querySelectorAll('.instance-button');
-                    let newSelectedButton = null;
-                    
-                    instanceButtons.forEach(button => {
-                        if (button.dataset.instance === instanceId) {
-                            newSelectedButton = button;
-                        }
-                    });
-                    
-                    if (newSelectedButton) {
-                        console.log("Reseleccionando instancia");
-                        newSelectedButton.click();
-                    }
-                }, 100);
-            }
-        } else {
-            showStatus(`Error updating instance: ${result.error}`);
-        }
-    }
-
     init();
 });
+
+// Open background selection popup
+function openBackgroundsPopup() {
+    const container = document.getElementById('defaultBackgroundsContainer');
+    if (!container) return;
+    if (container.children.length === 0) {
+        window.api.getDefaultBackgroundImages().then(images => {
+            images.forEach(image => {
+                const imgEl = document.createElement('img');
+                imgEl.src = image.dataURL;
+                imgEl.dataset.originalImage = image.originalDataURL;
+                imgEl.classList.add('default-version-image');
+                imgEl.title = image.name;
+                imgEl.addEventListener('click', () => {
+                    document.getElementById('versionBackgroundPreview').style.backgroundImage = `url('${image.originalDataURL}')`;
+                    window.tempSelectedBackground = image.originalDataURL;
+                    container.style.display = 'none';
+                });
+                container.appendChild(imgEl);
+            });
+        }).catch(error => console.error("Error loading default backgrounds:", error));
+    }
+    container.style.display = 'grid';
+}
