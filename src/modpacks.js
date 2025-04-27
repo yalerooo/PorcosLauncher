@@ -210,14 +210,27 @@ async function updateModpack(instanceId, modpackId, progressCallback) {
         
         const minecraftPath = getInstanceMinecraftPath(instanceId);
         
-        // Eliminar archivos que se especifican para ser eliminados
+        // Eliminar archivos o carpetas que se especifican para ser eliminados
         if (latestVersion.filesToDelete && latestVersion.filesToDelete.length > 0) {
             for (const fileToDelete of latestVersion.filesToDelete) {
                 const fullPath = path.join(minecraftPath, fileToDelete);
                 try {
-                    await fs.unlink(fullPath);
+                    // Verificar si es un directorio o un archivo
+                    const stat = await fs.stat(fullPath).catch(() => null);
+                    
+                    if (stat) {
+                        if (stat.isDirectory()) {
+                            // Es un directorio, eliminarlo recursivamente
+                            await fs.rm(fullPath, { recursive: true, force: true });
+                            console.log(`Carpeta eliminada: ${fileToDelete}`);
+                        } else {
+                            // Es un archivo, eliminarlo
+                            await fs.unlink(fullPath);
+                            console.log(`Archivo eliminado: ${fileToDelete}`);
+                        }
+                    }
                 } catch (err) {
-                    // Ignorar errores si el archivo no existe
+                    // Ignorar errores si el archivo o carpeta no existe
                     if (err.code !== 'ENOENT') {
                         console.warn(`No se pudo eliminar ${fileToDelete}:`, err.message);
                     }
