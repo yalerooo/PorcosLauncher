@@ -338,8 +338,19 @@ async function downloadSingleFile(url, destinationDir, keepArchive = false, save
                                 } catch (error) {
                                     throw new Error(`tar.gz extraction failed: ${error.message}`);
                                 }
+                            } else if (signature === '4D5A9000' || fileExt === '.exe') {
+                                console.log('Detected executable file (.exe), no extraction needed...');
+                                // Notificar que la descarga ha completado
+                                if (progressCallback) {
+                                    progressCallback('completed');
+                                }
+                                // Marcar como ejecutable para que el código que llama sepa que es un archivo ejecutable
+                                resolve({ success: true, path: destinationDir, isExecutable: true, filePath: savePath });
                             } else {
-                                throw new Error(`Unsupported archive format. Signature: ${signature}, Extension: ${fileExt}`);
+                                // Mejorar el mensaje de error para formatos no soportados
+                                const errorMsg = `Formato de archivo no soportado. Firma: ${signature}, Extensión: ${fileExt}`;
+                                console.error(errorMsg);
+                                throw new Error(errorMsg);
                             }
                         } catch (error) {
                             reject(new Error(`Extraction failed: ${error.message}`));
@@ -471,8 +482,19 @@ async function downloadSingleFile(url, destinationDir, keepArchive = false, save
                                 } catch (error) {
                                     throw new Error(`tar.gz extraction failed: ${error.message}`);
                                 }
+                            } else if (signature === '4D5A9000' || fileExt === '.exe') {
+                                console.log('Detected executable file (.exe), no extraction needed...');
+                                // Notificar que la descarga ha completado
+                                if (progressCallback) {
+                                    progressCallback('completed');
+                                }
+                                // Marcar como ejecutable para que el código que llama sepa que es un archivo ejecutable
+                                resolve({ success: true, path: destinationDir, isExecutable: true, filePath: savePath });
                             } else {
-                                throw new Error(`Unsupported archive format. Signature: ${signature}, Extension: ${fileExt}`);
+                                // Mejorar el mensaje de error para formatos no soportados
+                                const errorMsg = `Formato de archivo no soportado. Firma: ${signature}, Extensión: ${fileExt}`;
+                                console.error(errorMsg);
+                                throw new Error(errorMsg);
                             }
                         } else {
                             // Notificar que la descarga ha completado

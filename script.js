@@ -634,9 +634,10 @@ window.showSection = function showSection(sectionId) {
             const progress = data.progress;
             
             if (typeof progress === 'number') {
+                // El progreso ya viene como porcentaje (0-100) desde el proceso principal
                 const progressValue = Math.max(0, Math.min(100, progress));
                 updateProgressBar.style.width = `${progressValue}%`;
-                updateProgressStatus.textContent = `Descargando: ${progressValue.toFixed(1)}%`;
+                updateProgressStatus.textContent = `Descargando: ${progressValue}%`;
             } else if (progress === 'extracting') {
                 updateProgressStatus.textContent = 'Extrayendo archivos...';
             } else if (progress === 'completed') {

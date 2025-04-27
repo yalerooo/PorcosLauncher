@@ -116,9 +116,10 @@ async function downloadUpdate(mainWindow, downloadUrl) {
         const progressCallback = (progress) => {
             // Asegurarse de que el progreso sea un número para la barra de progreso
             if (typeof progress === 'number') {
-                // Enviar el progreso actualizado al proceso de renderizado
-                console.log('Enviando progreso de descarga:', progress);
-                mainWindow.webContents.send('update-download-progress', { progress });
+                // Convertir el progreso de decimal (0-1) a porcentaje (0-100) antes de enviarlo
+                const progressPercent = Math.round(progress * 100);
+                console.log('Enviando progreso de descarga:', progressPercent, '%');
+                mainWindow.webContents.send('update-download-progress', { progress: progressPercent });
             } else {
                 // Si es un estado como 'extracting' o 'completed', enviarlo también
                 console.log('Enviando estado de descarga:', progress);
